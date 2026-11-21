@@ -294,6 +294,278 @@
           ]
         }
       ]
+    },
+    {
+      "id": "random-bot-fixed-level",
+      "type": "boolean",
+      "label": {
+        "en": "Random bots never level up",
+        "fr": "Les bots aléatoires ne montent jamais de niveau"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.RandomBotFixedLevel" },
+      "default": false
+    },
+    {
+      "id": "disable-death-knights",
+      "type": "boolean",
+      "label": {
+        "en": "No Death Knight random bots",
+        "fr": "Pas de bots aléatoires chevaliers de la mort"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.DisableDeathKnightLogin" },
+      "default": false
+    },
+    {
+      "id": "random-gear-quality",
+      "type": "choice",
+      "label": {
+        "en": "Best gear of random bots",
+        "fr": "Meilleur équipement des bots aléatoires"
+      },
+      "default": "rare",
+      "choices": [
+        {
+          "id": "common",
+          "label": { "en": "Common (white)", "fr": "Commun (blanc)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 1 } }
+        },
+        {
+          "id": "uncommon",
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 2 } }
+        },
+        {
+          "id": "rare",
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 3 } }
+        },
+        {
+          "id": "epic",
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 4 } }
+        },
+        {
+          "id": "legendary",
+          "label": { "en": "Legendary (orange)", "fr": "Légendaire (orange)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 5 } }
+        }
+      ]
+    },
+    {
+      "id": "allow-account-bots",
+      "type": "boolean",
+      "label": {
+        "en": "Your other characters can be your bots",
+        "fr": "Vos autres personnages peuvent être vos bots"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AllowAccountBots" },
+      "default": true
+    },
+    {
+      "id": "allow-guild-bots",
+      "type": "boolean",
+      "label": {
+        "en": "Guild members' characters can be your bots",
+        "fr": "Les personnages de la guilde peuvent être vos bots"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AllowGuildBots" },
+      "default": true
+    },
+    {
+      "id": "auto-equip-upgrades",
+      "type": "boolean",
+      "label": {
+        "en": "Your bots equip the upgrades they loot",
+        "fr": "Vos bots s'équipent des améliorations qu'ils ramassent"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AutoEquipUpgradeLoot" },
+      "default": true
+    },
+    {
+      "id": "autogear-quality",
+      "type": "choice",
+      "label": {
+        "en": "Best gear of the \"autogear\" command",
+        "fr": "Meilleur équipement de la commande « autogear »"
+      },
+      "default": "rare",
+      "choices": [
+        {
+          "id": "common",
+          "label": { "en": "Common (white)", "fr": "Commun (blanc)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 1 } }
+        },
+        {
+          "id": "uncommon",
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 2 } }
+        },
+        {
+          "id": "rare",
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 3 } }
+        },
+        {
+          "id": "epic",
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 4 } }
+        },
+        {
+          "id": "legendary",
+          "label": { "en": "Legendary (orange)", "fr": "Légendaire (orange)" },
+          "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 5 } }
+        }
+      ]
+    },
+    {
+      "id": "sync-quests",
+      "type": "boolean",
+      "label": {
+        "en": "Your bots complete quests with you",
+        "fr": "Vos bots terminent les quêtes avec vous"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.SyncQuestWithPlayer" },
+      "default": true
+    },
+    {
+      "id": "summon-in-combat",
+      "type": "boolean",
+      "label": {
+        "en": "Summon your bots during a fight",
+        "fr": "Invoquer vos bots pendant un combat"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AllowSummonInCombat" },
+      "default": true
+    },
+    {
+      "id": "revive-when-summoned",
+      "type": "choice",
+      "label": {
+        "en": "Revive bots when summoning them",
+        "fr": "Ressusciter les bots en les invoquant"
+      },
+      "default": "out-of-combat",
+      "choices": [
+        {
+          "id": "never",
+          "label": { "en": "Never", "fr": "Jamais" },
+          "config": { "modules/playerbots.conf": { "Playerbots.ReviveBotWhenSummoned": 0 } }
+        },
+        {
+          "id": "out-of-combat",
+          "label": { "en": "Out of combat", "fr": "Hors combat" },
+          "config": { "modules/playerbots.conf": { "Playerbots.ReviveBotWhenSummoned": 1 } }
+        },
+        {
+          "id": "always",
+          "label": { "en": "Always", "fr": "Toujours" },
+          "config": { "modules/playerbots.conf": { "Playerbots.ReviveBotWhenSummoned": 2 } }
+        }
+      ]
+    },
+    {
+      "id": "loot-need",
+      "type": "choice",
+      "label": {
+        "en": "Bots roll on items they need",
+        "fr": "Les bots lancent les dés sur les objets utiles"
+      },
+      "default": "greed",
+      "choices": [
+        {
+          "id": "pass",
+          "label": { "en": "Pass", "fr": "Passer" },
+          "config": { "modules/playerbots.conf": { "Playerbots.LootNeedRollLevel": 0 } }
+        },
+        {
+          "id": "greed",
+          "label": { "en": "Greed", "fr": "Cupidité" },
+          "config": { "modules/playerbots.conf": { "Playerbots.LootNeedRollLevel": 1 } }
+        },
+        {
+          "id": "need",
+          "label": { "en": "Need", "fr": "Besoin" },
+          "config": { "modules/playerbots.conf": { "Playerbots.LootNeedRollLevel": 2 } }
+        }
+      ]
+    },
+    {
+      "id": "loot-greed",
+      "type": "boolean",
+      "label": {
+        "en": "Bots roll Greed on other items",
+        "fr": "Les bots lancent Cupidité sur les autres objets"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.LootGreedRollLevel" },
+      "default": false
+    },
+    {
+      "id": "loot-recipes",
+      "type": "boolean",
+      "label": {
+        "en": "Bots roll on recipes they can learn",
+        "fr": "Les bots lancent les dés sur les recettes qu'ils peuvent apprendre"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.LootRollRecipe" },
+      "default": false
+    },
+    {
+      "id": "loot-disenchant",
+      "type": "boolean",
+      "label": {
+        "en": "Enchanter bots roll Disenchant",
+        "fr": "Les bots enchanteurs lancent Désenchanter"
+      },
+      "target": { "file": "modules/playerbots.conf", "key": "Playerbots.LootRollDisenchant" },
+      "default": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "world",
+      "label": { "en": "Random bots in the world", "fr": "Bots aléatoires dans le monde" },
+      "options": [
+        "random-bot-autologin",
+        "min-random-bots",
+        "max-random-bots",
+        "random-bot-min-level",
+        "random-bot-max-level",
+        "sync-level-with-players",
+        "random-bot-fixed-level",
+        "disable-death-knights",
+        "random-gear-quality",
+        "random-bot-guild-count"
+      ]
+    },
+    {
+      "id": "activities",
+      "label": { "en": "What random bots do", "fr": "Ce que font les bots aléatoires" },
+      "options": [
+        "random-bot-join-lfg",
+        "random-bot-join-bg",
+        "random-bot-auto-join-bg",
+        "random-bot-talk",
+        "enable-broadcasts"
+      ]
+    },
+    {
+      "id": "yours",
+      "label": { "en": "Your bots", "fr": "Vos bots" },
+      "options": [
+        "max-added-bots",
+        "allow-account-bots",
+        "allow-guild-bots",
+        "auto-equip-upgrades",
+        "autogear-quality",
+        "sync-quests",
+        "summon-in-combat",
+        "revive-when-summoned"
+      ]
+    },
+    {
+      "id": "loot",
+      "label": { "en": "Loot rolls", "fr": "Jets de butin" },
+      "options": ["loot-need", "loot-greed", "loot-recipes", "loot-disenchant"]
     }
   ],
   "assets": [

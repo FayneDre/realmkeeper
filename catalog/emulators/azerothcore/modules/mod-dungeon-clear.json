@@ -91,6 +91,141 @@
         "key": "DungeonClear.BetterLootRolling"
       },
       "default": false
+    },
+    {
+      "id": "prevent-bot-release",
+      "type": "boolean",
+      "label": {
+        "en": "Dead bots wait for a resurrection in instances",
+        "fr": "Les bots morts attendent une résurrection en instance"
+      },
+      "target": {
+        "file": "modules/mod_dungeon_clear.conf",
+        "key": "DungeonClear.PreventBotRelease"
+      },
+      "default": true
+    },
+    {
+      "id": "loot-min-quality",
+      "type": "choice",
+      "label": { "en": "Loot from", "fr": "Ramasser à partir de" },
+      "default": "poor",
+      "choices": [
+        {
+          "id": "poor",
+          "label": { "en": "Everything", "fr": "Tout" },
+          "config": { "modules/mod_dungeon_clear.conf": { "DungeonClear.LootMinQuality": 0 } }
+        },
+        {
+          "id": "common",
+          "label": { "en": "Common (white)", "fr": "Commun (blanc)" },
+          "config": { "modules/mod_dungeon_clear.conf": { "DungeonClear.LootMinQuality": 1 } }
+        },
+        {
+          "id": "uncommon",
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "config": { "modules/mod_dungeon_clear.conf": { "DungeonClear.LootMinQuality": 2 } }
+        },
+        {
+          "id": "rare",
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "config": { "modules/mod_dungeon_clear.conf": { "DungeonClear.LootMinQuality": 3 } }
+        },
+        {
+          "id": "epic",
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "config": { "modules/mod_dungeon_clear.conf": { "DungeonClear.LootMinQuality": 4 } }
+        }
+      ]
+    },
+    {
+      "id": "smart-rest",
+      "type": "boolean",
+      "label": { "en": "Fewer, longer rests", "fr": "Repos moins fréquents mais complets" },
+      "target": { "file": "modules/mod_dungeon_clear.conf", "key": "DungeonClear.SmartRest" },
+      "default": false
+    },
+    {
+      "id": "wait-at-boss",
+      "type": "boolean",
+      "label": { "en": "Pause before each boss", "fr": "Pause avant chaque boss" },
+      "target": { "file": "modules/mod_dungeon_clear.conf", "key": "DungeonClear.WaitAtBoss" },
+      "default": false
+    },
+    {
+      "id": "spectate",
+      "type": "boolean",
+      "label": { "en": "Allow the spectator camera", "fr": "Autoriser la caméra spectateur" },
+      "target": { "file": "modules/mod_dungeon_clear.conf", "key": "DungeonClear.SpectateEnable" },
+      "default": true
+    },
+    {
+      "id": "queue-fill",
+      "type": "boolean",
+      "label": {
+        "en": "Dungeon Finder: complete the group with bots",
+        "fr": "Recherche de donjon : compléter le groupe avec des bots"
+      },
+      "target": {
+        "file": "modules/mod_dungeon_clear.conf",
+        "key": "DungeonClear.DungeonQueueFill.Enable"
+      },
+      "default": false,
+      "help": {
+        "en": "When you queue, bots of the missing roles queue with you.",
+        "fr": "Quand vous vous inscrivez, des bots des rôles manquants s'inscrivent avec vous."
+      }
+    },
+    {
+      "id": "queue-fill-auto-clear",
+      "type": "boolean",
+      "label": {
+        "en": "Those bots clear the dungeon themselves",
+        "fr": "Ces bots font le donjon eux-mêmes"
+      },
+      "target": {
+        "file": "modules/mod_dungeon_clear.conf",
+        "key": "DungeonClear.DungeonQueueFill.AutoClear"
+      },
+      "default": false
+    },
+    {
+      "id": "bg-queue-fill",
+      "type": "boolean",
+      "label": {
+        "en": "Battlegrounds: complete the teams with bots",
+        "fr": "Champs de bataille : compléter les équipes avec des bots"
+      },
+      "target": {
+        "file": "modules/mod_dungeon_clear.conf",
+        "key": "DungeonClear.BgQueueFill.Enable"
+      },
+      "default": false,
+      "help": {
+        "en": "Turn off \"Random bots join battlegrounds\" in the Bots tab with it, or matches fill twice.",
+        "fr": "Désactivez alors « Les bots aléatoires rejoignent champs de bataille » dans l'onglet Bots, sinon les parties se remplissent deux fois."
+      }
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "run",
+      "label": { "en": "During a run", "fr": "Pendant un donjon" },
+      "options": [
+        "clear-room",
+        "ignore-chests",
+        "better-loot",
+        "loot-min-quality",
+        "smart-rest",
+        "wait-at-boss",
+        "prevent-bot-release",
+        "spectate"
+      ]
+    },
+    {
+      "id": "queues",
+      "label": { "en": "Queues", "fr": "Files d'attente" },
+      "options": ["queue-fill", "queue-fill-auto-clear", "bg-queue-fill"]
     }
   ]
 }

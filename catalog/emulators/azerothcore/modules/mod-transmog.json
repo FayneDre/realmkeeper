@@ -96,6 +96,94 @@
       "default": 1,
       "min": 0,
       "max": 100
+    },
+    {
+      "id": "hidden",
+      "type": "boolean",
+      "label": {
+        "en": "Allow hiding a piece of gear",
+        "fr": "Permettre de masquer une pièce d'équipement"
+      },
+      "target": {
+        "file": "modules/transmog.conf",
+        "key": "Transmogrification.AllowHiddenTransmog"
+      },
+      "default": true
+    },
+    {
+      "id": "sets",
+      "type": "boolean",
+      "label": { "en": "Saved outfits", "fr": "Tenues enregistrées" },
+      "target": { "file": "modules/transmog.conf", "key": "Transmogrification.EnableSets" },
+      "default": true
+    },
+    {
+      "id": "allow-poor",
+      "type": "boolean",
+      "label": { "en": "Poor (grey) items", "fr": "Objets médiocres (gris)" },
+      "target": { "file": "modules/transmog.conf", "key": "Transmogrification.AllowPoor" },
+      "default": false
+    },
+    {
+      "id": "allow-common",
+      "type": "boolean",
+      "label": { "en": "Common (white) items", "fr": "Objets communs (blancs)" },
+      "target": { "file": "modules/transmog.conf", "key": "Transmogrification.AllowCommon" },
+      "default": false
+    },
+    {
+      "id": "allow-legendary",
+      "type": "boolean",
+      "label": { "en": "Legendary items", "fr": "Objets légendaires" },
+      "target": { "file": "modules/transmog.conf", "key": "Transmogrification.AllowLegendary" },
+      "default": false
+    },
+    {
+      "id": "mixed-armor",
+      "type": "boolean",
+      "label": {
+        "en": "Mix armor types (cloth look on plate...)",
+        "fr": "Mélanger les types d'armure (tissu sur plaques...)"
+      },
+      "target": {
+        "file": "modules/transmog.conf",
+        "key": "Transmogrification.AllowMixedArmorTypes"
+      },
+      "default": false
+    },
+    {
+      "id": "mixed-weapons",
+      "type": "boolean",
+      "label": { "en": "Mix weapon types", "fr": "Mélanger les types d'armes" },
+      "target": {
+        "file": "modules/transmog.conf",
+        "key": "Transmogrification.AllowMixedWeaponTypes"
+      },
+      "default": false
+    },
+    {
+      "id": "ignore-level",
+      "type": "boolean",
+      "label": {
+        "en": "Ignore the item's required level",
+        "fr": "Ignorer le niveau requis de l'objet"
+      },
+      "target": { "file": "modules/transmog.conf", "key": "Transmogrification.IgnoreReqLevel" },
+      "default": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "rules",
+      "label": { "en": "What can be used as a look", "fr": "Ce qui peut servir d'apparence" },
+      "options": [
+        "allow-poor",
+        "allow-common",
+        "allow-legendary",
+        "mixed-armor",
+        "mixed-weapons",
+        "ignore-level"
+      ]
     }
   ],
   "spawns": [

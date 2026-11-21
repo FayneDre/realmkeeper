@@ -365,9 +365,304 @@
       "database": "world",
       "file": "optional/sql/world/zz_optional_wotlk_hp_values_for_tbc_raids.sql",
       "default": false
+    },
+    {
+      "id": "starting-progression",
+      "type": "choice",
+      "label": { "en": "New characters start in", "fr": "Les nouveaux personnages commencent en" },
+      "default": "vanilla",
+      "choices": [
+        {
+          "id": "vanilla",
+          "label": { "en": "Vanilla", "fr": "Vanilla" },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.StartingProgression": 0
+            }
+          }
+        },
+        {
+          "id": "tbc",
+          "label": { "en": "The Burning Crusade", "fr": "The Burning Crusade" },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.StartingProgression": 8
+            }
+          }
+        },
+        {
+          "id": "wotlk",
+          "label": { "en": "Wrath of the Lich King", "fr": "Wrath of the Lich King" },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.StartingProgression": 13
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "progression-limit",
+      "type": "choice",
+      "label": { "en": "Progression stops after", "fr": "La progression s'arrête après" },
+      "default": "none",
+      "choices": [
+        {
+          "id": "none",
+          "label": { "en": "No limit", "fr": "Aucune limite" },
+          "config": {
+            "modules/individualProgression.conf": { "IndividualProgression.ProgressionLimit": 0 }
+          }
+        },
+        {
+          "id": "vanilla",
+          "label": { "en": "Vanilla", "fr": "Vanilla" },
+          "config": {
+            "modules/individualProgression.conf": { "IndividualProgression.ProgressionLimit": 7 }
+          }
+        },
+        {
+          "id": "tbc",
+          "label": { "en": "The Burning Crusade", "fr": "The Burning Crusade" },
+          "config": {
+            "modules/individualProgression.conf": { "IndividualProgression.ProgressionLimit": 12 }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tbc-races",
+      "type": "choice",
+      "label": { "en": "Draenei and Blood Elves", "fr": "Draeneï et elfes de sang" },
+      "default": "always",
+      "choices": [
+        {
+          "id": "always",
+          "label": { "en": "Always available", "fr": "Toujours disponibles" },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.TbcRacesUnlockProgression": 0
+            }
+          }
+        },
+        {
+          "id": "after-vanilla",
+          "label": { "en": "Once Vanilla is completed", "fr": "Une fois Vanilla terminé" },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.TbcRacesUnlockProgression": 8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "death-knights",
+      "type": "choice",
+      "label": { "en": "Death Knights", "fr": "Chevaliers de la mort" },
+      "default": "after-tbc",
+      "choices": [
+        {
+          "id": "always",
+          "label": { "en": "Always available", "fr": "Toujours disponibles" },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.DeathKnightUnlockProgression": 0
+            }
+          }
+        },
+        {
+          "id": "after-tbc",
+          "label": {
+            "en": "Once The Burning Crusade is completed",
+            "fr": "Une fois The Burning Crusade terminé"
+          },
+          "config": {
+            "modules/individualProgression.conf": {
+              "IndividualProgression.DeathKnightUnlockProgression": 13
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "quest-xp-fix",
+      "type": "boolean",
+      "label": { "en": "Original quest experience", "fr": "Expérience des quêtes d'origine" },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.QuestXPFix"
+      },
+      "default": true
+    },
+    {
+      "id": "disable-quest-markers",
+      "type": "boolean",
+      "label": {
+        "en": "No quest object sparkles (as before 2.3)",
+        "fr": "Pas de scintillement des objets de quête (comme avant 2.3)"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.DisableQuestMarkers"
+      },
+      "default": true
+    },
+    {
+      "id": "fishing-fix",
+      "type": "boolean",
+      "label": {
+        "en": "Fishing levelled zone by zone (as before 3.1)",
+        "fr": "Pêche montée zone par zone (comme avant 3.1)"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.FishingFix"
+      },
+      "default": true
+    },
+    {
+      "id": "quest-money-at-cap",
+      "type": "boolean",
+      "label": {
+        "en": "Extra quest money at the stage's level cap",
+        "fr": "Argent en plus des quêtes au niveau maximum de l'étape"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.QuestMoneyAtLevelCap"
+      },
+      "default": true
+    },
+    {
+      "id": "disable-rdf",
+      "type": "boolean",
+      "label": {
+        "en": "Disable the random dungeon finder",
+        "fr": "Désactiver la recherche de donjon aléatoire"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.DisableRDF"
+      },
+      "default": false
+    },
+    {
+      "id": "naxx-strath-entrance",
+      "type": "boolean",
+      "label": {
+        "en": "Naxxramas 40: first entry through Stratholme",
+        "fr": "Naxxramas 40 : première entrée par Stratholme"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.RequireNaxxStrathEntrance"
+      },
+      "default": false
+    },
+    {
+      "id": "all-spell-ranks",
+      "type": "boolean",
+      "label": {
+        "en": "Keep every spell rank in Wrath of the Lich King",
+        "fr": "Garder tous les rangs de sorts dans Wrath of the Lich King"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.EnableAllSpellRanks"
+      },
+      "default": false
+    },
+    {
+      "id": "vanilla-power",
+      "type": "number",
+      "label": { "en": "Player damage during Vanilla", "fr": "Dégâts des joueurs pendant Vanilla" },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.VanillaPowerAdjustment"
+      },
+      "default": 1.0,
+      "min": 0.1,
+      "max": 1.0,
+      "help": {
+        "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+      }
+    },
+    {
+      "id": "vanilla-healing",
+      "type": "number",
+      "label": { "en": "Player healing during Vanilla", "fr": "Soins des joueurs pendant Vanilla" },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.VanillaHealingAdjustment"
+      },
+      "default": 1.0,
+      "min": 0.1,
+      "max": 1.0,
+      "help": {
+        "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+      }
+    },
+    {
+      "id": "tbc-power",
+      "type": "number",
+      "label": {
+        "en": "Player damage during The Burning Crusade",
+        "fr": "Dégâts des joueurs pendant The Burning Crusade"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.TBCPowerAdjustment"
+      },
+      "default": 1.0,
+      "min": 0.1,
+      "max": 1.0,
+      "help": {
+        "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+      }
+    },
+    {
+      "id": "tbc-healing",
+      "type": "number",
+      "label": {
+        "en": "Player healing during The Burning Crusade",
+        "fr": "Soins des joueurs pendant The Burning Crusade"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.TBCHealingAdjustment"
+      },
+      "default": 1.0,
+      "min": 0.1,
+      "max": 1.0,
+      "help": {
+        "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+      }
+    },
+    {
+      "id": "bot-only-adjustments",
+      "type": "boolean",
+      "label": {
+        "en": "Apply those adjustments to random bots only",
+        "fr": "Appliquer ces ajustements aux bots aléatoires seulement"
+      },
+      "target": {
+        "file": "modules/individualProgression.conf",
+        "key": "IndividualProgression.BotOnlyAdjustments"
+      },
+      "default": false
     }
   ],
   "optionGroups": [
+    {
+      "id": "progression",
+      "label": { "en": "Progression", "fr": "Progression" },
+      "options": ["starting-progression", "progression-limit", "tbc-races", "death-knights"]
+    },
     {
       "id": "era",
       "label": { "en": "True to the era", "fr": "Fidèle à l'époque" },
@@ -386,7 +681,14 @@
         "sql-restore-rogue-poisons",
         "sql-spell-damage-and-healing",
         "sql-tbc-pvp-prices",
-        "sql-vanilla-transports"
+        "sql-vanilla-transports",
+        "quest-xp-fix",
+        "disable-quest-markers",
+        "fishing-fix",
+        "quest-money-at-cap",
+        "disable-rdf",
+        "naxx-strath-entrance",
+        "all-spell-ranks"
       ]
     },
     {
@@ -395,7 +697,12 @@
       "options": [
         "sql-creature-stats",
         "sql-av-landmines",
-        "sql-unobtainable-items"
+        "sql-unobtainable-items",
+        "vanilla-power",
+        "vanilla-healing",
+        "tbc-power",
+        "tbc-healing",
+        "bot-only-adjustments"
       ]
     },
     {

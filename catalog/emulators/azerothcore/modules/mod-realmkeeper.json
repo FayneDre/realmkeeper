@@ -42,6 +42,67 @@
       }
     ]
   },
+  "options": [
+    {
+      "id": "party-gear-quality",
+      "type": "choice",
+      "label": { "en": "Gear of party bots", "fr": "Équipement des bots du groupe" },
+      "default": "rare",
+      "choices": [
+        {
+          "id": "uncommon",
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "config": { "modules/mod_realmkeeper.conf": { "RealmKeeper.Party.GearQuality": 2 } }
+        },
+        {
+          "id": "rare",
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "config": { "modules/mod_realmkeeper.conf": { "RealmKeeper.Party.GearQuality": 3 } }
+        },
+        {
+          "id": "epic",
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "config": { "modules/mod_realmkeeper.conf": { "RealmKeeper.Party.GearQuality": 4 } }
+        }
+      ]
+    },
+    {
+      "id": "party-gear-lowering",
+      "type": "number",
+      "label": {
+        "en": "Share of pieces one quality lower",
+        "fr": "Part des pièces d'une qualité en dessous"
+      },
+      "target": {
+        "file": "modules/mod_realmkeeper.conf",
+        "key": "RealmKeeper.Party.GearLoweringChance"
+      },
+      "default": 0.35,
+      "min": 0.0,
+      "max": 1.0,
+      "help": {
+        "en": "0 = every piece of the chosen quality, 0.35 = about a third one quality lower.",
+        "fr": "0 = toutes les pièces de la qualité choisie, 0,35 = environ un tiers d'une qualité en dessous."
+      }
+    },
+    {
+      "id": "server-channel-names",
+      "type": "boolean",
+      "label": {
+        "en": "Same General and Trade channels as the bots",
+        "fr": "Mêmes canaux Général et Commerce que les bots"
+      },
+      "target": {
+        "file": "modules/mod_realmkeeper.conf",
+        "key": "RealmKeeper.Channels.ServerNames"
+      },
+      "default": true,
+      "help": {
+        "en": "A game in another language than the server joins the bots' channels.",
+        "fr": "Un jeu dans une autre langue que le serveur rejoint les canaux des bots."
+      }
+    }
+  ],
   "party": {
     "size": 5,
     "commands": {

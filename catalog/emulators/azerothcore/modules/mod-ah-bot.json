@@ -721,13 +721,111 @@
           ]
         }
       ]
+    },
+    {
+      "id": "only-bot-auctions",
+      "type": "boolean",
+      "label": {
+        "en": "Count only the bot's auctions",
+        "fr": "Ne compter que les enchères du bot"
+      },
+      "target": {
+        "file": "modules/mod_ahbot.conf",
+        "key": "AuctionHouseBot.ConsiderOnlyBotAuctions"
+      },
+      "default": false,
+      "help": {
+        "en": "When on, auctions posted by players (and player bots) do not count towards the number above.",
+        "fr": "Si activé, les enchères des joueurs (et de leurs bots) ne comptent pas dans les nombres ci-dessus."
+      }
+    },
+    {
+      "id": "auction-duration",
+      "type": "choice",
+      "label": { "en": "Duration of the bot's auctions", "fr": "Durée des enchères du bot" },
+      "default": "medium",
+      "choices": [
+        {
+          "id": "long",
+          "label": { "en": "1 to 3 days", "fr": "1 à 3 jours" },
+          "config": { "modules/mod_ahbot.conf": { "AuctionHouseBot.ElapsingTimeClass": 0 } }
+        },
+        {
+          "id": "medium",
+          "label": { "en": "1 to 24 hours", "fr": "1 à 24 heures" },
+          "config": { "modules/mod_ahbot.conf": { "AuctionHouseBot.ElapsingTimeClass": 1 } }
+        },
+        {
+          "id": "short",
+          "label": { "en": "10 to 60 minutes", "fr": "10 à 60 minutes" },
+          "config": { "modules/mod_ahbot.conf": { "AuctionHouseBot.ElapsingTimeClass": 2 } }
+        }
+      ]
+    },
+    {
+      "id": "vendor-items",
+      "type": "boolean",
+      "label": {
+        "en": "Also sell items vendors sell",
+        "fr": "Vendre aussi des objets vendus par les marchands"
+      },
+      "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.VendorItems" },
+      "default": false
+    },
+    {
+      "id": "vendor-trade-goods",
+      "type": "boolean",
+      "label": {
+        "en": "Also sell trade goods vendors sell",
+        "fr": "Vendre aussi des composants vendus par les marchands"
+      },
+      "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.VendorTradeGoods" },
+      "default": false
+    },
+    {
+      "id": "profession-items",
+      "type": "boolean",
+      "label": {
+        "en": "Also sell items professions need",
+        "fr": "Vendre aussi des objets nécessaires aux métiers"
+      },
+      "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.ProfessionItems" },
+      "default": false
+    },
+    {
+      "id": "other-items",
+      "type": "boolean",
+      "label": { "en": "Also sell miscellaneous items", "fr": "Vendre aussi des objets divers" },
+      "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.OtherItems" },
+      "default": false
+    },
+    {
+      "id": "market-price",
+      "type": "boolean",
+      "label": { "en": "Follow the market price", "fr": "Suivre le prix du marché" },
+      "target": {
+        "file": "modules/mod_ahbot.conf",
+        "key": "AuctionHouseBot.UseMarketPriceForSeller"
+      },
+      "default": false,
+      "help": {
+        "en": "The bot adjusts its prices to what the same item sells for.",
+        "fr": "Le bot ajuste ses prix sur ceux auxquels se vend le même objet."
+      }
     }
   ],
   "optionGroups": [
     {
       "id": "quantity",
       "label": { "en": "How many auctions", "fr": "Nombre d'enchères" },
-      "options": ["alliance-items", "horde-items", "neutral-items", "items-per-cycle"]
+      "options": [
+        "alliance-items",
+        "horde-items",
+        "neutral-items",
+        "items-per-cycle",
+        "only-bot-auctions",
+        "auction-duration"
+      ]
     },
     {
       "id": "content",
@@ -735,7 +833,15 @@
         "en": "What is sold, and at what price",
         "fr": "Ce qui est vendu, et à quel prix"
       },
-      "options": ["quality-mix", "prices"]
+      "options": [
+        "quality-mix",
+        "prices",
+        "vendor-items",
+        "vendor-trade-goods",
+        "profession-items",
+        "other-items",
+        "market-price"
+      ]
     }
   ],
   "postInstall": [

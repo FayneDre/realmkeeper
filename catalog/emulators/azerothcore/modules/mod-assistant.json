@@ -107,6 +107,176 @@
         "key": "Assistant.Instances.Enabled"
       },
       "default": true
+    },
+    {
+      "id": "glyphs",
+      "type": "boolean",
+      "label": { "en": "Sell glyphs", "fr": "Vendre les glyphes" },
+      "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Glyphs.Enabled" },
+      "default": true
+    },
+    {
+      "id": "gems",
+      "type": "boolean",
+      "label": { "en": "Sell gems", "fr": "Vendre les gemmes" },
+      "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Gems.Enabled" },
+      "default": true
+    },
+    {
+      "id": "elixirs",
+      "type": "boolean",
+      "label": { "en": "Sell elixirs", "fr": "Vendre les élixirs" },
+      "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Elixirs.Enabled" },
+      "default": true
+    },
+    {
+      "id": "food",
+      "type": "boolean",
+      "label": { "en": "Sell buff food", "fr": "Vendre la nourriture qui donne des bonus" },
+      "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Food.Enabled" },
+      "default": true
+    },
+    {
+      "id": "enchants",
+      "type": "boolean",
+      "label": { "en": "Sell enchantments", "fr": "Vendre les enchantements" },
+      "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Enchants.Enabled" },
+      "default": true
+    },
+    {
+      "id": "containers",
+      "type": "boolean",
+      "label": { "en": "Sell bags", "fr": "Vendre les sacs" },
+      "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Containers.Enabled" },
+      "default": true
+    },
+    {
+      "id": "flight-paths-vanilla",
+      "type": "boolean",
+      "label": {
+        "en": "Unlock classic flight paths (level 60)",
+        "fr": "Débloquer les trajets aériens classiques (niveau 60)"
+      },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.FlightPaths.Vanilla.Enabled"
+      },
+      "default": true
+    },
+    {
+      "id": "flight-paths-tbc",
+      "type": "boolean",
+      "label": {
+        "en": "Unlock Outland flight paths (level 70)",
+        "fr": "Débloquer les trajets aériens de l'Outreterre (niveau 70)"
+      },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.FlightPaths.BurningCrusade.Enabled"
+      },
+      "default": true
+    },
+    {
+      "id": "flight-paths-wotlk",
+      "type": "boolean",
+      "label": {
+        "en": "Unlock Northrend flight paths (level 80)",
+        "fr": "Débloquer les trajets aériens du Norfendre (niveau 80)"
+      },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.FlightPaths.WrathOfTheLichKing.Enabled"
+      },
+      "default": false
+    },
+    {
+      "id": "professions-apprentice",
+      "type": "boolean",
+      "label": { "en": "Apprentice (75)", "fr": "Apprenti (75)" },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.Professions.Apprentice.Enabled"
+      },
+      "default": true
+    },
+    {
+      "id": "professions-journeyman",
+      "type": "boolean",
+      "label": { "en": "Journeyman (150)", "fr": "Compagnon (150)" },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.Professions.Journeyman.Enabled"
+      },
+      "default": true
+    },
+    {
+      "id": "professions-expert",
+      "type": "boolean",
+      "label": { "en": "Expert (225)", "fr": "Expert (225)" },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.Professions.Expert.Enabled"
+      },
+      "default": true
+    },
+    {
+      "id": "professions-artisan",
+      "type": "boolean",
+      "label": { "en": "Artisan (300)", "fr": "Artisan (300)" },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.Professions.Artisan.Enabled"
+      },
+      "default": true
+    },
+    {
+      "id": "professions-master",
+      "type": "boolean",
+      "label": { "en": "Master (375)", "fr": "Maître (375)" },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.Professions.Master.Enabled"
+      },
+      "default": false
+    },
+    {
+      "id": "professions-grand-master",
+      "type": "boolean",
+      "label": { "en": "Grand Master (450)", "fr": "Grand maître (450)" },
+      "target": {
+        "file": "modules/mod_assistant.conf",
+        "key": "Assistant.Professions.GrandMaster.Enabled"
+      },
+      "default": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "shop",
+      "label": { "en": "Items for sale", "fr": "Objets en vente" },
+      "options": ["heirlooms", "glyphs", "gems", "elixirs", "food", "enchants", "containers"]
+    },
+    {
+      "id": "services",
+      "label": { "en": "Services", "fr": "Services" },
+      "options": ["utilities", "instances"]
+    },
+    {
+      "id": "flight-paths",
+      "label": { "en": "Flight paths for gold", "fr": "Trajets aériens contre de l'or" },
+      "options": ["flight-paths-vanilla", "flight-paths-tbc", "flight-paths-wotlk"]
+    },
+    {
+      "id": "professions",
+      "label": { "en": "Profession levels for gold", "fr": "Niveaux de métier contre de l'or" },
+      "options": [
+        "professions-apprentice",
+        "professions-journeyman",
+        "professions-expert",
+        "professions-artisan",
+        "professions-master",
+        "professions-grand-master"
+      ]
     }
   ]
 }
