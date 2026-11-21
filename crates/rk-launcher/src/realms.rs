@@ -83,6 +83,10 @@ struct PendingImport {
     bindings: Option<serde_json::Value>,
     /// The player databases were put back: only bindings and configs remain.
     restored: bool,
+    /// Link to the handoff folder written once the import ends (a realm
+    /// installed from another computer's share, ADR 0028).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    handoff: Option<crate::handoff::Link>,
 }
 
 /// A realm name as given by the player: trimmed, one line, not too long;
@@ -148,7 +152,7 @@ impl Launcher {
     }
 
     /// Fails when `id` is not a valid new realm id or is taken.
-    fn check_new_id(&self, id: &str) -> Result<()> {
+    pub(crate) fn check_new_id(&self, id: &str) -> Result<()> {
         if !install::valid_id(id) {
             return Err(install::PlanError::InvalidId(id.to_owned()).into());
         }
@@ -309,7 +313,7 @@ impl Launcher {
     }
 
     /// The exported emulator, flavor and modules exist in this catalog.
-    fn check_importable(&self, realm: &ExportedRealm) -> Result<()> {
+    pub(crate) fn check_importable(&self, realm: &ExportedRealm) -> Result<()> {
         let unsupported = |what: String| LauncherError::ExportUnsupported(what);
         let entry = self
             .catalog
@@ -339,6 +343,23 @@ impl Launcher {
         observer: &dyn Observer,
         cancel: &CancelToken,
     ) -> Result<InstanceRecord> {
+        self.import_linked(file, id, name, index, None, observer, cancel)
+            .await
+    }
+
+    /// [`Self::import`], the realm linked to a handoff folder at the end
+    /// when `handoff` is given (ADR 0028).
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn import_linked(
+        &self,
+        file: &Path,
+        id: &str,
+        name: Option<&str>,
+        index: Option<&str>,
+        handoff: Option<crate::handoff::Link>,
+        observer: &dyn Observer,
+        cancel: &CancelToken,
+    ) -> Result<InstanceRecord> {
         let (realm, bindings, _) = read_export_head(file)?;
         self.check_importable(&realm)?;
         let name = match clean_name(name)? {
@@ -361,6 +382,7 @@ impl Launcher {
                 name,
                 bindings,
                 restored: false,
+                handoff,
             },
         )?;
         let request = InstallRequest {
@@ -428,6 +450,9 @@ impl Launcher {
         let record = self
             .apply(record.clone(), &record, observer, cancel)
             .await?;
+        if let Some(link) = &pending.handoff {
+            self.save_link(id, link)?;
+        }
         let path = self.import_path(id);
         std::fs::remove_file(&path).map_err(|e| io_error(path, e))?;
         Ok(record)
@@ -467,7 +492,10 @@ fn copy_mode(relative: &str) -> CopyMode {
         "bin" | "sql" => CopyMode::Link,
         // Rebuilt for the copy: logs, the server data overlay (junctions),
         // the lock, an unfinished change's inputs.
-        "logs" | "data" | "instance.lock" | "pending.json" | "import.json" => CopyMode::Skip,
+        // A copy is a new realm, not shared (ADR 0028).
+        "logs" | "data" | "instance.lock" | "pending.json" | "import.json" | "handoff.json" => {
+            CopyMode::Skip
+        }
         _ if top.ends_with(".tmp") => CopyMode::Skip,
         "db" => {
             let name = relative.rsplit('/').next().unwrap_or_default();
@@ -635,7 +663,9 @@ fn read_small(
 }
 
 /// `realm.json`, `bindings.json` and the dump size of an export.
-fn read_export_head(file: &Path) -> Result<(ExportedRealm, Option<serde_json::Value>, u64)> {
+pub(crate) fn read_export_head(
+    file: &Path,
+) -> Result<(ExportedRealm, Option<serde_json::Value>, u64)> {
     let mut zip = open_export(file)?;
     let realm = read_small(&mut zip, file, REALM_ENTRY)?
         .ok_or_else(|| invalid_export(file, format!("no {REALM_ENTRY}")))?;
@@ -664,7 +694,7 @@ fn read_export_head(file: &Path) -> Result<(ExportedRealm, Option<serde_json::Va
 /// Unpacks the player data dump of an export to `out` (atomically). A
 /// dump that does not end like a finished one (a truncated download) is
 /// refused here, before anything is installed.
-fn extract_dump(file: &Path, out: &Path) -> Result<()> {
+pub(crate) fn extract_dump(file: &Path, out: &Path) -> Result<()> {
     let mut zip = open_export(file)?;
     let mut entry = zip
         .by_name(DUMP_ENTRY)
@@ -835,6 +865,7 @@ mod tests {
             name: None,
             bindings: None,
             restored: false,
+            handoff: None,
         };
         launcher.save_import("fresh", &pending).unwrap();
         let backups = launcher.layout().backups("fresh");

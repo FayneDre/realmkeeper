@@ -17,6 +17,7 @@ report. Your personal folders are hidden in it.
 - [Servers that do not start](#servers)
 - [Backups and restores](#backups)
 - [Several realms, moving to another computer](#realms)
+- [Playing on another computer](#handoff)
 - [Playing on a local network](#lan)
 - [GM panel and accounts](#gm)
 - [Something else](#other)
@@ -181,6 +182,28 @@ step. Each step is recorded, so nothing is lost when one stops.
   damaged or of another kind. Export it again.
 - An export holds account names and their password checks (not the
   passwords themselves). Share it only like a save file.
+
+<a id="handoff"></a>
+## Playing on another computer
+
+- **Other computer** (Home, above the realm) shares a realm with your other
+  computers through a folder your sync software already copies between
+  them: Google Drive for desktop (`G:\My Drive`), OneDrive, Dropbox... Choose
+  the same folder on each computer. Only the player data travels (a few
+  dozen MB); the server and its databases stay on each computer.
+- **Share with my other computers** sends the realm at once. On the other
+  computer, open **Other computer** and click **Install here** next to it.
+- After each clean stop of the servers the game is sent. On the other
+  computer, Play becomes **Take the game back**: the player data is put
+  back (the current one is backed up first), which takes a few minutes.
+- **"Not fully arrived yet"**: your sync software has not finished copying
+  the file. Leave the computer that played on until it is sent, or wait.
+- **Two different games**: both computers played since they last
+  exchanged the realm. RealmKeeper never merges them: choose the one to
+  continue. The other one stays in the realm's backups or in the folder.
+- Use a personal folder, never one of your employer ("OneDrive -
+  Company"): the files hold your account names and password checks (not
+  the passwords themselves) and your characters.
 
 <a id="lan"></a>
 ## Playing on a local network

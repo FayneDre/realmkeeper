@@ -32,6 +32,7 @@ A changed decision gets a new ADR that supersedes the old one.
 | [0025](0025-bot-party-from-the-launcher.md) | A party of bots formed from the launcher: our `mod-realmkeeper` module (`.rk party` console commands, `RKPARTY` replies), manifest `party` (classes, specs, roles), Party page in the Bots tab | Accepted |
 | [0026](0026-restore-from-another-server.md) | Restoring a backup from another server: realm tables kept, module accounts found again | Accepted |
 | [0027](0027-optional-module-sql.md) | Optional module SQL files as `sql` options: packaged by CI, put where dbimport reads them, world rebuilt when one is turned off | Accepted |
+| [0028](0028-handoff-between-computers.md) | Handoff between computers through a synchronised folder: state sent at each clean stop, taken back on the other computer, conflicts never merged | Accepted |
 
 Template:
 

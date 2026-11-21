@@ -95,6 +95,27 @@ pub enum LauncherError {
     Invalid(String),
     #[error("the servers of realm {0} are starting or stopping")]
     NotReady(String),
+    #[error("{}: {reason}", path.display())]
+    HandoffFolder {
+        path: std::path::PathBuf,
+        reason: String,
+    },
+    #[error("the handoff folder {} cannot be read (is its sync client running?)", .0.display())]
+    HandoffUnavailable(std::path::PathBuf),
+    #[error("realm {0} is not shared with another computer")]
+    HandoffNotShared(String),
+    #[error("{0} played this realm since: take its game back first, or keep this computer's")]
+    HandoffBehind(String),
+    #[error("the game played on {0} has not fully arrived in the handoff folder yet")]
+    HandoffNotArrived(String),
+    #[error("no newer game of another computer to take back")]
+    HandoffNothingToTake,
+    #[error("this game was saved by RealmKeeper {0}: update the launcher first")]
+    HandoffLauncherOlder(String),
+    #[error("this realm has a server update waiting: update it, then take the game back")]
+    HandoffUpdateFirst,
+    #[error("no shared realm '{0}' in the handoff folder")]
+    HandoffUnknown(String),
 }
 
 /// What the UI shows: `code` selects the translated message
@@ -237,6 +258,24 @@ impl LauncherError {
             },
             L::Invalid(_) => ("unknown", none()),
             L::NotReady(_) => ("server.notReady", none()),
+            L::HandoffFolder { path, .. } => {
+                ("handoff.folder", vec![("path", path.display().to_string())])
+            }
+            L::HandoffUnavailable(path) => (
+                "handoff.unavailable",
+                vec![("path", path.display().to_string())],
+            ),
+            L::HandoffNotShared(_) => ("handoff.notShared", none()),
+            L::HandoffBehind(machine) => ("handoff.behind", vec![("machine", machine.clone())]),
+            L::HandoffNotArrived(machine) => {
+                ("handoff.notArrived", vec![("machine", machine.clone())])
+            }
+            L::HandoffNothingToTake => ("handoff.nothingToTake", none()),
+            L::HandoffLauncherOlder(version) => {
+                ("handoff.launcherOlder", vec![("version", version.clone())])
+            }
+            L::HandoffUpdateFirst => ("handoff.updateFirst", none()),
+            L::HandoffUnknown(_) => ("handoff.unknown", none()),
         }
     }
 }

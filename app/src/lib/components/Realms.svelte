@@ -15,6 +15,7 @@
   } from "../api";
   import { localized, t } from "../i18n/i18n.svelte";
   import { chooseRealm, launcher, realmLabel, refresh, runOperation } from "../launcher.svelte";
+  import Handoff from "./Handoff.svelte";
   import Notify from "./Notify.svelte";
   import Modal from "./Modal.svelte";
 
@@ -37,6 +38,8 @@
     | { kind: "duplicate"; name: string }
     | { kind: "import"; path: string; summary: ExportSummary; name: string };
   let dialog = $state<Dialog | null>(null);
+  /** The "another computer" window (ADR 0028). */
+  let handoff = $state(false);
   let nameInput = $state<HTMLInputElement | null>(null);
   // The name field takes the focus when a dialog opens (keyboard players).
   $effect(() => {
@@ -195,6 +198,9 @@
         {t("realms.export")}
       </button>
     {/if}
+    <button class="btn small" title={t("handoff.hint")} onclick={() => (handoff = true)}>
+      {t("handoff.open")}
+    </button>
     <button class="btn small" disabled={busy} title={t("realms.importHint")} onclick={importRealm}>
       {t("realms.import")}
     </button>
@@ -213,6 +219,10 @@
 
 <Notify text={note} />
 <Notify {error} />
+
+{#if handoff}
+  <Handoff {realm} {instance} {newId} onclose={() => (handoff = false)} />
+{/if}
 
 {#if dialog}
   <Modal

@@ -36,6 +36,8 @@ pub enum BackupKind {
     Restore,
     /// Player data of an imported realm (ADR 0020), kept like a manual one.
     Import,
+    /// Player data taken back from another computer (ADR 0028).
+    Handoff,
     Other,
 }
 
@@ -97,7 +99,9 @@ pub fn list(dir: &Path) -> Result<Vec<Backup>> {
         });
         let kind = kind_of(stem);
         out.push(Backup {
-            automatic: (stem.starts_with("before-") || stem.starts_with("daily-"))
+            automatic: (stem.starts_with("before-")
+                || stem.starts_with("daily-")
+                || stem.starts_with("handoff-"))
                 && stamp.is_some(),
             name,
             kind,
@@ -163,6 +167,8 @@ fn kind_of(stem: &str) -> BackupKind {
         BackupKind::Restore
     } else if stem.starts_with("import-") {
         BackupKind::Import
+    } else if stem.starts_with("handoff-") {
+        BackupKind::Handoff
     } else {
         BackupKind::Other
     }

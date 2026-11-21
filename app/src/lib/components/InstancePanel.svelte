@@ -8,6 +8,7 @@
     type CommandError,
     type EmulatorOverview,
     type FirewallStatus,
+    type HandoffStatus,
     type InstanceView,
     type ServerUpdate,
   } from "../api";
@@ -20,6 +21,7 @@
   import ErrorBox from "./ErrorBox.svelte";
   import Notify from "./Notify.svelte";
   import JoinLan from "./JoinLan.svelte";
+  import Modal from "./Modal.svelte";
 
   let { realm, instance, client }: { realm: EmulatorOverview; instance: InstanceView; client: ClientView | null } =
     $props();
@@ -39,11 +41,37 @@
   let error = $state<CommandError | null>(null);
   let updateNote = $state<string | null>(null);
 
-  type Status = "stopped" | "starting" | "online" | "stopping" | "failed" | "unfinished" | "moved";
+  /** What the handoff folder says about this realm (ADR 0028); read again
+   * after each change or send, and every minute while stopped (the other
+   * computer's game may arrive). */
+  let handoff = $state<HandoffStatus | null>(null);
+  $effect(() => {
+    const realm = id;
+    void launcher.handoffTick;
+    handoff = null;
+    if (running || busy || incomplete) return;
+    const read = () =>
+      api
+        .handoffStatus(realm)
+        .then((status) => {
+          if (realm === id) handoff = status;
+        })
+        .catch(() => {});
+    void read();
+    const timer = setInterval(read, 60_000);
+    return () => clearInterval(timer);
+  });
+  const sending = $derived(launcher.handoffSending(id));
+  const when = (secs: number) =>
+    new Date(secs * 1000).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+
+  type Status = "stopped" | "starting" | "online" | "stopping" | "failed" | "unfinished" | "moved" | "toTake" | "conflict";
   const status = $derived.by((): Status => {
     // A state to fix first is the realm's status, in place (never a banner).
     if (!running && !progress && incomplete) return "unfinished";
     if (!running && !progress && moved) return "moved";
+    if (!running && !progress && handoff?.state === "toTake") return "toTake";
+    if (!running && !progress && handoff?.state === "conflict") return "conflict";
     if (!session) return running ? "online" : "stopped";
     if (session.phase === "ended") return session.failed ? "failed" : "stopped";
     if (session.phase === "ready") return "online";
@@ -76,6 +104,19 @@
 
   /** Finishes the interrupted change with the plan it started with. */
   const resume = () => act(() => runOperation(id, () => api.resume(id)));
+
+  /** Takes back the game played on the other computer. */
+  const take = () => act(() => runOperation(id, () => api.handoffTake(id), "handoff.taking"));
+  /** Both computers played: the player picks one game (the other is kept). */
+  let conflictOpen = $state(false);
+  function keepMine() {
+    conflictOpen = false;
+    void act(() => runOperation(id, () => api.handoffSend(id, true), "handoff.sending"));
+  }
+  function takeTheirs() {
+    conflictOpen = false;
+    void take();
+  }
 
   let repairNote = $state<string | null>(null);
   function repair() {
@@ -185,6 +226,8 @@
     failed: "status.failed",
     unfinished: "status.unfinished",
     moved: "status.moved",
+    toTake: "status.toTake",
+    conflict: "status.conflict",
   };
   const PROCESS_KEYS: Record<ProcessState | "idle", MessageKey> = {
     idle: "process.idle",
@@ -209,7 +252,7 @@
         class="display"
         class:online={status === "online"}
         class:failed={status === "failed"}
-        class:attention={status === "unfinished" || status === "moved"}
+        class:attention={status === "unfinished" || status === "moved" || status === "toTake" || status === "conflict"}
       >
         {t(STATUS_KEYS[status])}
       </h2>
@@ -218,6 +261,10 @@
           {t("home.unfinished")}
         {:else if status === "moved"}
           {t("home.moved")}
+        {:else if status === "toTake" && handoff?.state === "toTake"}
+          {t("handoff.toTakeBody", { machine: handoff.from.machine, date: when(handoff.from.secs) })}
+        {:else if status === "conflict" && handoff?.state === "conflict"}
+          {t("handoff.conflictBody", { machine: handoff.from.machine, date: when(handoff.from.secs) })}
         {:else if session?.error}
           <!-- Whatever the phase (a game that cannot launch while online too). -->
           <ErrorBox error={session.error} compact />
@@ -229,6 +276,12 @@
           {t("home.lanAddress", { address: session.address })}
         {:else if status === "online"}
           {t("home.onlineBody")}
+        {:else if sending}
+          {t("handoff.sending")}
+        {:else if handoff?.state === "arriving"}
+          {t("handoff.arriving", { machine: handoff.from.machine })}
+        {:else if handoff?.otherPlaying}
+          {t("handoff.otherPlaying", { machine: handoff.otherPlaying.machine })}
         {:else if !clientReady}
           {t("home.needClient")}
         {:else}
@@ -253,6 +306,14 @@
         {:else if status === "unfinished" || status === "moved"}
           <button class="btn btn-play" disabled={busy} onclick={resume}>
             {status === "unfinished" ? t("home.action.resume") : t("home.action.relocate")}
+          </button>
+        {:else if status === "toTake"}
+          <button class="btn btn-play" disabled={busy || sending} onclick={take}>
+            {t("handoff.take")}
+          </button>
+        {:else if status === "conflict"}
+          <button class="btn btn-play" disabled={busy || sending} onclick={() => (conflictOpen = true)}>
+            {t("handoff.choose")}
           </button>
         {:else}
           <button class="btn" disabled={busy || incomplete} onclick={startOnly}>
@@ -304,6 +365,19 @@
 
 <!-- Action errors and warnings float over the page (toasts). -->
 <Notify {error} />
+
+{#if conflictOpen && handoff?.state === "conflict"}
+  <Modal title={t("handoff.conflictTitle")} onclose={() => (conflictOpen = false)}>
+    <p>{t("handoff.conflictExplain", { machine: handoff.from.machine })}</p>
+    <div class="choices">
+      <button class="btn" onclick={takeTheirs}>
+        {t("handoff.takeTheirs", { machine: handoff.from.machine, date: when(handoff.from.secs) })}
+      </button>
+      <button class="btn" onclick={keepMine}>{t("handoff.keepMine")}</button>
+    </div>
+    <p class="muted">{t("handoff.conflictSafe")}</p>
+  </Modal>
+{/if}
 
 <div class="columns">
   <section class="panel column">
@@ -409,6 +483,12 @@
 </div>
 
 <style>
+  .choices {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-3) 0;
+  }
+
   .hero {
     padding-top: var(--space-3);
     padding-bottom: var(--space-3);

@@ -370,6 +370,8 @@ impl Launcher {
         if self.import_unfinished(id) {
             return self.finish_import(id, observer, cancel).await;
         }
+        // A take back from another computer ends with its restore.
+        self.finish_take(id)?;
         self.extract_server_data(&record, observer, cancel).await?;
         Ok(record)
     }

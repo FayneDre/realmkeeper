@@ -19,6 +19,7 @@ pub mod crash;
 pub mod diagnostic;
 mod error;
 pub mod firewall;
+pub mod handoff;
 pub mod location;
 mod operations;
 pub mod overview;

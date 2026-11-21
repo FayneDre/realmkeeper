@@ -16,6 +16,7 @@ use rk_engine::install::{InstanceRecord, Network};
 use rk_engine::CancelToken;
 use rk_launcher::backups::Backup;
 use rk_launcher::firewall::FirewallStatus;
+use rk_launcher::handoff;
 use rk_launcher::overview::EmulatorOverview;
 use rk_launcher::preferences::{self, Preferences};
 use rk_launcher::progress::{EventObserver, OperationEvent};
@@ -1123,6 +1124,177 @@ pub fn open_backups_folder(app: AppHandle, state: State<'_, AppState>, id: Strin
         .map_err(|e| app_error("backup.folder", e))
 }
 
+// ---------------------------------------------------- handoff (ADR 0028)
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HandoffPayload {
+    instance: String,
+    /// A send started (true) or ended (false).
+    sending: bool,
+    /// Time of the state sent, when one was.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sent: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    error: Option<UiError>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HandoffSettings {
+    folder: Option<PathBuf>,
+    machine: String,
+    suggestions: Vec<handoff::Suggestion>,
+}
+
+fn handoff_settings_now() -> Result<HandoffSettings> {
+    let settings = handoff::settings(&rk_launcher::app_dir()).map_err(ui)?;
+    Ok(HandoffSettings {
+        folder: settings.folder,
+        machine: handoff::machine_name(),
+        suggestions: handoff::suggested_folders(),
+    })
+}
+
+fn handoff_place() -> Result<handoff::Place> {
+    handoff::place(&rk_launcher::app_dir())
+        .map_err(ui)?
+        .ok_or_else(|| app_error("handoff.noFolder", "no handoff folder"))
+}
+
+/// This computer's handoff folder and the folders it could use.
+#[tauri::command]
+pub fn handoff_settings() -> Result<HandoffSettings> {
+    handoff_settings_now()
+}
+
+/// Chooses the handoff folder (`None`: none). A suggested folder that does
+/// not exist yet is made (`create`).
+#[tauri::command]
+pub fn set_handoff_folder(
+    state: State<'_, AppState>,
+    folder: Option<PathBuf>,
+    create: bool,
+) -> Result<HandoffSettings> {
+    let launcher = state.launcher()?;
+    if let (Some(folder), true) = (&folder, create) {
+        std::fs::create_dir_all(folder).map_err(|e| app_error("handoff.folder", e))?;
+    }
+    handoff::set_folder(
+        &rk_launcher::app_dir(),
+        &launcher.layout().root,
+        folder.as_deref(),
+    )
+    .map_err(ui)?;
+    handoff_settings_now()
+}
+
+#[tauri::command]
+pub fn handoff_status(state: State<'_, AppState>, id: String) -> Result<handoff::Status> {
+    let place = handoff::place(&rk_launcher::app_dir()).map_err(ui)?;
+    state
+        .launcher()?
+        .handoff_status(&id, place.as_ref())
+        .map_err(ui)
+}
+
+/// Shares the stopped realm `id` (sends it at once).
+#[tauri::command]
+pub async fn handoff_share(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<handoff::Status> {
+    let place = handoff_place()?;
+    let instance = id.clone();
+    let shared = place.clone();
+    operation(app, &state, &instance, |launcher, _, _| async move {
+        launcher.handoff_share(&id, &shared).await
+    })
+    .await?;
+    state
+        .launcher()?
+        .handoff_status(&instance, Some(&place))
+        .map_err(ui)
+}
+
+#[tauri::command]
+pub fn handoff_unshare(state: State<'_, AppState>, id: String) -> Result<()> {
+    state.launcher()?.handoff_unshare(&id).map_err(ui)
+}
+
+/// Sends the stopped realm now (`keepMine`: over the other computer's game).
+#[tauri::command]
+pub async fn handoff_send(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+    keep_mine: bool,
+) -> Result<handoff::Status> {
+    let place = handoff_place()?;
+    let instance = id.clone();
+    let sent = place.clone();
+    operation(app, &state, &instance, |launcher, _, _| async move {
+        launcher.handoff_send(&id, &sent, keep_mine).await
+    })
+    .await?;
+    state
+        .launcher()?
+        .handoff_status(&instance, Some(&place))
+        .map_err(ui)
+}
+
+/// Takes back the other computer's newer game of `id`.
+#[tauri::command]
+pub async fn handoff_take(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<InstanceRecord> {
+    let place = handoff_place()?;
+    let instance = id.clone();
+    operation(
+        app,
+        &state,
+        &instance,
+        |launcher, observer, cancel| async move {
+            launcher.handoff_take(&id, &place, &observer, &cancel).await
+        },
+    )
+    .await
+}
+
+/// Realms shared in the handoff folder.
+#[tauri::command]
+pub fn handoff_shared(state: State<'_, AppState>) -> Result<Vec<handoff::SharedRealm>> {
+    let place = handoff_place()?;
+    state.launcher()?.handoff_shared(&place).map_err(ui)
+}
+
+/// Installs the folder's shared realm `uid` as the new realm `id`.
+#[tauri::command]
+pub async fn handoff_join(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    uid: String,
+    id: String,
+    name: Option<String>,
+) -> Result<InstanceRecord> {
+    let place = handoff_place()?;
+    let instance = id.clone();
+    operation(
+        app,
+        &state,
+        &instance,
+        |launcher, observer, cancel| async move {
+            launcher
+                .handoff_join(&place, &uid, &id, name.as_deref(), None, &observer, &cancel)
+                .await
+        },
+    )
+    .await
+}
+
 // ----------------------------------------------------------------- sessions
 
 #[derive(Clone, Serialize)]
@@ -1181,25 +1353,63 @@ fn game_ended(app: &AppHandle) {
     }
 }
 
-/// After a clean stop: the daily backup when one is due (ADR 0018), in the
-/// background; the next action on this instance waits for it.
-fn schedule_daily_backup(app: &AppHandle, instance: &str) {
+/// After a clean stop, in the background (the next action on this instance
+/// waits for it): the daily backup when one is due (ADR 0018), then the
+/// player data sent to the handoff folder when the realm is shared (ADR
+/// 0028), reported with a `handoff` event.
+fn schedule_after_stop(app: &AppHandle, instance: &str) {
     let state = app.state::<AppState>();
-    if state.closing.load(Ordering::SeqCst)
-        || !preferences::load(&rk_launcher::app_dir()).daily_backup
-    {
+    if state.closing.load(Ordering::SeqCst) {
         return;
     }
     let Ok(launcher) = state.launcher() else {
         return;
     };
+    let daily = preferences::load(&rk_launcher::app_dir()).daily_backup;
+    let shared = matches!(launcher.handoff_link(instance), Ok(Some(_)));
+    if !daily && !shared {
+        return;
+    }
     let id = instance.to_owned();
+    let app = app.clone();
     let handle = tauri::async_runtime::spawn(async move {
         // In the realm's turn: account work waits instead of borrowing the
         // database the backup started. Best effort: a failure leaves the
         // next stop to try again.
         let _turn = launcher.database_turn(&id).await;
-        let _ = launcher.daily_backup(&id).await;
+        if daily {
+            let _ = launcher.daily_backup(&id).await;
+        }
+        if !shared {
+            return;
+        }
+        let place = handoff::place(&rk_launcher::app_dir()).ok().flatten();
+        let Some(place) = place else {
+            return;
+        };
+        let _ = app.emit(
+            "handoff",
+            HandoffPayload {
+                instance: id.clone(),
+                sending: true,
+                sent: None,
+                error: None,
+            },
+        );
+        let result = launcher.handoff_send(&id, &place, false).await;
+        let (sent, error) = match result {
+            Ok(head) => (head.map(|h| h.secs), None),
+            Err(e) => (None, Some(ui(e))),
+        };
+        let _ = app.emit(
+            "handoff",
+            HandoffPayload {
+                instance: id,
+                sending: false,
+                sent,
+                error,
+            },
+        );
     });
     state
         .background
@@ -1232,14 +1442,21 @@ fn forward_session_events(app: AppHandle, instance: String) -> rk_launcher::sess
     Arc::new(move |event| {
         let (app, instance) = &hooks;
         match &event {
-            SessionEvent::Ready { .. } => notify_ready_if_hidden(app),
+            SessionEvent::Ready { .. } => {
+                notify_ready_if_hidden(app);
+                // Played on this computer: sent at the clean stop (ADR 0028).
+                let place = handoff::place(&rk_launcher::app_dir()).ok().flatten();
+                if let Ok(launcher) = app.state::<AppState>().launcher() {
+                    let _ = launcher.handoff_started(instance, place.as_ref());
+                }
+            }
             SessionEvent::GameStarted { .. } => game_started(app),
             SessionEvent::GameExited { .. } => game_ended(app),
             SessionEvent::Ended { clean } => {
                 update_shutdown_block(app, Some(instance));
                 game_ended(app);
                 if *clean {
-                    schedule_daily_backup(app, instance);
+                    schedule_after_stop(app, instance);
                 }
             }
             _ => {}
@@ -1274,6 +1491,13 @@ pub async fn start_instance(app: AppHandle, state: State<'_, AppState>, id: Stri
     // waiting for it then finds the realm running.
     let _turn = state.settle(&launcher, &id).await;
     refused(&state)?;
+    // The other computer's newer game would be hidden (ADR 0028).
+    let place = handoff::place(&rk_launcher::app_dir()).map_err(ui)?;
+    if let Ok(status) = launcher.handoff_status(&id, place.as_ref()) {
+        if let handoff::State::ToTake { from } | handoff::State::Conflict { from } = status.state {
+            return Err(ui(LauncherError::HandoffBehind(from.machine)));
+        }
+    }
     let server = launcher.server(&id).map_err(ui)?;
     // The game is launched once the servers are online (`launch_game`).
     let events = forward_session_events(app.clone(), id.clone());

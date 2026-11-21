@@ -239,6 +239,14 @@ Update this table when a fact is (re)verified; date it.
   Individual Progression: 22 files, off by default (4 need patch-V/S),
   under `optionGroups`; game cache cleared when build, modules or options
   change (`rk_client::cache_owner`).
+- **0028** Handoff between computers: a folder the player already
+  synchronises (Google Drive, OneDrive...; `<app dir>/handoff.json` holds
+  it and the machine id); a shared realm (`instances/<id>/handoff.json`:
+  uid, generation, played) is exported to `<folder>/<uid>/state-<gen>-<machine>.rkrealm`
+  + `head-<machine>.json` (written last, size + sha256) at each clean stop;
+  pure decision `upToDate | toSend | toTake | arriving | conflict`; take
+  back = other computer's choices (`set_choices`) + restore; conflicts are
+  never merged (player picks); not encrypted (personal folder only).
 - Scope v1: solo + LAN; Internet later. Linux/macOS later (keep code portable).
 
 Never re-propose rejected options (MariaDB, Docker/WSL2, per-combination builds,
@@ -358,6 +366,7 @@ cargo run -p rk-cli -- diagnostic            # support report (redacted), ADR 00
 cargo run -p rk-cli -- firewall show|allow|remove <id>   # LAN firewall rule (allow/remove ask for elevation), ADR 0022
 node tools/ci/auth-client.mjs --self-test | --login <user> <password>   # SRP6 logon client of the smoke test
 cargo run -p rk-cli -- realm duplicate <source> <id> [--name <n>] | export <id> <file> | import <file> <id> [--name <n>] | rename <id> [<name>]   # ADR 0020
+cargo run -p rk-cli -- handoff folder [<path>] | status|share|unshare|take <id> | send <id> [--keep-mine] | list | join <uid> <id>   # ADR 0028 (RK_HANDOFF_DIR: a second "computer")
 node tools/ci/index.mjs keygen|entry|update|verify   # CI side of the index (ADR 0010)
 node tools/ci/zip-zstd.mjs <dir> <out.zip> [--level 19]   # release archive (ADR 0015)
 ```

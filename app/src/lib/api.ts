@@ -450,6 +450,62 @@ export async function pickRealmTarget(title: string, filterName: string, default
   return typeof picked === "string" ? picked : null;
 }
 
+/** Another computer's state of a shared realm (ADR 0028). */
+export interface HandoffRemote {
+  machine: string;
+  /** Unix seconds. */
+  secs: number;
+  generation: number;
+}
+
+export type HandoffState =
+  | { state: "notShared" }
+  | { state: "noFolder" }
+  | { state: "unavailable" }
+  | { state: "upToDate" }
+  | { state: "toSend" }
+  | { state: "toTake"; from: HandoffRemote }
+  | { state: "arriving"; from: HandoffRemote }
+  | { state: "conflict"; from: HandoffRemote };
+
+export type HandoffStatus = HandoffState & {
+  /** Another computer's servers seem to run on this realm. */
+  otherPlaying?: HandoffRemote;
+  /** When this computer sent the newest state (unix seconds). */
+  sent?: number;
+};
+
+export interface HandoffSuggestion {
+  path: string;
+  client: string;
+}
+
+export interface HandoffSettings {
+  folder: string | null;
+  /** This computer's name, shown on the others. */
+  machine: string;
+  suggestions: HandoffSuggestion[];
+}
+
+export interface SharedRealm {
+  uid: string;
+  /** Emulator (game version) of the realm. */
+  emulator: string;
+  name: string | null;
+  from: HandoffRemote;
+  arrived: boolean;
+  /** The local realm sharing it, if any. */
+  local: string | null;
+}
+
+/** A background send after a clean stop. */
+export interface HandoffEvent {
+  instance: string;
+  sending: boolean;
+  sent?: number;
+  error?: CommandError;
+}
+
 /** Where realms, downloads and backups are installed. */
 export interface DataLocation {
   root: string;
@@ -534,6 +590,19 @@ export const api = {
   importRealm: (path: string, id: string, name: string | null) =>
     invoke<InstanceRecord>("import_instance", { path, id, name }),
   rename: (id: string, name: string | null) => invoke<InstanceRecord>("rename_instance", { id, name }),
+  /** Playing on another computer through a synchronised folder (ADR 0028). */
+  handoffSettings: () => invoke<HandoffSettings>("handoff_settings"),
+  /** `create`: make the (suggested) folder first. */
+  setHandoffFolder: (folder: string | null, create = false) =>
+    invoke<HandoffSettings>("set_handoff_folder", { folder, create }),
+  handoffStatus: (id: string) => invoke<HandoffStatus>("handoff_status", { id }),
+  handoffShare: (id: string) => invoke<HandoffStatus>("handoff_share", { id }),
+  handoffUnshare: (id: string) => invoke<void>("handoff_unshare", { id }),
+  handoffSend: (id: string, keepMine: boolean) => invoke<HandoffStatus>("handoff_send", { id, keepMine }),
+  handoffTake: (id: string) => invoke<InstanceRecord>("handoff_take", { id }),
+  handoffShared: () => invoke<SharedRealm[]>("handoff_shared"),
+  handoffJoin: (uid: string, id: string, name: string | null) =>
+    invoke<InstanceRecord>("handoff_join", { uid, id, name }),
   /** Support report to paste into a bug report (personal folders redacted). */
   diagnosticReport: () => invoke<string>("diagnostic_report"),
   preferences: () => invoke<Preferences>("preferences"),
@@ -559,6 +628,8 @@ export const events = {
       handler(e.payload.instance, e.payload.events),
     ),
   closing: (handler: () => void): Promise<UnlistenFn> => listen("closing", () => handler()),
+  handoff: (handler: (event: HandoffEvent) => void): Promise<UnlistenFn> =>
+    listen<HandoffEvent>("handoff", (e) => handler(e.payload)),
   appUpdate: (handler: (progress: AppUpdateProgress) => void): Promise<UnlistenFn> =>
     listen<AppUpdateProgress>("app-update", (e) => handler(e.payload)),
 };

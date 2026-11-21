@@ -8,13 +8,14 @@ import {
   events,
   inDesktopApp,
   type CommandError,
+  type HandoffEvent,
   type InstanceView,
   type LauncherOverview,
   type OperationEvent,
   type SessionEvent,
 } from "./api";
 import { t, type LocalizedText, type MessageKey } from "./i18n/i18n.svelte";
-import { notify } from "./toasts.svelte";
+import { notify, notifyError } from "./toasts.svelte";
 
 /** Log lines kept per process (older ones are dropped; the log files keep all). */
 const LOG_LIMIT = 1500;
@@ -231,6 +232,19 @@ export async function refresh(): Promise<void> {
   }
 }
 
+/** Realms whose player data is being sent to the handoff folder (ADR 0028). */
+let handoffSending = $state<Record<string, boolean>>({});
+/** Bumped after each send: the handoff states are read again. */
+let handoffTick = $state(0);
+
+function applyHandoff(event: HandoffEvent) {
+  handoffSending[event.instance] = event.sending;
+  if (event.sending) return;
+  handoffTick++;
+  if (event.error) notifyError(event.error);
+  else if (event.sent) notify(t("handoff.sentToast"));
+}
+
 let started = false;
 
 /** Subscribes to backend events once and loads the first overview. */
@@ -240,6 +254,7 @@ export function connect(): void {
   void events.operation(applyOperation);
   void events.session(applySession);
   void events.closing(() => (closing = true));
+  void events.handoff(applyHandoff);
   void refresh();
 }
 
@@ -268,6 +283,7 @@ export async function runOperation<T>(
     return await run();
   } finally {
     progress = null;
+    handoffTick++;
     await refresh();
   }
 }
@@ -340,6 +356,13 @@ export const launcher = {
   },
   get closing() {
     return closing;
+  },
+  /** Changes on every send or change: handoff states to read again. */
+  get handoffTick() {
+    return handoffTick;
+  },
+  handoffSending(id: string): boolean {
+    return handoffSending[id] ?? false;
   },
   session(id: string): SessionState | null {
     return sessions[id] ?? null;

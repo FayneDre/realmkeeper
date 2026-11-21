@@ -28,13 +28,14 @@
 //! The same operation finishes `rk install` and every module change; call
 //! [`finished`] once it completes.
 
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
 
 use rk_engine::install::assets::{self, ServerOverlay};
 use rk_store::Store;
 
-use rk_core::manifest::{EmulatorManifest, PostInstallStep, Readiness, REALM_OPTIONS};
+use rk_core::manifest::{EmulatorManifest, OptionValue, PostInstallStep, Readiness, REALM_OPTIONS};
 use rk_core::Catalog;
 use rk_engine::install::bindings::Bindings;
 use rk_engine::install::{
@@ -65,6 +66,19 @@ pub fn set_modules(
     let (old, _) = install::open_existing(layout, id)?;
     // An interrupted update must finish first (binaries and SQL half-swapped).
     install::ensure_finished(layout, &[install::instance_operation_id(id)])?;
+    let new = with_modules(catalog, &old, enable, disable)?;
+    install::save_record(layout, &new)?;
+    Ok((new, old))
+}
+
+/// `old` with `enable` turned on and `disable` off, the rebuilds a removal
+/// needs scheduled (nothing saved).
+fn with_modules(
+    catalog: &Catalog,
+    old: &InstanceRecord,
+    enable: &[String],
+    disable: &[String],
+) -> Result<InstanceRecord, RuntimeError> {
     let entry = catalog
         .emulator(&old.emulator)
         .ok_or_else(|| install::PlanError::Unknown(format!("emulator '{}'", old.emulator)))?;
@@ -118,6 +132,102 @@ pub fn set_modules(
     let selected: Vec<&str> = new.modules.iter().map(String::as_str).collect();
     rk_core::resolve(catalog, &new.emulator, Some(&new.flavor), &selected)
         .map_err(install::PlanError::from)?;
+    Ok(new)
+}
+
+/// Replaces the chosen modules and every option value (realm settings
+/// included) of `id` with those of another computer's copy of the realm
+/// (ADR 0028), scheduling the rebuilds a removed module or a turned-off SQL
+/// file needs, as [`set_modules`] and [`set_options`] do. Values that do
+/// not fit an option of this catalog are refused.
+pub fn set_choices(
+    catalog: &Catalog,
+    layout: &Layout,
+    id: &str,
+    modules: &[String],
+    options: &BTreeMap<String, BTreeMap<String, OptionValue>>,
+) -> Result<(InstanceRecord, InstanceRecord), RuntimeError> {
+    let (old, _) = install::open_existing(layout, id)?;
+    install::ensure_finished(layout, &[install::instance_operation_id(id)])?;
+    let disable: Vec<String> = old
+        .modules
+        .iter()
+        .filter(|m| !modules.contains(m))
+        .cloned()
+        .collect();
+    let enable: Vec<String> = modules
+        .iter()
+        .filter(|m| !old.modules.contains(m))
+        .cloned()
+        .collect();
+    let mut new = with_modules(catalog, &old, &enable, &disable)?;
+    let entry = catalog
+        .emulator(&new.emulator)
+        .ok_or_else(|| install::PlanError::Unknown(format!("emulator '{}'", new.emulator)))?;
+    let enabled = enabled_modules(catalog, &new)?;
+    for (module, values) in options {
+        let module_error = |message: String| RuntimeError::Module {
+            module: module.clone(),
+            message,
+        };
+        let specs: Vec<&rk_core::manifest::ModuleOption> = if module == REALM_OPTIONS {
+            entry
+                .manifest
+                .settings
+                .iter()
+                .flat_map(|s| &s.options)
+                .collect()
+        } else {
+            if !enabled.contains(module) {
+                return Err(module_error(
+                    "this module is not enabled on the instance".into(),
+                ));
+            }
+            entry
+                .modules
+                .get(module)
+                .ok_or_else(|| module_error("unknown module".into()))?
+                .options
+                .iter()
+                .collect()
+        };
+        for (option, value) in values {
+            let fits = specs
+                .iter()
+                .find(|o| o.id() == option)
+                .and_then(|spec| spec.fit(value));
+            if fits.is_none() {
+                return Err(module_error(format!(
+                    "no option '{option}' taking {value:?}"
+                )));
+            }
+        }
+    }
+    new.options = options.clone();
+    new.options.retain(|_, v| !v.is_empty());
+    let mut turned_off = Vec::new();
+    for module in &enabled {
+        let Some(manifest) = entry.modules.get(module) else {
+            continue;
+        };
+        if let Some((option, required)) =
+            manifest.unmet_requirements(new.options.get(module)).first()
+        {
+            return Err(RuntimeError::Module {
+                module: module.clone(),
+                message: format!("option '{option}' needs another value of '{required}'"),
+            });
+        }
+        let after = manifest.selected_sql(new.options.get(module));
+        turned_off.extend(
+            manifest
+                .selected_sql(old.options.get(module))
+                .into_iter()
+                .filter(|file| !after.contains(file))
+                .map(|(database, _)| database),
+        );
+    }
+    schedule_rebuild(catalog, &mut new, &turned_off)?;
     install::save_record(layout, &new)?;
     Ok((new, old))
 }

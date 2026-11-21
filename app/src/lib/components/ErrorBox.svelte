@@ -50,6 +50,7 @@
     [/^(server|database)\./, "servers"],
     [/^backup\./, "backups"],
     [/^realm\./, "realms"],
+    [/^handoff\./, "handoff"],
     [/^(lan|firewall)\./, "lan"],
     [/^(gm|account)\./, "gm"],
   ];

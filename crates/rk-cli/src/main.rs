@@ -10,6 +10,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use rk_engine::install;
 use rk_engine::CancelToken;
+use rk_launcher::handoff;
 use rk_launcher::session::{Game, Session, SessionEvent};
 use rk_launcher::{InstallRequest, Launcher, ServerUpdate, UpdateOutcome};
 
@@ -141,6 +142,12 @@ enum Command {
     Realm {
         #[command(subcommand)]
         command: RealmCommand,
+    },
+    /// Play a realm on several computers through a synchronised folder
+    /// (ADR 0028). The settings of this computer live in `--root`.
+    Handoff {
+        #[command(subcommand)]
+        command: HandoffCommand,
     },
     /// Player-data backups of an instance (servers stopped; the app also
     /// backs up a running realm, ADR 0022).
@@ -336,6 +343,83 @@ enum RealmCommand {
     Rename {
         id: String,
         name: Option<String>,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum HandoffCommand {
+    /// Show this computer's handoff folder, or choose it (`--clear`: none).
+    Folder {
+        path: Option<PathBuf>,
+        #[arg(long)]
+        clear: bool,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// What the folder says about a realm (take back, send, conflict...).
+    Status {
+        id: String,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// Share a stopped realm through the folder (sends it at once).
+    Share {
+        id: String,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// Stop sharing a realm on this computer (the folder keeps its files).
+    Unshare {
+        id: String,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// Send a stopped realm's player data now (`--keep-mine`: over the
+    /// other computer's game, after a conflict).
+    Send {
+        id: String,
+        #[arg(long)]
+        keep_mine: bool,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// Take back the game played on the other computer.
+    Take {
+        id: String,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// The realms shared in the folder.
+    List {
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// Install a realm shared in the folder (by its share id) as `id`.
+    Join {
+        uid: String,
+        id: String,
+        #[arg(long)]
+        name: Option<String>,
+        #[arg(long)]
+        index: Option<String>,
         #[arg(long, default_value = "catalog")]
         catalog: PathBuf,
         #[arg(long, default_value = ".local/rk")]
@@ -547,13 +631,201 @@ fn prepare_client(
 /// the game once the world is ready.
 fn play(catalog: &Path, root: &Path, id: &str, keep_running: bool) -> Result<ExitCode> {
     let launcher = open(catalog, root)?;
+    let place = handoff_before_start(&launcher, root, id)?;
     let server = launcher.server(id)?;
     let client = prepare_client(&launcher, server.record())?;
     let game = Game {
         client,
         keep_running,
     };
-    block_on(run_instance(server, Some(game)))?
+    let code = block_on(run_instance(server, Some(game)))??;
+    handoff_after_stop(&launcher, place.as_ref(), id, code)
+}
+
+/// Before the servers of a shared realm start: refuse while the other
+/// computer's newer game waits, then mark the realm as played here.
+fn handoff_before_start(
+    launcher: &Launcher,
+    root: &Path,
+    id: &str,
+) -> Result<Option<handoff::Place>> {
+    let place = handoff::place(&handoff_dir(root))?;
+    let status = launcher.handoff_status(id, place.as_ref())?;
+    match &status.state {
+        handoff::State::ToTake { from } | handoff::State::Conflict { from } => {
+            anyhow::bail!(
+                "{} played this realm since: run `rk handoff take {id}` (or `rk handoff send {id} --keep-mine`)",
+                from.machine
+            )
+        }
+        handoff::State::Arriving { from } => {
+            eprintln!(
+                "warning: the game played on {} has not arrived yet",
+                from.machine
+            )
+        }
+        _ => {}
+    }
+    if let Some(other) = &status.other_playing {
+        eprintln!("warning: {} may still be playing this realm", other.machine);
+    }
+    launcher.handoff_started(id, place.as_ref())?;
+    Ok(place)
+}
+
+/// After a clean stop, send a shared realm's player data.
+fn handoff_after_stop(
+    launcher: &Launcher,
+    place: Option<&handoff::Place>,
+    id: &str,
+    code: ExitCode,
+) -> Result<ExitCode> {
+    if code != ExitCode::SUCCESS || launcher.handoff_link(id)?.is_none() {
+        return Ok(code);
+    }
+    let Some(place) = place else {
+        return Ok(code);
+    };
+    eprintln!("sending the realm to the handoff folder");
+    match block_on(launcher.handoff_send(id, place, false))? {
+        Ok(Some(head)) => println!("sent (generation {})", head.generation),
+        Ok(None) => {}
+        Err(e) => eprintln!("warning: not sent ({e}); `rk handoff send {id}` tries again"),
+    }
+    Ok(code)
+}
+
+/// Where this computer's handoff settings live: `--root`, or
+/// `RK_HANDOFF_DIR` (to play two computers on one in tests).
+fn handoff_dir(root: &Path) -> PathBuf {
+    std::env::var_os("RK_HANDOFF_DIR").map_or_else(|| root.to_path_buf(), PathBuf::from)
+}
+
+fn handoff_place(root: &Path) -> Result<handoff::Place> {
+    handoff::place(&handoff_dir(root))?
+        .ok_or_else(|| anyhow::anyhow!("no handoff folder: run `rk handoff folder <path>` first"))
+}
+
+fn handoff_command(command: HandoffCommand) -> Result<ExitCode> {
+    let print_status = |status: &handoff::Status| -> Result<()> {
+        println!("{}", serde_json::to_string_pretty(status)?);
+        Ok(())
+    };
+    match command {
+        HandoffCommand::Folder {
+            path,
+            clear,
+            catalog,
+            root,
+        } => {
+            let launcher = open(&catalog, &root)?;
+            let settings = if clear || path.is_some() {
+                let path = path.map(std::path::absolute).transpose()?;
+                handoff::set_folder(
+                    &handoff_dir(&root),
+                    &launcher.layout().root,
+                    path.as_deref(),
+                )?
+            } else {
+                handoff::settings(&handoff_dir(&root))?
+            };
+            match &settings.folder {
+                Some(folder) => println!("handoff folder: {}", folder.display()),
+                None => println!("no handoff folder"),
+            }
+            println!(
+                "this computer: {} ({})",
+                handoff::machine_name(),
+                settings.machine_id
+            );
+            for suggestion in handoff::suggested_folders() {
+                println!(
+                    "suggested ({}): {}",
+                    suggestion.client,
+                    suggestion.path.display()
+                );
+            }
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::Status { id, catalog, root } => {
+            let launcher = open(&catalog, &root)?;
+            print_status(
+                &launcher.handoff_status(&id, handoff::place(&handoff_dir(&root))?.as_ref())?,
+            )?;
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::Share { id, catalog, root } => {
+            let launcher = open(&catalog, &root)?;
+            let place = handoff_place(&root)?;
+            let head = block_on(launcher.handoff_share(&id, &place))??;
+            println!(
+                "realm '{id}' shared as {} (generation {})",
+                head.uid, head.generation
+            );
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::Unshare { id, catalog, root } => {
+            open(&catalog, &root)?.handoff_unshare(&id)?;
+            println!("realm '{id}' is no longer shared on this computer");
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::Send {
+            id,
+            keep_mine,
+            catalog,
+            root,
+        } => {
+            let launcher = open(&catalog, &root)?;
+            let place = handoff_place(&root)?;
+            match block_on(launcher.handoff_send(&id, &place, keep_mine))?? {
+                Some(head) => {
+                    println!("sent (generation {}, {} bytes)", head.generation, head.size)
+                }
+                None => println!("nothing new to send"),
+            }
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::Take { id, catalog, root } => {
+            let launcher = open(&catalog, &root)?;
+            let place = handoff_place(&root)?;
+            let observer = ConsoleObserver::default();
+            block_on(launcher.handoff_take(&id, &place, &observer, &CancelToken::new()))??;
+            print_status(&launcher.handoff_status(&id, Some(&place))?)?;
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::List { catalog, root } => {
+            let launcher = open(&catalog, &root)?;
+            let place = handoff_place(&root)?;
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&launcher.handoff_shared(&place)?)?
+            );
+            Ok(ExitCode::SUCCESS)
+        }
+        HandoffCommand::Join {
+            uid,
+            id,
+            name,
+            index,
+            catalog,
+            root,
+        } => {
+            let launcher = open(&catalog, &root)?;
+            let place = handoff_place(&root)?;
+            let observer = ConsoleObserver::default();
+            let record = block_on(launcher.handoff_join(
+                &place,
+                &uid,
+                &id,
+                name.as_deref(),
+                index.as_deref(),
+                &observer,
+                &CancelToken::new(),
+            ))??;
+            println!("realm '{}' installed from the handoff folder", record.id);
+            Ok(ExitCode::SUCCESS)
+        }
+    }
 }
 
 fn client_command(command: ClientCommand) -> Result<ExitCode> {
@@ -1012,9 +1284,12 @@ fn main() -> Result<ExitCode> {
         }
         Command::Start { id, catalog, root } => {
             let launcher = open(&catalog, &root)?;
+            let place = handoff_before_start(&launcher, &root, &id)?;
             let server = launcher.server(&id)?;
-            block_on(run_instance(server, None))?
+            let code = block_on(run_instance(server, None))??;
+            handoff_after_stop(&launcher, place.as_ref(), &id, code)
         }
+        Command::Handoff { command } => handoff_command(command),
         Command::Account {
             command:
                 AccountCommand::Create {

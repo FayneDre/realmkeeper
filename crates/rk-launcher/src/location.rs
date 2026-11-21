@@ -32,6 +32,32 @@ fn synced_folders() -> Vec<(PathBuf, &'static str)> {
     folders
 }
 
+/// Synchronised folders of personal accounts (a handoff folder must not be
+/// a work one, ADR 0028): personal OneDrive and Dropbox.
+pub fn personal_synced_folders() -> Vec<(PathBuf, &'static str)> {
+    let mut folders = Vec::new();
+    if let Some(path) = std::env::var_os("OneDriveConsumer").filter(|p| !p.is_empty()) {
+        folders.push((PathBuf::from(path), "OneDrive"));
+    }
+    for base in ["APPDATA", "LOCALAPPDATA"] {
+        let Some(base) = std::env::var_os(base) else {
+            continue;
+        };
+        let info = PathBuf::from(base).join("Dropbox").join("info.json");
+        if let Ok(bytes) = std::fs::read(info) {
+            let personal = serde_json::from_slice::<serde_json::Value>(&bytes)
+                .ok()
+                .and_then(|v| v.get("personal")?.get("path")?.as_str().map(PathBuf::from));
+            if let Some(path) = personal {
+                if !folders.iter().any(|(p, _)| p == &path) {
+                    folders.push((path, "Dropbox"));
+                }
+            }
+        }
+    }
+    folders
+}
+
 fn dropbox_folders(info: &[u8]) -> Vec<PathBuf> {
     let Ok(serde_json::Value::Object(accounts)) = serde_json::from_slice(info) else {
         return Vec::new();

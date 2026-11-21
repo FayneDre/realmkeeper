@@ -449,6 +449,14 @@ accepted index stay.
   name, restore of the player databases, exported bindings and
   `modules-<id>`. `instances\<id>\import.json` tracks what is left, and
   `resume` finishes it.
+- Handoff between computers (ADR 0028, `rk-launcher::handoff`): a shared
+  realm (`instances\<id>\handoff.json`) is exported after each clean stop
+  to `<folder>\<uid>\state-<generation>-<machine>.rkrealm`, then
+  `head-<machine>.json` is written; each computer writes only its own
+  names. On the other computer the heads decide: take back (the other
+  computer's choices through `set_choices`, then a restore of the player
+  data), arriving, or conflict (the player chooses). `rk handoff join`
+  installs a folder's realm like an import, then links it.
 
 ## 9. Configuration layering
 

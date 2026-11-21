@@ -17,6 +17,7 @@ et colle-le dans le signalement : tes dossiers personnels y sont masqués.
 - [Des serveurs qui ne démarrent pas](#servers)
 - [Sauvegardes et restaurations](#backups)
 - [Plusieurs royaumes, changer de PC](#realms)
+- [Jouer sur un autre PC](#handoff)
 - [Jouer en réseau local](#lan)
 - [Panneau MJ et comptes](#gm)
 - [Autre chose](#other)
@@ -199,6 +200,33 @@ n'est perdu quand l'une s'arrête.
 - Un export contient les noms des comptes et la vérification de leurs mots
   de passe (pas les mots de passe eux-mêmes). Partage-le seulement comme
   une sauvegarde.
+
+<a id="handoff"></a>
+## Jouer sur un autre PC
+
+- **Autre PC** (Accueil, au-dessus du royaume) partage un royaume avec tes
+  autres PC grâce à un dossier que ton logiciel de synchronisation copie
+  déjà entre eux : Google Drive pour ordinateur (`G:\Mon Drive`), OneDrive,
+  Dropbox... Choisis le même dossier sur chaque PC. Seules les données des
+  joueurs voyagent (quelques dizaines de Mo) ; le serveur et ses bases
+  restent sur chaque PC.
+- **Partager avec mes autres PC** envoie le royaume tout de suite. Sur
+  l'autre PC, ouvre **Autre PC** et clique sur **Installer ici** à côté de
+  lui.
+- Après chaque arrêt propre des serveurs, la partie est envoyée. Sur
+  l'autre PC, Jouer devient **Reprendre la partie** : les données des
+  joueurs sont remises en place (l'état actuel est sauvegardé avant), ce
+  qui prend quelques minutes.
+- **« Pas encore arrivée »** : ton logiciel de synchronisation n'a pas fini
+  de copier le fichier. Laisse allumé le PC qui a joué jusqu'à l'envoi, ou
+  attends.
+- **Deux parties différentes** : les deux PC ont joué depuis leur dernier
+  échange. RealmKeeper ne les fusionne jamais : choisis celle à continuer.
+  L'autre reste dans les sauvegardes du royaume ou dans le dossier.
+- Utilise un dossier personnel, jamais celui de ton employeur (« OneDrive -
+  Entreprise ») : les fichiers contiennent les noms de tes comptes, la
+  vérification de leurs mots de passe (pas les mots de passe eux-mêmes) et
+  tes personnages.
 
 <a id="lan"></a>
 ## Jouer en réseau local

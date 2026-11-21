@@ -254,3 +254,49 @@ fn optional_sql_requirements_are_enforced() {
     assert!(manifest.selected_sql(record.options.get(module)).is_empty());
     assert_eq!(record.regenerate, strings(&["acore_world"]));
 }
+
+/// A realm taken back from another computer (ADR 0028) takes its modules
+/// and options, with the rebuilds a removal or a turned-off file needs.
+#[test]
+fn another_computers_choices_replace_these() {
+    use rk_core::manifest::OptionValue;
+    use rk_runtime::modules::{set_choices, set_options};
+    use std::collections::BTreeMap;
+
+    let catalog = catalog();
+    let dir = tempfile::tempdir().unwrap();
+    let layout = Layout::new(dir.path());
+    let ip = "mod-individual-progression";
+    let request = NewInstance {
+        id: "t".into(),
+        emulator: "azerothcore".into(),
+        flavor: None,
+        modules: strings(&[ip]),
+        network: Network::Solo,
+    };
+    install::open_or_create(&catalog, &layout, &request).unwrap();
+    let on = vec![("sql-vanilla-regen-values".to_string(), "true".to_string())];
+    set_options(&catalog, &layout, "t", ip, &on).unwrap();
+
+    // The other computer has AHBot instead, and a realm setting.
+    let mut options = BTreeMap::new();
+    options.insert(
+        rk_core::manifest::REALM_OPTIONS.to_string(),
+        BTreeMap::from([("max-level".to_string(), OptionValue::Integer(70))]),
+    );
+    let (record, old) =
+        set_choices(&catalog, &layout, "t", &strings(&["mod-ah-bot"]), &options).unwrap();
+    assert_eq!(old.modules, strings(&[ip]));
+    assert_eq!(record.modules, strings(&["mod-ah-bot"]));
+    assert_eq!(record.options, options);
+    assert_eq!(record.regenerate, strings(&["acore_world"]));
+    assert_eq!(install::open_existing(&layout, "t").unwrap().0, record);
+
+    // A value this catalog does not offer is refused, nothing saved.
+    let bad = BTreeMap::from([(
+        "mod-ah-bot".to_string(),
+        BTreeMap::from([("no-such-option".to_string(), OptionValue::Bool(true))]),
+    )]);
+    assert!(set_choices(&catalog, &layout, "t", &strings(&["mod-ah-bot"]), &bad).is_err());
+    assert_eq!(install::open_existing(&layout, "t").unwrap().0, record);
+}
