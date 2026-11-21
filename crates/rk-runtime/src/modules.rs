@@ -104,13 +104,22 @@ fn with_modules(
         if !old.modules.contains(module) {
             continue;
         }
-        // Its SQL stays harmless while disabled: nothing to rebuild.
-        if manifest.database.apply_when_disabled {
-            continue;
-        }
+        // Its base SQL stays harmless while disabled: only the databases
+        // its optional SQL files changed are rebuilt (ADR 0027).
+        let touched: Vec<&String> = if manifest.database.apply_when_disabled {
+            let chosen = manifest.selected_sql(old.options.get(module.as_str()));
+            manifest
+                .database
+                .touches
+                .iter()
+                .filter(|d| chosen.iter().any(|(db, _)| db == d))
+                .collect()
+        } else {
+            manifest.database.touches.iter().collect()
+        };
         // Content databases it changed are rebuilt without it; player data
         // keeps its tables, inert.
-        for touched in &manifest.database.touches {
+        for touched in touched {
             let db = all_databases.iter().find(|d| &d.id == touched);
             if let Some(db) = db.filter(|d| !d.player_data) {
                 if !regenerate.contains(&db.name) {
@@ -178,18 +187,16 @@ pub fn set_choices(
                 .flat_map(|s| &s.options)
                 .collect()
         } else {
-            if !enabled.contains(module) {
-                return Err(module_error(
-                    "this module is not enabled on the instance".into(),
-                ));
-            }
-            entry
+            let manifest = entry
                 .modules
                 .get(module)
-                .ok_or_else(|| module_error("unknown module".into()))?
-                .options
-                .iter()
-                .collect()
+                .ok_or_else(|| module_error("unknown module".into()))?;
+            // Kept as they are, like `set_modules` keeps them: the values of
+            // a module turned off apply (checked by `fit`) if it comes back.
+            if !enabled.contains(module) {
+                continue;
+            }
+            manifest.options.iter().collect()
         };
         for (option, value) in values {
             let fits = specs

@@ -370,12 +370,18 @@ impl Launcher {
         observer: &dyn Observer,
         cancel: &CancelToken,
     ) -> Result<InstanceRecord> {
+        // A take back from another computer ends with its restore: only
+        // that restore, resumed here, completes it.
+        let take = self.take_pending(id)?;
         let record = self.resume_change(id, observer, cancel).await?;
         if self.import_unfinished(id) {
             return self.finish_import(id, observer, cancel).await;
         }
-        // A take back from another computer ends with its restore.
-        self.finish_take(id)?;
+        if take {
+            self.finish_take(id)?;
+        } else {
+            self.abandon_take(id)?;
+        }
         self.extract_server_data(&record, observer, cancel).await?;
         Ok(record)
     }
@@ -444,13 +450,17 @@ impl Launcher {
         let (_, secrets) = install::open_existing(&self.layout, &record.id)?;
         let emu = self.emulator(&record.emulator)?;
         // A catalog newer than the realm's build (a module or option added
-        // since): refuse before any step instead of failing half way.
-        let missing = install::instance_plan(&self.catalog, &self.layout, &record, &secrets)?
-            .missing_from_build();
+        // since): refuse a new choice before any step instead of failing
+        // half way. A resumed change (same record) runs: if it fails, it is
+        // rolled back and no longer holds back an update.
+        let missing = if record == *old {
+            Vec::new()
+        } else {
+            install::instance_plan(&self.catalog, &self.layout, &record, &secrets)?
+                .missing_from_build()
+        };
         if !missing.is_empty() {
-            if record != *old {
-                install::save_record(&self.layout, old)?;
-            }
+            install::save_record(&self.layout, old)?;
             return Err(LauncherError::ServerUpdateNeeded {
                 files: missing.iter().map(|p| p.display().to_string()).collect(),
             });

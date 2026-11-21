@@ -299,4 +299,14 @@ fn another_computers_choices_replace_these() {
     )]);
     assert!(set_choices(&catalog, &layout, "t", &strings(&["mod-ah-bot"]), &bad).is_err());
     assert_eq!(install::open_existing(&layout, "t").unwrap().0, record);
+
+    // Options the other computer kept for a module it turned off come
+    // along, unchecked, like `set_modules` keeps them.
+    let kept = BTreeMap::from([(
+        "mod-transmog".to_string(),
+        BTreeMap::from([("portable".to_string(), OptionValue::Bool(false))]),
+    )]);
+    let (record, _) =
+        set_choices(&catalog, &layout, "t", &strings(&["mod-ah-bot"]), &kept).unwrap();
+    assert_eq!(record.options, kept);
 }

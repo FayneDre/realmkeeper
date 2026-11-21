@@ -695,10 +695,23 @@ fn handoff_after_stop(
     Ok(code)
 }
 
-/// Where this computer's handoff settings live: `--root`, or
-/// `RK_HANDOFF_DIR` (to play two computers on one in tests).
+/// Where this computer's handoff settings live: `RK_HANDOFF_DIR` (to play
+/// two computers on one in tests); the app's folder when `--root` is the
+/// app's data root (same machine id and folder as the app); else `--root`
+/// (development realms never write to the player's handoff folder).
 fn handoff_dir(root: &Path) -> PathBuf {
-    std::env::var_os("RK_HANDOFF_DIR").map_or_else(|| root.to_path_buf(), PathBuf::from)
+    if let Some(dir) = std::env::var_os("RK_HANDOFF_DIR") {
+        return PathBuf::from(dir);
+    }
+    let same = |a: &Path, b: &Path| match (a.canonicalize(), b.canonicalize()) {
+        (Ok(a), Ok(b)) => a == b,
+        _ => false,
+    };
+    if same(root, &rk_launcher::data_root().root) {
+        rk_launcher::app_dir()
+    } else {
+        root.to_path_buf()
+    }
 }
 
 fn handoff_place(root: &Path) -> Result<handoff::Place> {

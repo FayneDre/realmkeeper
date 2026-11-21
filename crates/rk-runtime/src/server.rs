@@ -622,6 +622,13 @@ fn table_sql(
         let names = std::iter::once(write.table.as_str())
             .chain(write.row.keys().map(String::as_str))
             .chain(write.set.keys().map(String::as_str));
+        if write.set.is_empty() || write.row.is_empty() {
+            return Err(install::PlanError::Unknown(format!(
+                "table write on '{}' without columns or row",
+                write.table
+            ))
+            .into());
+        }
         if let Some(bad) = names.clone().find(|n| !plain(n)) {
             return Err(install::PlanError::Unknown(format!("table name '{bad}'")).into());
         }
@@ -671,6 +678,9 @@ mod table_tests {
         let mut bad = write.clone();
         bad.table = "x`; DROP".into();
         assert!(table_sql(&entry.manifest, &[bad]).is_err());
+        let mut empty = write.clone();
+        empty.row.clear();
+        assert!(table_sql(&entry.manifest, &[empty]).is_err());
         let mut unknown = write;
         unknown.database = "nowhere".into();
         assert!(table_sql(&entry.manifest, &[unknown]).is_err());

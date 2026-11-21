@@ -781,16 +781,47 @@ impl Launcher {
                 realm.emulator, realm.flavor
             )));
         }
-        // Player data never goes to an older schema: a newer build there
-        // means this realm has an update waiting.
+        // Player data never goes to an older schema. Builds have no order:
+        // the game was made on the build this realm is offered as an update
+        // (the other computer updated first). A newer launcher there was
+        // refused above; an older build there is upgraded by the restore's
+        // database update.
         if realm.build.is_some() && realm.build != record.build {
-            if let ServerUpdate::Available { .. } = self.server_update(id).await? {
-                return Err(LauncherError::HandoffUpdateFirst);
+            if let ServerUpdate::Available { build, .. } = self.server_update(id).await? {
+                if realm.build.as_deref() == Some(build.as_str()) {
+                    return Err(LauncherError::HandoffUpdateFirst);
+                }
             }
         }
         let _lock = install::lock_instance(&self.layout, id)?;
         link.pulling = Some(head.generation);
         self.save_link(id, link)?;
+        let result = self
+            .pull(id, record, &realm, head, state, observer, cancel)
+            .await;
+        match &result {
+            // Interrupted: `resume` finishes the restore, then the take.
+            Err(LauncherError::Cancelled(_)) if self.take_pending(id)? => {}
+            // Failed (rolled back): this computer keeps its own game and
+            // can take the other one again later.
+            Err(_) => self.abandon_take(id)?,
+            Ok(_) => {}
+        }
+        result
+    }
+
+    /// The take back proper, once `pulling` is saved.
+    #[allow(clippy::too_many_arguments)]
+    async fn pull(
+        &self,
+        id: &str,
+        record: InstanceRecord,
+        realm: &realms::ExportedRealm,
+        head: &Head,
+        state: &Path,
+        observer: &dyn Observer,
+        cancel: &CancelToken,
+    ) -> Result<InstanceRecord> {
         let name = format!("handoff-{}-{}.sql", head.generation, unix_secs());
         let backups_dir = self.layout.backups(id);
         std::fs::create_dir_all(&backups_dir).map_err(|e| io_error(backups_dir.clone(), e))?;
@@ -813,6 +844,34 @@ impl Launcher {
         self.finish_take(id)?;
         let _ = backups::prune(&backups_dir);
         Ok(record)
+    }
+
+    /// Whether the change waiting to be resumed is the restore of a take
+    /// back (its dump is a `handoff-` backup).
+    pub(crate) fn take_pending(&self, id: &str) -> Result<bool> {
+        Ok(matches!(
+            self.pending(id)?,
+            Some(Pending::Restore { dump, .. })
+                if dump.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.starts_with("handoff-"))
+        ))
+    }
+
+    /// A take back that will not finish: the realm keeps its own game, the
+    /// other computer's stays to take (the restore, if it ran, was rolled
+    /// back; a restore left unfinished keeps its pending change).
+    pub(crate) fn abandon_take(&self, id: &str) -> Result<()> {
+        if self.take_pending(id)?
+            && install::ensure_finished(&self.layout, &[install::instance_operation_id(id)]).is_ok()
+        {
+            self.clear_pending(id)?;
+        }
+        let Some(mut link) = self.handoff_link(id)? else {
+            return Ok(());
+        };
+        if link.pulling.take().is_some() {
+            self.save_link(id, &link)?;
+        }
+        Ok(())
     }
 
     /// A take back that ended (also through `resume`): the realm is at

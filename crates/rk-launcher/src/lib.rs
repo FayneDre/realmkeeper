@@ -623,7 +623,7 @@ impl Launcher {
     }
 
     /// What the unfinished `instance-<id>` operation was started with.
-    fn pending(&self, id: &str) -> Result<Option<Pending>> {
+    pub(crate) fn pending(&self, id: &str) -> Result<Option<Pending>> {
         let path = self.pending_path(id);
         match std::fs::read(&path) {
             Ok(bytes) => serde_json::from_slice(&bytes)
@@ -642,7 +642,7 @@ impl Launcher {
         std::fs::rename(&tmp, &path).map_err(|e| io_error(path, e))
     }
 
-    fn clear_pending(&self, id: &str) -> Result<()> {
+    pub(crate) fn clear_pending(&self, id: &str) -> Result<()> {
         let path = self.pending_path(id);
         match std::fs::remove_file(&path) {
             Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(io_error(path, e)),
