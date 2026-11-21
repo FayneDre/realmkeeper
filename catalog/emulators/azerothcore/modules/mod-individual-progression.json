@@ -97,6 +97,223 @@
         { "id": "on", "label": { "en": "On", "fr": "Activé" }, "assets": ["classic-spells"] }
       ]
     }
+,
+    {
+      "id": "sql-phasing",
+      "type": "sql",
+      "label": { "en": "Phase later NPCs and objects until their era", "fr": "Phaser les PNJ et objets ajoutés plus tard jusqu'à leur époque" },
+      "help": {
+        "en": "Quest givers, flight paths, meeting stones and other NPCs or objects added to the old world by later patches only appear once your character reaches the matching phase.",
+        "fr": "Les donneurs de quêtes, maîtres de vol, pierres de rencontre et autres PNJ ou objets ajoutés au monde d'origine par des patchs ultérieurs n'apparaissent qu'une fois ton personnage arrivé à la phase correspondante."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_phasing.sql",
+      "default": false
+    },
+    {
+      "id": "sql-limit-spells-to-expansion",
+      "type": "sql",
+      "label": { "en": "Train class spells in their own expansion", "fr": "Apprendre les sorts de classe à leur extension" },
+      "help": {
+        "en": "Spells added by TBC or WotLK (Victory Rush, Aspect of the Viper, Water Shield...) are taught only from level 61 or 71. Random bots are not affected: they do not learn from trainers.",
+        "fr": "Les sorts ajoutés par TBC ou WotLK (Frappe de la victoire, Aspect de la vipère, Bouclier d'eau...) ne s'apprennent qu'à partir du niveau 61 ou 71. Sans effet sur les bots aléatoires, qui n'apprennent pas chez les maîtres."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_limit_spells_to_expansion.sql",
+      "default": false
+    },
+    {
+      "id": "sql-remove-heirlooms",
+      "type": "sql",
+      "label": { "en": "Remove heirlooms", "fr": "Retirer les objets hérités" },
+      "help": {
+        "en": "Removes the heirloom vendors and items, made to skip progression.",
+        "fr": "Retire les vendeurs et les objets hérités, conçus pour sauter la progression."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_remove_heirlooms.sql",
+      "default": false
+    },
+    {
+      "id": "sql-vanilla-crafting-requirements",
+      "type": "sql",
+      "label": { "en": "Vanilla crafting specializations", "fr": "Spécialisations d'artisanat de Vanilla" },
+      "help": {
+        "en": "Vanilla recipes require their specialization again (Dragonscale Leatherworking...). The game's item cache may need clearing.",
+        "fr": "Les recettes de Vanilla exigent de nouveau leur spécialisation (Travail du cuir d'écailles de dragon...). Le cache d'objets du jeu peut devoir être vidé."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_vanilla_crafting_requirements.sql",
+      "default": false
+    },
+    {
+      "id": "sql-restore-crafting-cd-timers",
+      "type": "sql",
+      "label": { "en": "Vanilla and TBC crafting cooldowns", "fr": "Temps de recharge d'artisanat de Vanilla et TBC" },
+      "help": {
+        "en": "Transmutes and other crafts get their original cooldowns back (Iron to Gold: one day). The game's item cache may need clearing.",
+        "fr": "Les transmutations et autres fabrications retrouvent leur temps de recharge d'origine (Fer en or : un jour). Le cache d'objets du jeu peut devoir être vidé."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_restore_crafting_cd_timers.sql",
+      "default": false
+    },
+    {
+      "id": "sql-restore-potion-cd",
+      "type": "sql",
+      "label": { "en": "Two-minute potion cooldown", "fr": "Recharge des potions à deux minutes" },
+      "help": {
+        "en": "Vanilla and TBC potions share a two-minute cooldown again.",
+        "fr": "Les potions de Vanilla et TBC retrouvent leur recharge commune de deux minutes."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_restore_potion_cd.sql",
+      "default": false
+    },
+    {
+      "id": "sql-item-stack-sizes",
+      "type": "sql",
+      "label": { "en": "Vanilla and TBC stack sizes", "fr": "Taille des piles de Vanilla et TBC" },
+      "help": {
+        "en": "Vanilla and TBC items stack as they did then (healing potions by 5...): less room in bags.",
+        "fr": "Les objets de Vanilla et TBC s'empilent comme à l'époque (potions de soins par 5...) : moins de place dans les sacs."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_item_stack_sizes.sql",
+      "default": false
+    },
+    {
+      "id": "sql-ammo-stack-size",
+      "type": "sql",
+      "label": { "en": "Ammunition in stacks of 200", "fr": "Munitions par piles de 200" },
+      "help": {
+        "en": "Vanilla and TBC arrows and bullets stack to 200 instead of 1000: quivers and ammo pouches matter again.",
+        "fr": "Les flèches et balles de Vanilla et TBC s'empilent par 200 au lieu de 1000 : carquois et gibernes redeviennent utiles."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_ammo_stack_size.sql",
+      "default": false
+    },
+    {
+      "id": "sql-stackable-buff-scrolls",
+      "type": "sql",
+      "label": { "en": "Stackable buff scrolls", "fr": "Parchemins d'amélioration cumulables" },
+      "help": {
+        "en": "Scrolls of different stats stack again, as in Vanilla (also in TBC and WotLK: upstream has no way to limit it to Vanilla yet).",
+        "fr": "Les parchemins de caractéristiques différentes se cumulent de nouveau, comme dans Vanilla (aussi pendant TBC et WotLK : le module ne sait pas encore le limiter à Vanilla)."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_stackable_buff_scrolls.sql",
+      "default": false
+    },
+    {
+      "id": "sql-vanilla-regen-values",
+      "type": "sql",
+      "label": { "en": "Vanilla health and mana regeneration", "fr": "Régénération de vie et de mana de Vanilla" },
+      "help": {
+        "en": "Health and mana regeneration values of Vanilla. Upstream says some values are uncertain.",
+        "fr": "Valeurs de régénération de vie et de mana de Vanilla. Selon le module, certaines valeurs sont incertaines."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_vanilla_regen_values.sql",
+      "default": false
+    },
+    {
+      "id": "sql-vanilla-models",
+      "type": "sql",
+      "label": { "en": "Vanilla creature models", "fr": "Apparences des créatures de Vanilla" },
+      "help": {
+        "en": "Creatures whose model changed after Vanilla get their original one back, when the game files still have it.",
+        "fr": "Les créatures dont l'apparence a changé après Vanilla retrouvent l'originale, quand les fichiers du jeu l'ont encore."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_vanilla_models.sql",
+      "default": false
+    },
+    {
+      "id": "sql-creature-stats",
+      "type": "sql",
+      "label": { "en": "Stronger low-level creatures (VMaNGOS stats)", "fr": "Créatures de bas niveau plus fortes (stats VMaNGOS)" },
+      "help": {
+        "en": "Low-level creatures use VMaNGOS stats: stronger than originally intended. For more challenge.",
+        "fr": "Les créatures de bas niveau prennent les stats de VMaNGOS : plus fortes que prévu à l'origine. Pour plus de difficulté."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_creature_stats.sql",
+      "default": false
+    },
+    {
+      "id": "sql-av-landmines",
+      "type": "sql",
+      "label": { "en": "Landmines in Vanilla Alterac Valley", "fr": "Mines terrestres dans l'Alterac de Vanilla" },
+      "help": {
+        "en": "Adds the landmines of Vanilla Alterac Valley; each side sees only its own. Bots do not avoid them.",
+        "fr": "Ajoute les mines de la vallée d'Alterac de Vanilla ; chaque camp ne voit que les siennes. Les bots ne les évitent pas."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_av_landmines.sql",
+      "default": false
+    },
+    {
+      "id": "sql-unobtainable-items",
+      "type": "sql",
+      "label": { "en": "Promotional items obtainable in the world", "fr": "Objets promotionnels obtenables en jeu" },
+      "help": {
+        "en": "Mostly cosmetic items once given outside the game (card game, events) drop in fitting places, such as the Tabard of Flame from Ragnaros.",
+        "fr": "Des objets surtout cosmétiques autrefois obtenus hors du jeu (jeu de cartes, événements) tombent à des endroits adaptés, comme le Tabard de flammes sur Ragnaros."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_unobtainable_items.sql",
+      "default": false
+    },
+    {
+      "id": "sql-small-group-adjustments",
+      "type": "sql",
+      "label": { "en": "Raid adjustments for small groups", "fr": "Ajustements de raid pour petits groupes" },
+      "help": {
+        "en": "Eases raid requirements meant for 40 players (Eternal Quintessence earlier, without cooldown...). Makes the game easier.",
+        "fr": "Allège des exigences de raid prévues pour 40 joueurs (Quintessence éternelle plus tôt, sans recharge...). Rend le jeu plus facile."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_small_group_adjustments.sql",
+      "default": false
+    },
+    {
+      "id": "sql-aq-quest-nerf",
+      "type": "sql",
+      "label": { "en": "Lighter Ahn'Qiraj quests", "fr": "Quêtes d'Ahn'Qiraj allégées" },
+      "help": {
+        "en": "The Ahn'Qiraj quests, made for a whole server, need far fewer turn-ins. Makes the game easier.",
+        "fr": "Les quêtes d'Ahn'Qiraj, prévues pour tout un serveur, demandent beaucoup moins de remises. Rend le jeu plus facile."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_aq_quest_nerf.sql",
+      "default": false
+    },
+    {
+      "id": "sql-tbc-heroic-dungeon-keys-nerf",
+      "type": "sql",
+      "label": { "en": "TBC heroic keys at Honored", "fr": "Clés héroïques de TBC à Honoré" },
+      "help": {
+        "en": "TBC heroic dungeon keys need Honored instead of Revered, as from patch 2.3. Makes the game easier.",
+        "fr": "Les clés des donjons héroïques de TBC demandent Honoré au lieu de Révéré, comme depuis le patch 2.3. Rend le jeu plus facile."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_tbc_heroic_dungeon_keys_nerf.sql",
+      "default": false
+    },
+    {
+      "id": "sql-wotlk-hp-values-for-tbc-raids",
+      "type": "sql",
+      "label": { "en": "Weaker TBC raid bosses (patch 3.0.2)", "fr": "Boss de raid TBC affaiblis (patch 3.0.2)" },
+      "help": {
+        "en": "Applies the patch 3.0.2 health nerf to TBC raid creatures. Makes the game easier.",
+        "fr": "Applique la baisse de points de vie du patch 3.0.2 aux créatures des raids TBC. Rend le jeu plus facile."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_wotlk_hp_values_for_tbc_raids.sql",
+      "default": false
+    }
   ],
   "assets": [
     {

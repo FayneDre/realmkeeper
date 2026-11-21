@@ -139,6 +139,25 @@
             }
           },
           "additionalProperties": false
+        },
+        "optionalSql": {
+          "description": "Where the files of 'sql' module options are, relative to the instance SQL tree (ADR 0027). 'source': in the server artifact ({module} = module id, {file} = the option's file). 'target': a directory the migration tool reads, owned by the launcher ({module}, {database} = catalog database id).",
+          "type": "object",
+          "required": [
+            "source",
+            "target"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

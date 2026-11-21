@@ -87,6 +87,7 @@ emulators, clients and modules later **as data + a small driver**, never as rewr
 | authserver answers a logon challenge for an unknown account with result `0x04`; the Node SRP6 client (`tools/ci/auth-client.mjs`) matches the worldserver verifier vector and a simulated `SRP6.cpp` server. | local test (2026-11-18) |
 | worldserver aborts on a missing table or column (`ER_NO_SUCH_TABLE` / `ER_BAD_FIELD_ERROR` -> `ABORT`): a compiled-in module that queries its own tables while disabled needs `applyWhenDisabled`. | fork `MySQLConnection.cpp` @ Playerbot (2026-11-18) |
 | mod-transmog reads and cleans `custom_transmogrification*` / `custom_unlocked_appearances` (characters) at startup and at each login whatever `Transmogrification.Enable` says -> `applyWhenDisabled`. mod-reagent-bank never reads `ReagentBank.Enable` (inert without its NPC, world SQL). mod-assistant has no global switch (one `Assistant.<service>.Enabled` per service). mod-junk-to-gold has no config at all: not in the catalog (always on in a full build). | module sources @ d309745, 62c2653, 77505b1, 2134690 (2026-11-18) |
+| dbimport applies module SQL in the order of the **file names** across every directory (`zz_optional_*` last) and never cleans up applied `MODULE` files that vanished from disk: removing a file does not undo it. Individual Progression ships 22 `optional/sql/world/zz_optional_*.sql`; 4 need patch-V/S (rogue poisons, spell damage and healing, TBC PvP prices, Vanilla transports). | fork `UpdateFetcher.cpp` @ 32fd347, module @ e179555 (2026-11-21) |
 | mod-reagent-bank-account creates its own tables at `OnStartup` (`CREATE TABLE IF NOT EXISTS`, characters + world) whatever `ReagentBankAccount.Enable` says: no `applyWhenDisabled`. Used only through its add-on `ReagentBankUI` (in the module repo, `.rbank` `SEC_PLAYER`); loader `Addmod_reagent_bank_accountScripts`; distinct symbols and tables from mod-reagent-bank (`custom_reagent_bank`). `LICENSE` says MIT, the source headers say AGPL-3.0-or-later. | module sources @ f80a7e9 (2026-11-21) |
 | dbimport reads module SQL recursively under `data/sql/` (depth 10): `db-world/base/*.sql` works. Transmog, enchanter and reagent bank NPCs are templates only (placed with `.npc add 190010` / `601015` / `290011`); mod-assistant spawns its own. mod-dungeon-clear links against mod-playerbots (switch `DungeonClear.Enable`). | fork `UpdateFetcher.cpp`, module SQL and READMEs (2026-11-18) |
 | The `mysql` 8.4 client runs its own commands from a piped file (`system` starts a program, `tee` writes a file, `source`). `--skip-system-command` stops only `system`; `--commands=OFF` stops all but `USE`/`DELIMITER` yet **disables the `--one-database` filter** (so does `--binary-mode`). The portable server has `secure_file_priv = NULL`, `local_infile = 0`. A database grant on `acore_auth` also covers `acoreXauth` (`_` is a wildcard). | local tests on `pubtest` and `rk-db` tests (2026-11-19) |
@@ -228,6 +229,13 @@ Update this table when a fact is (re)verified; date it.
   kept across `db-restore`; the restore runs post-install again with the
   bindings looked up by name (old `bindings.json` put back on rollback) and
   renders the configs, keeping those the realm's older build lacks.
+- **0027** Optional module SQL: option type `sql` (`database`, `file`),
+  files packaged by CI (`optionalSql` in the build plan, at
+  `sql/modules/<id>/<file>`), emulator `instance.optionalSql` (source,
+  target `.../db-{database}/rk-optional`), step `optional-sql` before
+  dbimport (module + update operations), turning one off schedules the
+  database rebuild (ADR 0012); smoke test round B applies them all.
+  Individual Progression: 18 files without client patch, off by default.
 - Scope v1: solo + LAN; Internet later. Linux/macOS later (keep code portable).
 
 Never re-propose rejected options (MariaDB, Docker/WSL2, per-combination builds,

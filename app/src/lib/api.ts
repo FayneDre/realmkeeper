@@ -243,6 +243,16 @@ export type ModuleOption =
       help?: LocalizedText | null;
       default: string;
       choices: OptionChoice[];
+    }
+  | {
+      /** An optional SQL file of the module (ADR 0027): on/off like a boolean. */
+      type: "sql";
+      id: string;
+      label: LocalizedText;
+      help?: LocalizedText | null;
+      database: string;
+      file: string;
+      default: boolean;
     };
 
 export interface ModuleOptions {

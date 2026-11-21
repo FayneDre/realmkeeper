@@ -75,7 +75,11 @@
         "Updates.EnableDatabases": 0
       }
     },
-    "dbImport": { "executable": "bin/dbimport.exe", "configFile": "dbimport.conf" }
+    "dbImport": { "executable": "bin/dbimport.exe", "configFile": "dbimport.conf" },
+    "optionalSql": {
+      "source": "modules/{module}/{file}",
+      "target": "modules/{module}/data/sql/db-{database}/rk-optional"
+    }
   },
   "ports": {
     "auth": 3724,

@@ -5,6 +5,8 @@
 //     dist/                     everything `cmake --install` produced (executables, DLLs, .conf.dist)
 //     sql/data/sql/**           core SQL (read by dbimport through `SourceDirectory`)
 //     sql/modules/<id>/data/sql/**   module SQL, one directory per catalog module id
+//     sql/modules/<id>/<file>   files of the module's `sql` options (ADR 0027;
+//                               emulator `instance.optionalSql.source`)
 //     build-info.json           plan (exact source commits) + toolchain information
 //     files.json                every file with size and sha256 (integrity + differential updates)
 //
@@ -12,7 +14,7 @@
 
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { join, relative, sep } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 
 const [planPath, sourceDir, distDir, staging] = process.argv.slice(2);
 if (!planPath || !sourceDir || !distDir || !staging) {
@@ -30,6 +32,16 @@ for (const module of plan.modules) {
     cpSync(moduleSql, join(staging, "sql", "modules", module.id, "data", "sql"), { recursive: true });
   } else {
     console.warn(`note: ${module.id} has no data/sql directory`);
+  }
+  for (const file of module.optionalSql ?? []) {
+    const source = join(sourceDir, "modules", module.id, ...file.split("/"));
+    if (!existsSync(source)) {
+      console.error(`${module.id}: optional SQL file ${file} is missing at the pinned commit`);
+      process.exit(1);
+    }
+    const target = join(staging, "sql", "modules", module.id, ...file.split("/"));
+    mkdirSync(dirname(target), { recursive: true });
+    cpSync(source, target);
   }
 }
 

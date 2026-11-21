@@ -13,7 +13,8 @@
 //   module SQL must NOT be applied (validates Updates.AllowedModules naming +
 //   inertness).
 // Round B ("modules on"): all modules allowed and enabled -> servers must start;
-//   optional module SQL must be applied on top of the existing databases. Then,
+//   optional module SQL must be applied on top of the existing databases, with
+//   every optional SQL file of the modules (ADR 0027). Then,
 //   as a player would see it: a real logon on authserver (SRP6 challenge,
 //   proof, realm list naming the world port, realm online), random bots in
 //   the world, and AHBot auctions in the auction house.
@@ -471,9 +472,35 @@ async function checkLive(label, world, ahbotGuid) {
   }
 }
 
+/**
+ * ADR 0027: puts every optional SQL file (`sql` options) of `modules` where
+ * dbimport reads them, as the launcher's `optional-sql` step does, so the
+ * round checks that each one still applies on the pinned build.
+ */
+function placeOptionalSql(modules) {
+  const spec = JSON.parse(readFileSync(join(emulatorDir, "emulator.json"), "utf8")).instance.optionalSql;
+  if (!spec) return;
+  let count = 0;
+  for (const id of modules) {
+    const manifest = join(emulatorDir, "modules", `${id}.json`);
+    if (!existsSync(manifest)) continue;
+    for (const option of JSON.parse(readFileSync(manifest, "utf8")).options ?? []) {
+      if (option.type !== "sql") continue;
+      const source = join(sourceDir, spec.source.replaceAll("{module}", id).replaceAll("{file}", option.file));
+      const targetDir = join(sourceDir, spec.target.replaceAll("{module}", id).replaceAll("{database}", option.database));
+      if (!existsSync(source)) fail(`${id}: optional SQL ${option.file} is missing from the artifact`);
+      mkdirSync(targetDir, { recursive: true });
+      copyFileSync(source, join(targetDir, basename(option.file)));
+      count += 1;
+    }
+  }
+  if (count > 0) note(`✅ ${count} optional SQL files put in place for dbimport`);
+}
+
 async function round(label, allowed, enabled, maxImportSeconds = Infinity, live = false) {
   note(`\n### Round ${label}`);
   toggle(enabled);
+  if (enabled) placeOptionalSql(allowed);
   const seconds = dbimport(label, allowed);
   if (seconds > maxImportSeconds) fail(`dbimport (${label}) took ${seconds} s: the restored snapshot is not up to date`);
   let ahbotGuid = null;

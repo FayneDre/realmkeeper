@@ -4,7 +4,8 @@
 //!
 //! ```text
 //! servers-stopped → [download/unpack assets] → server-data → db-start
-//!   → post-install → [regenerate-<db>] → render-config → db-import → db-stop
+//!   → post-install → [regenerate-<db>] → [optional-sql] → render-config
+//!   → db-import → db-stop
 //! ```
 //!
 //! - assets: the files the option choices select (ADR 0013), downloaded from
@@ -19,6 +20,8 @@
 //!   database, ADR 0003): its tables move aside, dbimport rebuilds it from
 //!   the base SQL and the remaining modules; the old copy is dropped at
 //!   finalize, or restored on rollback. Player data is never touched.
+//! - `optional-sql` leaves the optional SQL files turned on by `sql`
+//!   options where dbimport reads them (ADR 0027).
 //! - `render-config` re-renders every config with the module set, expanding
 //!   the bindings; `db-import` applies the chosen modules' SQL.
 //!
@@ -147,6 +150,7 @@ pub fn apply_modules_operation(
         op.step(DbRegenerate::new(plan.db.clone(), name))
     });
     Ok(op
+        .maybe_step(plan.optional_sql)
         .step(plan.render)
         .maybe_step(plan.import)
         .step(DbStop { db: plan.db }))
@@ -157,7 +161,7 @@ pub fn apply_modules_operation(
 ///
 /// ```text
 /// servers-stopped → db-start → db-backup → extract-bin → extract-sql
-///   → post-install → render-config → db-import → db-stop
+///   → post-install → [optional-sql] → render-config → db-import → db-stop
 /// ```
 ///
 /// Every database is dumped first (kept in `backups/<id>/`); a failure puts
@@ -202,6 +206,8 @@ pub fn update_operation(
         .step(Extract::new("extract-sql", server_artifact, &paths.sql).subdir("sql"))
         .step(overlay(layout, record, &plan))
         .step(post_install)
+        // The new SQL tree has none of the optional files yet.
+        .maybe_step(plan.optional_sql)
         .step(plan.render)
         .maybe_step(plan.import)
         .step(DbStop { db: plan.db }))
@@ -383,6 +389,37 @@ pub fn set_options(
         }
     }
     new.options.retain(|_, v| !v.is_empty());
+    // An optional SQL file turned off (ADR 0027): its database is rebuilt
+    // without it, like after removing a module.
+    if module != REALM_OPTIONS {
+        let before = old.options.get(module);
+        let after = new.options.get(module);
+        let mut turned_off: Vec<&str> = Vec::new();
+        for spec in &specs {
+            if let rk_core::manifest::ModuleOption::Sql { database, .. } = spec {
+                let on = |values: Option<&std::collections::BTreeMap<_, _>>| {
+                    spec.effective(values.and_then(|v| v.get(spec.id())))
+                        == rk_core::manifest::OptionValue::Bool(true)
+                };
+                if on(before) && !on(after) {
+                    turned_off.push(database);
+                }
+            }
+        }
+        if !turned_off.is_empty() {
+            let selected: Vec<&str> = new.modules.iter().map(String::as_str).collect();
+            let resolution = rk_core::resolve(catalog, &new.emulator, Some(&new.flavor), &selected)
+                .map_err(install::PlanError::from)?;
+            for db in install::databases(catalog, &resolution)? {
+                if turned_off.contains(&db.id.as_str())
+                    && !db.player_data
+                    && !new.regenerate.contains(&db.name)
+                {
+                    new.regenerate.push(db.name);
+                }
+            }
+        }
+    }
     install::save_record(layout, &new)?;
     Ok((new, old))
 }
@@ -471,6 +508,68 @@ impl<C: Sync> Step<C> for ServersStopped {
             Ok(())
         })
     }
+}
+
+/// The record to put back when the operation for `attempted` failed: `old`,
+/// plus a rebuild of every content database an optional SQL file was being
+/// turned on for (ADR 0027). dbimport may have run part of that file before
+/// failing, and the restored record no longer lists it: only a rebuild
+/// takes those changes out again.
+pub fn after_failure(
+    catalog: &Catalog,
+    attempted: &InstanceRecord,
+    old: &InstanceRecord,
+) -> InstanceRecord {
+    use rk_core::manifest::{ModuleOption, OptionValue};
+    let mut restored = old.clone();
+    let Some(entry) = catalog.emulator(&attempted.emulator) else {
+        return restored;
+    };
+    let (Ok(now), Ok(before)) = (
+        enabled_modules(catalog, attempted),
+        enabled_modules(catalog, old),
+    ) else {
+        return restored;
+    };
+    let mut turned_on: Vec<&str> = Vec::new();
+    for id in &now {
+        let Some(manifest) = entry.modules.get(id) else {
+            continue;
+        };
+        for option in &manifest.options {
+            let ModuleOption::Sql { database, .. } = option else {
+                continue;
+            };
+            let on = |record: &InstanceRecord| {
+                option.effective(record.options.get(id).and_then(|v| v.get(option.id())))
+                    == OptionValue::Bool(true)
+            };
+            if on(attempted) && !(before.contains(id) && on(old)) {
+                turned_on.push(database);
+            }
+        }
+    }
+    if turned_on.is_empty() {
+        return restored;
+    }
+    let selected: Vec<&str> = attempted.modules.iter().map(String::as_str).collect();
+    let Ok(resolution) = rk_core::resolve(
+        catalog,
+        &attempted.emulator,
+        Some(&attempted.flavor),
+        &selected,
+    ) else {
+        return restored;
+    };
+    for db in install::databases(catalog, &resolution).unwrap_or_default() {
+        if turned_on.contains(&db.id.as_str())
+            && !db.player_data
+            && !restored.regenerate.contains(&db.name)
+        {
+            restored.regenerate.push(db.name);
+        }
+    }
+    restored
 }
 
 /// Clears the regeneration request once the operation has completed.

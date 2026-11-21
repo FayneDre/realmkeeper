@@ -228,6 +228,29 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
             }
         }
 
+        // Optional module SQL (ADR 0027): both paths stay in the SQL tree,
+        // one directory per module and database.
+        if let Some(spec) = &emu.instance.optional_sql {
+            let source = spec.source_path("m", "f.sql");
+            let target = spec.target_dir("m", "d");
+            if !spec.source.contains("{file}") || !is_safe_relative(&source) {
+                push(
+                    here.clone(),
+                    "instance.optionalSql.source: a relative path with '{file}'".into(),
+                );
+            }
+            if !spec.target.contains("{module}")
+                || !spec.target.contains("{database}")
+                || !is_safe_relative(&target)
+            {
+                push(
+                    here.clone(),
+                    "instance.optionalSql.target: a relative path with '{module}' and '{database}'"
+                        .into(),
+                );
+            }
+        }
+
         // Realm settings (ADR 0017): core config files only, never a key the
         // launcher imposes, no assets, unique ids.
         if entry.modules.contains_key(rk_core::manifest::REALM_OPTIONS) {
@@ -252,6 +275,10 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                 | rk_core::manifest::ModuleOption::Number { target, .. } => {
                     targets.push((&target.file, &target.key))
                 }
+                rk_core::manifest::ModuleOption::Sql { .. } => push(
+                    here.clone(),
+                    format!("realm setting '{id}': only module options can apply SQL files"),
+                ),
                 rk_core::manifest::ModuleOption::Choice { choices, .. } => {
                     for choice in choices {
                         if !choice.assets.is_empty() {
@@ -461,6 +488,8 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                 }
             }
             let mut option_ids = BTreeSet::new();
+            // The migration tool orders files by name and refuses duplicates.
+            let mut sql_names = BTreeSet::new();
             for option in &module.options {
                 if !option_ids.insert(option.id()) {
                     push(here.clone(), format!("duplicate option '{}'", option.id()));
@@ -487,6 +516,51 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                                 );
                             }
                         }
+                    }
+                }
+                // Optional SQL (ADR 0027): a file of the module, for a
+                // content database it touches (turning it off rebuilds that
+                // database; player data is never rebuilt).
+                if let ModuleOption::Sql {
+                    id, database, file, ..
+                } = option
+                {
+                    if emu.instance.optional_sql.is_none() || emu.instance.db_import.is_none() {
+                        push(
+                            here.clone(),
+                            format!(
+                                "option '{id}': the emulator declares no 'instance.optionalSql' and 'dbImport'"
+                            ),
+                        );
+                    }
+                    if !module.database.touches.contains(database) {
+                        push(
+                            here.clone(),
+                            format!("option '{id}': database '{database}' is not in 'touches'"),
+                        );
+                    }
+                    if emu
+                        .databases
+                        .iter()
+                        .any(|d| &d.id == database && d.player_data)
+                    {
+                        push(
+                            here.clone(),
+                            format!("option '{id}': '{database}' holds player data"),
+                        );
+                    }
+                    let name = file.rsplit('/').next().unwrap_or(file);
+                    if !sql_names.insert(name) {
+                        push(
+                            here.clone(),
+                            format!("option '{id}': another option uses a file named '{name}'"),
+                        );
+                    }
+                    if !is_safe_relative(file) || !file.ends_with(".sql") {
+                        push(
+                            here.clone(),
+                            format!("option '{id}': '{file}' is not a relative .sql path"),
+                        );
                     }
                 }
                 if let ModuleOption::Integer {

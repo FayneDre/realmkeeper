@@ -218,6 +218,36 @@ pub struct InstanceSpec {
     /// they start (built-in updater).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub db_import: Option<ToolSpec>,
+    /// Where the files of `sql` module options are found and put for the
+    /// migration tool (ADR 0027). Needed by any module with `sql` options.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub optional_sql: Option<OptionalSqlSpec>,
+}
+
+/// Paths of optional module SQL, relative to the instance SQL tree
+/// (`dir.sql`): `{module}` is the module id, `{file}` the option's file,
+/// `{database}` the catalog database id.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OptionalSqlSpec {
+    /// Where the server artifact keeps the file (`modules/{module}/{file}`).
+    pub source: String,
+    /// Directory the migration tool reads, owned by the launcher: only the
+    /// chosen files are left in it.
+    pub target: String,
+}
+
+impl OptionalSqlSpec {
+    pub fn source_path(&self, module: &str, file: &str) -> String {
+        self.source
+            .replace("{module}", module)
+            .replace("{file}", file)
+    }
+    pub fn target_dir(&self, module: &str, database: &str) -> String {
+        self.target
+            .replace("{module}", module)
+            .replace("{database}", database)
+    }
 }
 
 /// A command-line tool shipped with the server build.
@@ -536,6 +566,20 @@ pub enum ModuleOption {
         default: String,
         choices: Vec<OptionChoice>,
     },
+    /// An optional SQL file of the module, applied to a content database by
+    /// the migration tool while on; turning it off rebuilds that database
+    /// (ADR 0027). Its value is a boolean.
+    Sql {
+        id: String,
+        label: LocalizedText,
+        #[serde(default)]
+        help: Option<LocalizedText>,
+        /// Catalog database id (a content database the module touches).
+        database: String,
+        /// Path in the module repository (packaged in the server artifact).
+        file: String,
+        default: bool,
+    },
 }
 
 impl ModuleOption {
@@ -544,13 +588,16 @@ impl ModuleOption {
             ModuleOption::Boolean { id, .. }
             | ModuleOption::Integer { id, .. }
             | ModuleOption::Number { id, .. }
-            | ModuleOption::Choice { id, .. } => id,
+            | ModuleOption::Choice { id, .. }
+            | ModuleOption::Sql { id, .. } => id,
         }
     }
 
     pub fn default_value(&self) -> OptionValue {
         match self {
-            ModuleOption::Boolean { default, .. } => OptionValue::Bool(*default),
+            ModuleOption::Boolean { default, .. } | ModuleOption::Sql { default, .. } => {
+                OptionValue::Bool(*default)
+            }
             ModuleOption::Integer { default, .. } => OptionValue::Integer(*default),
             ModuleOption::Number { default, .. } => OptionValue::Number(*default),
             ModuleOption::Choice { default, .. } => OptionValue::Choice(default.clone()),
@@ -561,7 +608,7 @@ impl ModuleOption {
     /// in range, or a choice id) and checks it.
     pub fn parse_value(&self, text: &str) -> Result<OptionValue, String> {
         match self {
-            ModuleOption::Boolean { .. } => match text {
+            ModuleOption::Boolean { .. } | ModuleOption::Sql { .. } => match text {
                 "true" | "1" | "on" => Ok(OptionValue::Bool(true)),
                 "false" | "0" | "off" => Ok(OptionValue::Bool(false)),
                 _ => Err(format!("'{text}' is not true or false")),
@@ -620,7 +667,9 @@ impl ModuleOption {
     /// also a decimal one).
     pub fn fit(&self, value: &OptionValue) -> Option<OptionValue> {
         match (self, value) {
-            (ModuleOption::Boolean { .. }, OptionValue::Bool(_)) => Some(value.clone()),
+            (ModuleOption::Boolean { .. } | ModuleOption::Sql { .. }, OptionValue::Bool(_)) => {
+                Some(value.clone())
+            }
             (ModuleOption::Integer { min, max, .. }, OptionValue::Integer(n)) => {
                 (!(min.is_some_and(|m| *n < m) || max.is_some_and(|m| *n > m)))
                     .then(|| value.clone())
@@ -675,6 +724,24 @@ impl ModuleManifest {
         self.assets
             .iter()
             .filter(|a| ids.contains(&a.id.as_str()))
+            .collect()
+    }
+
+    /// The optional SQL files turned on by the effective option values, as
+    /// `(database, file)`, in manifest order (ADR 0027).
+    pub fn selected_sql(
+        &self,
+        values: Option<&std::collections::BTreeMap<String, OptionValue>>,
+    ) -> Vec<(&str, &str)> {
+        self.options
+            .iter()
+            .filter_map(|option| match option {
+                ModuleOption::Sql { database, file, .. } => {
+                    let value = option.effective(values.and_then(|v| v.get(option.id())));
+                    (value == OptionValue::Bool(true)).then_some((database.as_str(), file.as_str()))
+                }
+                _ => None,
+            })
             .collect()
     }
 }

@@ -19,6 +19,8 @@ description: Update pinned upstream commits (core flavors, modules) and componen
    fork commit that its module version expects (they move together). A module
    with `assets` (ADR 0013): re-download each `source.path` at the new commit,
    update `size` / `sha256`, and check that the listed archive members still exist.
+   A module with `sql` options (ADR 0027): check that every `file` still exists at
+   the new commit and re-read its header (purpose, client patch needed).
    When mod-playerbots moves, check `Playerbots.PremadeSpecName.<class>.<n>` in its
    `conf/playerbots.conf.dist` against the spec numbers of `mod-realmkeeper.json`
    (`party.classes[].specs[].number`, ADR 0025), and that the public API the module

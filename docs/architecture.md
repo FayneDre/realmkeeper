@@ -509,7 +509,10 @@ Implemented in `rk-client` (ADR 0013); the client is never distributed.
 - Module options (`rk option set <id> <module> <option>=<value>`) select
   assets; the module operation downloads them from the module's pinned
   commit (sha256-pinned `.zip` or `.7z`), unpacks them once and builds the
-  server overlay (§7).
+  server overlay (§7). `sql` options (ADR 0027) pick optional module SQL
+  files packaged in the server artifact; the `optional-sql` step leaves the
+  chosen ones where dbimport reads them, and turning one off rebuilds the
+  database it changed.
 - Before each launch (`rk play`, or `rk client prepare <id>`):
   - `Data/<locale>/realmlist.wtf` and the `SET realmList` line of
     `WTF/Config.wtf` (when present) point at `127.0.0.1`;

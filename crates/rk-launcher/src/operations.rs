@@ -446,7 +446,8 @@ impl Launcher {
             &self.store,
         )?;
         if let Err(error) = self.run(&op, observer, cancel).await {
-            install::save_record(&self.layout, old)?;
+            let restored = rk_runtime::modules::after_failure(&self.catalog, &record, old);
+            install::save_record(&self.layout, &restored)?;
             return Err(error);
         }
         let record = rk_runtime::modules::finished(&self.layout, &record)?;

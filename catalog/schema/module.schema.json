@@ -600,6 +600,52 @@
             }
           },
           "additionalProperties": false
+        },
+        {
+          "description": "An optional SQL file of the module (ADR 0027), applied by the migration tool to a content database while on; turning it off rebuilds that database.",
+          "type": "object",
+          "required": [
+            "id",
+            "type",
+            "label",
+            "database",
+            "file",
+            "default"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "common.schema.json#/$defs/id"
+            },
+            "type": {
+              "const": "sql"
+            },
+            "label": {
+              "$ref": "common.schema.json#/$defs/localizedText"
+            },
+            "help": {
+              "$ref": "common.schema.json#/$defs/localizedText"
+            },
+            "database": {
+              "description": "Catalog database id: a content database the module touches.",
+              "$ref": "common.schema.json#/$defs/id"
+            },
+            "file": {
+              "description": "Path of the file in the module repository (packaged in the server artifact).",
+              "allOf": [
+                {
+                  "$ref": "#/$defs/relativePath"
+                },
+                {
+                  "type": "string",
+                  "pattern": "\\.sql$"
+                }
+              ]
+            },
+            "default": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
         }
       ]
     },

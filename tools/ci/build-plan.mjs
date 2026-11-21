@@ -35,6 +35,10 @@ const modules = readdirSync(join(emulatorDir, "modules"))
     commit: m.source.commit,
     dbimportId: m.database.dbimportId,
     mandatory: flavor.requiredModules.includes(m.id) || m.removable === false,
+    // Files of its `sql` options, packaged next to its SQL (ADR 0027).
+    ...((m.options ?? []).some((o) => o.type === "sql")
+      ? { optionalSql: m.options.filter((o) => o.type === "sql").map((o) => o.file) }
+      : {}),
   }));
 
 for (const required of flavor.requiredModules) {

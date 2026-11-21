@@ -39,6 +39,9 @@
     untrack(() => (draft = saved()));
   });
 
+  /** Some options apply SQL files: turning one off rebuilds a database. */
+  const hasSql = $derived(module.options.some((o) => o.option.type === "sql"));
+
   const changed = $derived(module.options.some((o) => draft[o.option.id] !== asText(o.value)));
 
   function set(option: string, value: string) {
@@ -72,7 +75,7 @@
           {localized(option.label)}
           {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
         </span>
-        {#if option.type === "boolean"}
+        {#if option.type === "boolean" || option.type === "sql"}
           <input
             type="checkbox"
             disabled={locked}
@@ -101,6 +104,7 @@
   </ul>
   <div class="apply">
     <p class="muted">{t("settings.optionsHint")}</p>
+    {#if hasSql}<p class="muted">{t("settings.sqlHint")}</p>{/if}
     <button class="btn" disabled={!changed || locked} onclick={() => (draft = saved())}>
       {t("common.reset")}
     </button>

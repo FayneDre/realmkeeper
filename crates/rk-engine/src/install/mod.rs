@@ -10,6 +10,7 @@ pub mod assets;
 pub mod bindings;
 pub mod config;
 pub mod index;
+pub mod optional_sql;
 mod steps;
 
 use std::collections::BTreeMap;
@@ -588,6 +589,9 @@ pub struct InstancePlan {
     /// dbimport, when the emulator migrates through one (else the servers
     /// migrate their databases themselves at start).
     pub import: Option<RunTool>,
+    /// Optional module SQL to put in place before `import` (ADR 0027),
+    /// when the emulator declares where.
+    pub optional_sql: Option<optional_sql::OptionalSql>,
     /// Module assets selected by the option values (ADR 0013).
     pub assets: Vec<assets::SelectedAsset>,
     /// Shared server data and the directory `DataDir` points at (the
@@ -607,10 +611,10 @@ pub fn instance_plan(
     let selected: Vec<&str> = record.modules.iter().map(String::as_str).collect();
     let resolution: Resolution =
         rk_core::resolve(catalog, &record.emulator, Some(&record.flavor), &selected)?;
-    let emu = &catalog
+    let entry = catalog
         .emulator(&record.emulator)
-        .ok_or_else(|| PlanError::Unknown(format!("emulator '{}'", record.emulator)))?
-        .manifest;
+        .ok_or_else(|| PlanError::Unknown(format!("emulator '{}'", record.emulator)))?;
+    let emu = &entry.manifest;
     let client = catalog
         .clients
         .get(&emu.client)
@@ -651,6 +655,11 @@ pub fn instance_plan(
         options: &record.options,
     };
     let files = plan_configs(catalog, &resolution, &values)?;
+    let optional_sql = emu
+        .instance
+        .optional_sql
+        .as_ref()
+        .map(|spec| plan_optional_sql(spec, entry, &resolution, record, &paths.sql));
     let databases = databases(catalog, &resolution)?
         .into_iter()
         .map(|d| d.name)
@@ -673,11 +682,55 @@ pub fn instance_plan(
             cwd: paths.root.clone(),
             log: paths.logs.join("dbimport.log"),
         }),
+        optional_sql,
         resolution,
         assets: selected_assets,
         server_data,
         data,
     })
+}
+
+/// Every module with `sql` options owns its directories (one per database):
+/// the files its options turn on when it is enabled, none otherwise.
+fn plan_optional_sql(
+    spec: &rk_core::manifest::OptionalSqlSpec,
+    entry: &rk_core::catalog::EmulatorEntry,
+    resolution: &Resolution,
+    record: &InstanceRecord,
+    sql: &Path,
+) -> optional_sql::OptionalSql {
+    use rk_core::manifest::ModuleOption;
+    let mut dirs = Vec::new();
+    for module in entry.modules.values() {
+        let databases: std::collections::BTreeSet<&str> = module
+            .options
+            .iter()
+            .filter_map(|o| match o {
+                ModuleOption::Sql { database, .. } => Some(database.as_str()),
+                _ => None,
+            })
+            .collect();
+        let chosen = if resolution.modules.contains(&module.id) {
+            module.selected_sql(record.options.get(&module.id))
+        } else {
+            Vec::new()
+        };
+        for database in databases {
+            let files = chosen
+                .iter()
+                .filter(|(db, _)| *db == database)
+                .map(|(_, file)| optional_sql::OptionalSqlFile {
+                    source: sql.join(spec.source_path(&module.id, file)),
+                    name: file.rsplit('/').next().unwrap_or(file).to_owned(),
+                })
+                .collect();
+            dirs.push(optional_sql::OptionalSqlDir {
+                target: sql.join(spec.target_dir(&module.id, database)),
+                files,
+            });
+        }
+    }
+    optional_sql::OptionalSql { dirs }
 }
 
 /// `instance-<id>`: builds the instance from the server artifact (a ZIP with
