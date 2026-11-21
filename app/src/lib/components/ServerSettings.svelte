@@ -226,16 +226,11 @@
     min-height: 0;
   }
 
-  /* A module with many options: its list scrolls inside the panel, which
+  /* A module with many options: they scroll inside the panel, which
      keeps the column's height (its frame and buttons stay in view). */
   .detail > :global(section) {
     flex: 1 1 auto;
     min-height: 0;
-  }
-
-  .detail :global(.options) {
-    min-height: 0;
-    overflow-y: auto;
   }
 
   /* Any number of modules: the list scrolls inside its frame, the apply

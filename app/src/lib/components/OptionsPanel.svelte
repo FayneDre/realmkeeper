@@ -109,45 +109,48 @@
 
 <section class="panel">
   <h3 class="panel-title">{title}</h3>
-  {#each sections as section (section.id)}
-    {#if section.label}<h4 class="group">{section.label}</h4>{/if}
-    <ul class="options" style:--columns={columns}>
-      {#each section.options as option (option.id)}
-        {@const value = draft[option.id] ?? ""}
-        <li title={help(option) ?? undefined}>
-          <span class="label">
-            {localized(option.label)}
-            {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
-            {#if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
-          </span>
-          {#if option.type === "boolean" || option.type === "sql"}
-            <input
-              type="checkbox"
-              disabled={locked || (!met(option) && value !== "true")}
-              checked={value === "true"}
-              onchange={(e) => set(option.id, String(e.currentTarget.checked))}
-            />
-          {:else if option.type === "integer" || option.type === "number"}
-            <input
-              type="number"
-              disabled={locked}
-              min={option.min ?? undefined}
-              max={option.max ?? undefined}
-              step={option.type === "number" ? "0.1" : "1"}
-              {value}
-              onchange={(e) => set(option.id, e.currentTarget.value)}
-            />
-          {:else}
-            <select disabled={locked} {value} onchange={(e) => set(option.id, e.currentTarget.value)}>
-              {#each option.choices as choice (choice.id)}
-                <option value={choice.id}>{localized(choice.label)}</option>
-              {/each}
-            </select>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-  {/each}
+  <!-- One scroll for every group when the panel is given a height. -->
+  <div class="sections">
+    {#each sections as section (section.id)}
+      {#if section.label}<h4 class="group">{section.label}</h4>{/if}
+      <ul class="options" style:--columns={columns}>
+        {#each section.options as option (option.id)}
+          {@const value = draft[option.id] ?? ""}
+          <li title={help(option) ?? undefined}>
+            <span class="label">
+              {localized(option.label)}
+              {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
+              {#if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
+            </span>
+            {#if option.type === "boolean" || option.type === "sql"}
+              <input
+                type="checkbox"
+                disabled={locked || (!met(option) && value !== "true")}
+                checked={value === "true"}
+                onchange={(e) => set(option.id, String(e.currentTarget.checked))}
+              />
+            {:else if option.type === "integer" || option.type === "number"}
+              <input
+                type="number"
+                disabled={locked}
+                min={option.min ?? undefined}
+                max={option.max ?? undefined}
+                step={option.type === "number" ? "0.1" : "1"}
+                {value}
+                onchange={(e) => set(option.id, e.currentTarget.value)}
+              />
+            {:else}
+              <select disabled={locked} {value} onchange={(e) => set(option.id, e.currentTarget.value)}>
+                {#each option.choices as choice (choice.id)}
+                  <option value={choice.id}>{localized(choice.label)}</option>
+                {/each}
+              </select>
+            {/if}
+          </li>
+        {/each}
+      </ul>
+    {/each}
+  </div>
   <div class="apply">
     <p class="muted">{t("settings.optionsHint")}</p>
     {#if rebuilds}
@@ -169,6 +172,16 @@
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
+  }
+
+  /* Grows with its options; when the page gives the panel a height
+     (module options beside the module list), the groups scroll together
+     and the buttons stay in view. */
+  .sections {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: var(--space-1);
   }
 
   .options {
