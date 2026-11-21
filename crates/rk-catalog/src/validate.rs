@@ -271,8 +271,16 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
             let mut targets: Vec<(&str, &str)> = Vec::new();
             match option {
                 rk_core::manifest::ModuleOption::Boolean { target, .. }
-                | rk_core::manifest::ModuleOption::Integer { target, .. }
-                | rk_core::manifest::ModuleOption::Number { target, .. } => {
+                | rk_core::manifest::ModuleOption::Integer { target, .. } => {
+                    match target.config() {
+                        Some(target) => targets.push((&target.file, &target.key)),
+                        None => push(
+                            here.clone(),
+                            format!("realm setting '{id}': only module options can write tables"),
+                        ),
+                    }
+                }
+                rk_core::manifest::ModuleOption::Number { target, .. } => {
                     targets.push((&target.file, &target.key))
                 }
                 rk_core::manifest::ModuleOption::Sql { .. } => push(
@@ -285,6 +293,14 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                             push(
                                 here.clone(),
                                 format!("realm setting '{id}': choices cannot install assets"),
+                            );
+                        }
+                        if !choice.tables.is_empty() {
+                            push(
+                                here.clone(),
+                                format!(
+                                    "realm setting '{id}': only module options can write tables"
+                                ),
                             );
                         }
                         for (file, keys) in &choice.config {
@@ -493,6 +509,11 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
             for option in &module.options {
                 if !option_ids.insert(option.id()) {
                     push(here.clone(), format!("duplicate option '{}'", option.id()));
+                }
+                // Table targets (ADR 0029): a content database the module
+                // touches, plain identifiers (they end up in SQL).
+                for issue in table_issues(emu, module, option) {
+                    push(here.clone(), issue);
                 }
                 if let ModuleOption::Choice {
                     id,
@@ -719,6 +740,80 @@ fn requirement_issues(
         issues.push(format!(
             "option '{id}': on by default while '{required}' is not"
         ));
+    }
+    issues
+}
+
+/// A plain SQL identifier: lower-case letters, digits and `_`.
+fn is_identifier(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= 64
+        && !name.starts_with(|c: char| c.is_ascii_digit())
+        && name
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_')
+}
+
+/// Problems of the table writes an option declares (ADR 0029).
+fn table_issues(
+    emu: &rk_core::manifest::EmulatorManifest,
+    module: &rk_core::manifest::ModuleManifest,
+    option: &ModuleOption,
+) -> Vec<String> {
+    use rk_core::manifest::OptionTarget;
+    let id = option.id();
+    // (database, table, where columns, set columns)
+    let mut writes: Vec<(&str, &str, Vec<&str>, Vec<&str>)> = Vec::new();
+    match option {
+        ModuleOption::Boolean {
+            target: OptionTarget::Table(t),
+            ..
+        }
+        | ModuleOption::Integer {
+            target: OptionTarget::Table(t),
+            ..
+        } => writes.push((
+            &t.database,
+            &t.table,
+            t.row.keys().map(String::as_str).collect(),
+            vec![t.column.as_str()],
+        )),
+        ModuleOption::Choice { choices, .. } => {
+            for change in choices.iter().flat_map(|c| &c.tables) {
+                writes.push((
+                    &change.database,
+                    &change.table,
+                    change.row.keys().map(String::as_str).collect(),
+                    change.set.keys().map(String::as_str).collect(),
+                ));
+            }
+        }
+        _ => {}
+    }
+    let mut issues = Vec::new();
+    for (database, table, row, set) in writes {
+        if !module.database.touches.iter().any(|d| d == database) {
+            issues.push(format!(
+                "option '{id}': database '{database}' is not in 'touches'"
+            ));
+        }
+        if emu
+            .databases
+            .iter()
+            .any(|d| d.id == database && d.player_data)
+        {
+            issues.push(format!("option '{id}': '{database}' holds player data"));
+        }
+        if row.is_empty() || set.is_empty() {
+            issues.push(format!(
+                "option '{id}': a table write needs 'where' and a column to set"
+            ));
+        }
+        for name in std::iter::once(table).chain(row).chain(set) {
+            if !is_identifier(name) {
+                issues.push(format!("option '{id}': '{name}' is not a plain SQL name"));
+            }
+        }
     }
     issues
 }

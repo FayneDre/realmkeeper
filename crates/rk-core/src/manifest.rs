@@ -525,6 +525,58 @@ pub struct ConfigTarget {
     pub key: String,
 }
 
+/// Where a boolean or integer option's value goes: a key of a config file,
+/// or a column of one row of a content database table, written before each
+/// start (ADR 0029).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum OptionTarget {
+    Config(ConfigTarget),
+    Table(TableTarget),
+}
+
+impl OptionTarget {
+    pub fn config(&self) -> Option<&ConfigTarget> {
+        match self {
+            OptionTarget::Config(target) => Some(target),
+            OptionTarget::Table(_) => None,
+        }
+    }
+}
+
+/// One column of the row of `table` (in the catalog database `database`)
+/// whose columns hold the `where` values.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TableTarget {
+    pub database: String,
+    pub table: String,
+    pub column: String,
+    #[serde(rename = "where")]
+    pub row: BTreeMap<String, i64>,
+}
+
+/// Columns a choice sets in one row of a content database table (ADR 0029).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TableChange {
+    pub database: String,
+    pub table: String,
+    #[serde(rename = "where")]
+    pub row: BTreeMap<String, i64>,
+    pub set: BTreeMap<String, i64>,
+}
+
+/// One row update the effective option values make (ADR 0029).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TableWrite {
+    /// Catalog database id.
+    pub database: String,
+    pub table: String,
+    pub row: BTreeMap<String, i64>,
+    pub set: BTreeMap<String, i64>,
+}
+
 /// A simplified setting shown in the launcher UI. Applied after activation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "kebab-case", deny_unknown_fields)]
@@ -534,7 +586,7 @@ pub enum ModuleOption {
         label: LocalizedText,
         #[serde(default)]
         help: Option<LocalizedText>,
-        target: ConfigTarget,
+        target: OptionTarget,
         default: bool,
     },
     Integer {
@@ -542,7 +594,7 @@ pub enum ModuleOption {
         label: LocalizedText,
         #[serde(default)]
         help: Option<LocalizedText>,
-        target: ConfigTarget,
+        target: OptionTarget,
         default: i64,
         #[serde(default)]
         min: Option<i64>,
@@ -730,6 +782,17 @@ pub enum OptionValue {
     Choice(String),
 }
 
+impl TableTarget {
+    fn write(&self, value: i64) -> TableWrite {
+        TableWrite {
+            database: self.database.clone(),
+            table: self.table.clone(),
+            row: self.row.clone(),
+            set: BTreeMap::from([(self.column.clone(), value)]),
+        }
+    }
+}
+
 impl ModuleManifest {
     /// Assets selected by the effective option values, in manifest order.
     pub fn selected_assets(
@@ -751,6 +814,46 @@ impl ModuleManifest {
             .iter()
             .filter(|a| ids.contains(&a.id.as_str()))
             .collect()
+    }
+
+    /// The table rows the effective option values set before each start
+    /// (ADR 0029), in manifest order; a later write of the same column wins.
+    pub fn table_writes(
+        &self,
+        values: Option<&std::collections::BTreeMap<String, OptionValue>>,
+    ) -> Vec<TableWrite> {
+        let mut out = Vec::new();
+        for option in &self.options {
+            let value = option.effective(values.and_then(|v| v.get(option.id())));
+            match (option, &value) {
+                (
+                    ModuleOption::Boolean {
+                        target: OptionTarget::Table(t),
+                        ..
+                    },
+                    OptionValue::Bool(b),
+                ) => out.push(t.write(i64::from(*b))),
+                (
+                    ModuleOption::Integer {
+                        target: OptionTarget::Table(t),
+                        ..
+                    },
+                    OptionValue::Integer(n),
+                ) => out.push(t.write(*n)),
+                (ModuleOption::Choice { choices, .. }, OptionValue::Choice(chosen)) => {
+                    if let Some(choice) = choices.iter().find(|c| &c.id == chosen) {
+                        out.extend(choice.tables.iter().map(|c| TableWrite {
+                            database: c.database.clone(),
+                            table: c.table.clone(),
+                            row: c.row.clone(),
+                            set: c.set.clone(),
+                        }));
+                    }
+                }
+                _ => {}
+            }
+        }
+        out
     }
 
     /// The optional SQL files turned on by the effective option values, as
@@ -834,6 +937,9 @@ pub struct OptionChoice {
     pub assets: Vec<String>,
     #[serde(default)]
     pub config: ConfigChanges,
+    /// Table rows this choice sets before each start (ADR 0029).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tables: Vec<TableChange>,
 }
 
 /// Optional files a module ships in its own repository (client MPQ patches,

@@ -460,6 +460,82 @@
       },
       "additionalProperties": false
     },
+    "sqlName": {
+      "description": "A plain SQL identifier (table or column name).",
+      "type": "string",
+      "pattern": "^[a-z_][a-z0-9_]{0,63}$"
+    },
+    "tableRow": {
+      "description": "Columns and values selecting one row.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/sqlName"
+      },
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "tableTarget": {
+      "description": "One column of one row of a content database table, written before each start (ADR 0029).",
+      "type": "object",
+      "required": [
+        "database",
+        "table",
+        "column",
+        "where"
+      ],
+      "properties": {
+        "database": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "table": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "column": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "where": {
+          "$ref": "#/$defs/tableRow"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableChange": {
+      "description": "Columns a choice sets in one row of a content database table (ADR 0029).",
+      "type": "object",
+      "required": [
+        "database",
+        "table",
+        "where",
+        "set"
+      ],
+      "properties": {
+        "database": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "table": {
+          "$ref": "#/$defs/sqlName"
+        },
+        "where": {
+          "$ref": "#/$defs/tableRow"
+        },
+        "set": {
+          "$ref": "#/$defs/tableRow"
+        }
+      },
+      "additionalProperties": false
+    },
+    "optionTarget": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/configTarget"
+        },
+        {
+          "$ref": "#/$defs/tableTarget"
+        }
+      ]
+    },
     "option": {
       "oneOf": [
         {
@@ -485,7 +561,7 @@
               "$ref": "common.schema.json#/$defs/localizedText"
             },
             "target": {
-              "$ref": "#/$defs/configTarget"
+              "$ref": "#/$defs/optionTarget"
             },
             "default": {
               "type": "boolean"
@@ -516,7 +592,7 @@
               "$ref": "common.schema.json#/$defs/localizedText"
             },
             "target": {
-              "$ref": "#/$defs/configTarget"
+              "$ref": "#/$defs/optionTarget"
             },
             "default": {
               "type": "integer"
@@ -622,6 +698,12 @@
                   },
                   "config": {
                     "$ref": "#/$defs/configChanges"
+                  },
+                  "tables": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/tableChange"
+                    }
                   }
                 },
                 "additionalProperties": false

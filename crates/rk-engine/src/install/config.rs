@@ -36,17 +36,22 @@ pub struct InstanceValues<'a> {
 fn option_changes(option: &ModuleOption, value: &OptionValue) -> ConfigChanges {
     let mut changes = ConfigChanges::new();
     match (option, value) {
+        // A table target is written before each start instead (ADR 0029).
         (ModuleOption::Boolean { target, .. }, OptionValue::Bool(b)) => {
-            changes
-                .entry(target.file.clone())
-                .or_default()
-                .insert(target.key.clone(), ConfigValue::Integer(i64::from(*b)));
+            if let Some(target) = target.config() {
+                changes
+                    .entry(target.file.clone())
+                    .or_default()
+                    .insert(target.key.clone(), ConfigValue::Integer(i64::from(*b)));
+            }
         }
         (ModuleOption::Integer { target, .. }, OptionValue::Integer(n)) => {
-            changes
-                .entry(target.file.clone())
-                .or_default()
-                .insert(target.key.clone(), ConfigValue::Integer(*n));
+            if let Some(target) = target.config() {
+                changes
+                    .entry(target.file.clone())
+                    .or_default()
+                    .insert(target.key.clone(), ConfigValue::Integer(*n));
+            }
         }
         (ModuleOption::Number { target, .. }, OptionValue::Number(n)) => {
             changes

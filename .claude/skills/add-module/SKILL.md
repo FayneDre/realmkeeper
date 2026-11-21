@@ -40,6 +40,10 @@ files (MPQ) or server DBC overrides, accounts/characters it needs.
 - `config.coreOverrides` only for settings the module *requires*.
 - `options`: a few user-friendly settings, labels in `en` and `fr`, defaults = upstream
   defaults unless the user asks otherwise (never throttle in-game behaviour).
+  A setting the module reads from a table of a content database (not its
+  `.conf`) uses a table `target` (`{database, table, column, where}`) or a
+  choice's `tables` (ADR 0029); check the table and columns in its SQL and
+  where the source reads them.
 - Never commit client files. An asset names an archive of the module repository at
   its pinned commit (`source.path`, `size`, `sha256`; `.zip` or `.7z`) and the members
   it uses (`client` / `server`, each `{from, to}`, ADR 0013). Download the archive

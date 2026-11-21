@@ -3,10 +3,7 @@
   "schemaVersion": 1,
   "id": "mod-ah-bot",
   "emulator": "azerothcore",
-  "name": {
-    "en": "Auction House Bot",
-    "fr": "Bot de l'hôtel des ventes"
-  },
+  "name": { "en": "Auction House Bot", "fr": "Bot de l'hôtel des ventes" },
   "description": {
     "en": "Fills the auction houses with items and buys player auctions, so the economy feels alive.",
     "fr": "Remplit les hôtels des ventes d'objets et achète les enchères des joueurs pour une économie vivante."
@@ -38,15 +35,9 @@
       }
     }
   },
-  "database": {
-    "dbimportId": "mod-ah-bot",
-    "applyWhenDisabled": true,
-    "touches": ["world"]
-  },
+  "database": { "dbimportId": "mod-ah-bot", "applyWhenDisabled": true, "touches": ["world"] },
   "config": {
-    "files": [
-      { "file": "modules/mod_ahbot.conf", "dist": "modules/mod_ahbot.conf.dist" }
-    ]
+    "files": [{ "file": "modules/mod_ahbot.conf", "dist": "modules/mod_ahbot.conf.dist" }]
   },
   "options": [
     {
@@ -70,12 +61,691 @@
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.ItemsPerCycle" },
       "default": 200,
       "min": 1,
-      "max": 5000
+      "max": 5000,
+      "help": {
+        "en": "How many auctions the bot adds at most each time it fills an auction house.",
+        "fr": "Nombre maximum d'enchères ajoutées chaque fois que le bot remplit un hôtel des ventes."
+      }
+    },
+    {
+      "id": "alliance-items",
+      "type": "integer",
+      "label": {
+        "en": "Auctions in the Alliance auction house",
+        "fr": "Enchères à l'hôtel des ventes Alliance"
+      },
+      "help": {
+        "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module)."
+      },
+      "target": {
+        "database": "world",
+        "table": "mod_auctionhousebot",
+        "column": "maxitems",
+        "where": { "auctionhouse": 2 }
+      },
+      "default": 250,
+      "min": 0,
+      "max": 20000
+    },
+    {
+      "id": "horde-items",
+      "type": "integer",
+      "label": {
+        "en": "Auctions in the Horde auction house",
+        "fr": "Enchères à l'hôtel des ventes Horde"
+      },
+      "help": {
+        "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module)."
+      },
+      "target": {
+        "database": "world",
+        "table": "mod_auctionhousebot",
+        "column": "maxitems",
+        "where": { "auctionhouse": 6 }
+      },
+      "default": 250,
+      "min": 0,
+      "max": 20000
+    },
+    {
+      "id": "neutral-items",
+      "type": "integer",
+      "label": {
+        "en": "Auctions in the Neutral (Booty Bay, Gadgetzan, Everlook) auction house",
+        "fr": "Enchères à l'hôtel des ventes Neutre (Baie-du-Butin, Gadgetzan, Long-guet)"
+      },
+      "help": {
+        "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module)."
+      },
+      "target": {
+        "database": "world",
+        "table": "mod_auctionhousebot",
+        "column": "maxitems",
+        "where": { "auctionhouse": 7 }
+      },
+      "default": 250,
+      "min": 0,
+      "max": 20000
+    },
+    {
+      "id": "quality-mix",
+      "type": "choice",
+      "label": { "en": "What the bot sells", "fr": "Ce que le bot vend" },
+      "help": {
+        "en": "Share of trade goods (cloth, ore, herbs...) and gear, by quality.",
+        "fr": "Part des composants (tissu, minerai, herbes...) et de l'équipement, par qualité."
+      },
+      "default": "original",
+      "choices": [
+        {
+          "id": "original",
+          "label": { "en": "As the module ships it", "fr": "Comme le module d'origine" },
+          "help": {
+            "en": "Half trade goods, half gear; few rare items.",
+            "fr": "Moitié composants, moitié équipement ; peu d'objets rares."
+          },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 27,
+                "percentgreentradegoods": 12,
+                "percentbluetradegoods": 10,
+                "percentpurpletradegoods": 1,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 10,
+                "percentgreenitems": 30,
+                "percentblueitems": 8,
+                "percentpurpleitems": 2,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 27,
+                "percentgreentradegoods": 12,
+                "percentbluetradegoods": 10,
+                "percentpurpletradegoods": 1,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 10,
+                "percentgreenitems": 30,
+                "percentblueitems": 8,
+                "percentpurpleitems": 2,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 27,
+                "percentgreentradegoods": 12,
+                "percentbluetradegoods": 10,
+                "percentpurpletradegoods": 1,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 10,
+                "percentgreenitems": 30,
+                "percentblueitems": 8,
+                "percentpurpleitems": 2,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "crafting",
+          "label": { "en": "Mostly trade goods", "fr": "Surtout des composants d'artisanat" },
+          "help": {
+            "en": "Four fifths trade goods: for players who level professions.",
+            "fr": "Quatre cinquièmes de composants : pour monter les métiers."
+          },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 45,
+                "percentgreentradegoods": 20,
+                "percentbluetradegoods": 12,
+                "percentpurpletradegoods": 3,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 5,
+                "percentgreenitems": 12,
+                "percentblueitems": 3,
+                "percentpurpleitems": 0,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 45,
+                "percentgreentradegoods": 20,
+                "percentbluetradegoods": 12,
+                "percentpurpletradegoods": 3,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 5,
+                "percentgreenitems": 12,
+                "percentblueitems": 3,
+                "percentpurpleitems": 0,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 45,
+                "percentgreentradegoods": 20,
+                "percentbluetradegoods": 12,
+                "percentpurpletradegoods": 3,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 5,
+                "percentgreenitems": 12,
+                "percentblueitems": 3,
+                "percentpurpleitems": 0,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "gear",
+          "label": { "en": "More gear", "fr": "Plus d'équipement" },
+          "help": {
+            "en": "Four fifths gear, mostly uncommon (green).",
+            "fr": "Quatre cinquièmes d'équipement, surtout peu commun (vert)."
+          },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 10,
+                "percentgreentradegoods": 5,
+                "percentbluetradegoods": 3,
+                "percentpurpletradegoods": 0,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 15,
+                "percentgreenitems": 45,
+                "percentblueitems": 18,
+                "percentpurpleitems": 4,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 10,
+                "percentgreentradegoods": 5,
+                "percentbluetradegoods": 3,
+                "percentpurpletradegoods": 0,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 15,
+                "percentgreenitems": 45,
+                "percentblueitems": 18,
+                "percentpurpleitems": 4,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 10,
+                "percentgreentradegoods": 5,
+                "percentbluetradegoods": 3,
+                "percentpurpletradegoods": 0,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 15,
+                "percentgreenitems": 45,
+                "percentblueitems": 18,
+                "percentpurpleitems": 4,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "rare",
+          "label": { "en": "More rare and epic items", "fr": "Plus d'objets rares et épiques" },
+          "help": {
+            "en": "A third of the auctions are rare (blue) or epic (purple).",
+            "fr": "Un tiers des enchères sont rares (bleues) ou épiques (violettes)."
+          },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 15,
+                "percentgreentradegoods": 8,
+                "percentbluetradegoods": 7,
+                "percentpurpletradegoods": 2,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 5,
+                "percentgreenitems": 30,
+                "percentblueitems": 25,
+                "percentpurpleitems": 8,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 15,
+                "percentgreentradegoods": 8,
+                "percentbluetradegoods": 7,
+                "percentpurpletradegoods": 2,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 5,
+                "percentgreenitems": 30,
+                "percentblueitems": 25,
+                "percentpurpleitems": 8,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "percentgreytradegoods": 0,
+                "percentwhitetradegoods": 15,
+                "percentgreentradegoods": 8,
+                "percentbluetradegoods": 7,
+                "percentpurpletradegoods": 2,
+                "percentorangetradegoods": 0,
+                "percentyellowtradegoods": 0,
+                "percentgreyitems": 0,
+                "percentwhiteitems": 5,
+                "percentgreenitems": 30,
+                "percentblueitems": 25,
+                "percentpurpleitems": 8,
+                "percentorangeitems": 0,
+                "percentyellowitems": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prices",
+      "type": "choice",
+      "label": { "en": "Prices of the bot's auctions", "fr": "Prix des enchères du bot" },
+      "help": {
+        "en": "Buyout prices compared with the module's own (a multiple of what a vendor pays for the item, by quality).",
+        "fr": "Prix d'achat immédiat comparés à ceux du module (un multiple de ce qu'un marchand paie l'objet, selon sa qualité)."
+      },
+      "default": "original",
+      "choices": [
+        {
+          "id": "low",
+          "label": { "en": "Half price", "fr": "Moitié prix" },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "minpricegrey": 50,
+                "maxpricegrey": 75,
+                "minpricewhite": 75,
+                "maxpricewhite": 125,
+                "minpricegreen": 400,
+                "maxpricegreen": 700,
+                "minpriceblue": 625,
+                "maxpriceblue": 875,
+                "minpricepurple": 1125,
+                "maxpricepurple": 2275,
+                "minpriceorange": 1625,
+                "maxpriceorange": 2775,
+                "minpriceyellow": 2625,
+                "maxpriceyellow": 3275
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "minpricegrey": 50,
+                "maxpricegrey": 75,
+                "minpricewhite": 75,
+                "maxpricewhite": 125,
+                "minpricegreen": 400,
+                "maxpricegreen": 700,
+                "minpriceblue": 625,
+                "maxpriceblue": 875,
+                "minpricepurple": 1125,
+                "maxpricepurple": 2275,
+                "minpriceorange": 1625,
+                "maxpriceorange": 2775,
+                "minpriceyellow": 2625,
+                "maxpriceyellow": 3275
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "minpricegrey": 50,
+                "maxpricegrey": 75,
+                "minpricewhite": 75,
+                "maxpricewhite": 125,
+                "minpricegreen": 400,
+                "maxpricegreen": 700,
+                "minpriceblue": 625,
+                "maxpriceblue": 875,
+                "minpricepurple": 1125,
+                "maxpricepurple": 2275,
+                "minpriceorange": 1625,
+                "maxpriceorange": 2775,
+                "minpriceyellow": 2625,
+                "maxpriceyellow": 3275
+              }
+            }
+          ]
+        },
+        {
+          "id": "original",
+          "label": { "en": "As the module ships it", "fr": "Comme le module d'origine" },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "minpricegrey": 100,
+                "maxpricegrey": 150,
+                "minpricewhite": 150,
+                "maxpricewhite": 250,
+                "minpricegreen": 800,
+                "maxpricegreen": 1400,
+                "minpriceblue": 1250,
+                "maxpriceblue": 1750,
+                "minpricepurple": 2250,
+                "maxpricepurple": 4550,
+                "minpriceorange": 3250,
+                "maxpriceorange": 5550,
+                "minpriceyellow": 5250,
+                "maxpriceyellow": 6550
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "minpricegrey": 100,
+                "maxpricegrey": 150,
+                "minpricewhite": 150,
+                "maxpricewhite": 250,
+                "minpricegreen": 800,
+                "maxpricegreen": 1400,
+                "minpriceblue": 1250,
+                "maxpriceblue": 1750,
+                "minpricepurple": 2250,
+                "maxpricepurple": 4550,
+                "minpriceorange": 3250,
+                "maxpriceorange": 5550,
+                "minpriceyellow": 5250,
+                "maxpriceyellow": 6550
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "minpricegrey": 100,
+                "maxpricegrey": 150,
+                "minpricewhite": 150,
+                "maxpricewhite": 250,
+                "minpricegreen": 800,
+                "maxpricegreen": 1400,
+                "minpriceblue": 1250,
+                "maxpriceblue": 1750,
+                "minpricepurple": 2250,
+                "maxpricepurple": 4550,
+                "minpriceorange": 3250,
+                "maxpriceorange": 5550,
+                "minpriceyellow": 5250,
+                "maxpriceyellow": 6550
+              }
+            }
+          ]
+        },
+        {
+          "id": "high",
+          "label": { "en": "Twice as expensive", "fr": "Deux fois plus cher" },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "minpricegrey": 200,
+                "maxpricegrey": 300,
+                "minpricewhite": 300,
+                "maxpricewhite": 500,
+                "minpricegreen": 1600,
+                "maxpricegreen": 2800,
+                "minpriceblue": 2500,
+                "maxpriceblue": 3500,
+                "minpricepurple": 4500,
+                "maxpricepurple": 9100,
+                "minpriceorange": 6500,
+                "maxpriceorange": 11100,
+                "minpriceyellow": 10500,
+                "maxpriceyellow": 13100
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "minpricegrey": 200,
+                "maxpricegrey": 300,
+                "minpricewhite": 300,
+                "maxpricewhite": 500,
+                "minpricegreen": 1600,
+                "maxpricegreen": 2800,
+                "minpriceblue": 2500,
+                "maxpriceblue": 3500,
+                "minpricepurple": 4500,
+                "maxpricepurple": 9100,
+                "minpriceorange": 6500,
+                "maxpriceorange": 11100,
+                "minpriceyellow": 10500,
+                "maxpriceyellow": 13100
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "minpricegrey": 200,
+                "maxpricegrey": 300,
+                "minpricewhite": 300,
+                "maxpricewhite": 500,
+                "minpricegreen": 1600,
+                "maxpricegreen": 2800,
+                "minpriceblue": 2500,
+                "maxpriceblue": 3500,
+                "minpricepurple": 4500,
+                "maxpricepurple": 9100,
+                "minpriceorange": 6500,
+                "maxpriceorange": 11100,
+                "minpriceyellow": 10500,
+                "maxpriceyellow": 13100
+              }
+            }
+          ]
+        },
+        {
+          "id": "very-high",
+          "label": { "en": "Three times as expensive", "fr": "Trois fois plus cher" },
+          "tables": [
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 2 },
+              "set": {
+                "minpricegrey": 300,
+                "maxpricegrey": 450,
+                "minpricewhite": 450,
+                "maxpricewhite": 750,
+                "minpricegreen": 2400,
+                "maxpricegreen": 4200,
+                "minpriceblue": 3750,
+                "maxpriceblue": 5250,
+                "minpricepurple": 6750,
+                "maxpricepurple": 13650,
+                "minpriceorange": 9750,
+                "maxpriceorange": 16650,
+                "minpriceyellow": 15750,
+                "maxpriceyellow": 19650
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 6 },
+              "set": {
+                "minpricegrey": 300,
+                "maxpricegrey": 450,
+                "minpricewhite": 450,
+                "maxpricewhite": 750,
+                "minpricegreen": 2400,
+                "maxpricegreen": 4200,
+                "minpriceblue": 3750,
+                "maxpriceblue": 5250,
+                "minpricepurple": 6750,
+                "maxpricepurple": 13650,
+                "minpriceorange": 9750,
+                "maxpriceorange": 16650,
+                "minpriceyellow": 15750,
+                "maxpriceyellow": 19650
+              }
+            },
+            {
+              "database": "world",
+              "table": "mod_auctionhousebot",
+              "where": { "auctionhouse": 7 },
+              "set": {
+                "minpricegrey": 300,
+                "maxpricegrey": 450,
+                "minpricewhite": 450,
+                "maxpricewhite": 750,
+                "minpricegreen": 2400,
+                "maxpricegreen": 4200,
+                "minpriceblue": 3750,
+                "maxpriceblue": 5250,
+                "minpricepurple": 6750,
+                "maxpricepurple": 13650,
+                "minpriceorange": 9750,
+                "maxpriceorange": 16650,
+                "minpriceyellow": 15750,
+                "maxpriceyellow": 19650
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "quantity",
+      "label": { "en": "How many auctions", "fr": "Nombre d'enchères" },
+      "options": ["alliance-items", "horde-items", "neutral-items", "items-per-cycle"]
+    },
+    {
+      "id": "content",
+      "label": {
+        "en": "What is sold, and at what price",
+        "fr": "Ce qui est vendu, et à quel prix"
+      },
+      "options": ["quality-mix", "prices"]
     }
   ],
   "postInstall": [
     { "step": "create-account", "as": "ahbot_account", "username": "AHBOT", "gmLevel": 0 },
-    { "step": "create-character", "as": "ahbot_character", "account": "ahbot_account", "name": "Auctioneer" },
+    {
+      "step": "create-character",
+      "as": "ahbot_character",
+      "account": "ahbot_account",
+      "name": "Auctioneer"
+    },
     {
       "step": "set-config",
       "values": {

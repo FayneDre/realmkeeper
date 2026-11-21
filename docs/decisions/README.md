@@ -33,6 +33,7 @@ A changed decision gets a new ADR that supersedes the old one.
 | [0026](0026-restore-from-another-server.md) | Restoring a backup from another server: realm tables kept, module accounts found again | Accepted |
 | [0027](0027-optional-module-sql.md) | Optional module SQL files as `sql` options: packaged by CI, put where dbimport reads them, world rebuilt when one is turned off | Accepted |
 | [0028](0028-handoff-between-computers.md) | Handoff between computers through a synchronised folder: state sent at each clean stop, taken back on the other computer, conflicts never merged | Accepted |
+| [0029](0029-module-settings-in-tables.md) | Module settings kept in database tables: option targets and choices write table columns before each start (AHBot quantities, quality mix, prices) | Accepted |
 
 Template:
 

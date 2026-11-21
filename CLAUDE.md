@@ -69,6 +69,7 @@ emulators, clients and modules later **as data + a small driver**, never as rewr
 | A cleanly stopped MySQL 8.4 data directory copied without `auto.cnf`, `*.pem`, `#innodb_temp/` and spare redo files (`#innodb_redo/*_tmp`) starts in ~2 s (new UUID, keys, spares); `--init-file` sets root before listening. dbimport on up-to-date databases: ~9 s (vs 6-14 min from empty). `updates_include` paths are `$/`-relative (portable). | local test (2026-11-14), ADR 0009 |
 | worldserver with stdin as a **pipe** reads commands with `std::getline` and calls `World::StopNow` at EOF (clean: bots logged out, DB pools closed), also when the launcher is killed. Accounts: SRP6 `v = g^H(s‖H(USER:PASS)) mod N`, SHA-1, g = 7, little-endian; our verifier matches one made by worldserver. | fork `CliRunnable.cpp`, `SRP6.cpp`, `AccountMgr.cpp`; local test (2026-11-15) |
 | mod-ah-bot never loads its character: it builds an in-memory `Player` with `Initialize(AuctionHouseBot.GUID)` and owns auctions by that guid; `Account`/`GUID = 0` → "Account id and player id missing" and no bot. A `characters` row (next guid, worldserver stopped) is enough. | mod-ah-bot `c11d831` `AuctionHouseBot.cpp`, local test (2026-11-15) |
+| mod-ah-bot keeps per-house settings in `acore_world.mod_auctionhousebot` (rows 2/6/7): `maxitems` (SQL default 250; the seller fills up to it, `minitems` only sets a flag), 14 `percent<quality>{tradegoods,items}` that must sum to 100 (else module defaults), `min/maxprice<quality>` (% of vendor price). `.ahbotoptions` is `Console::Yes`. | mod-ah-bot `c11d831` `AuctionHouseBotConfig.cpp`, `AuctionHouseBot.cpp`, `cs_ah_bot.cpp`; Garona DB (2026-11-21) |
 | Client 3.3.5a = build **12340**. Ports: auth 3724, world 8085, SOAP 7878. | AzerothCore defaults |
 | `Wow.exe` 3.3.5a: `VS_FIXEDFILEINFO` file version 3.3.5.12340 (build = low word of the low dword). The client reads `Data/<locale>/realmlist.wtf` and also saves `SET realmList "..."` in `WTF/Config.wtf`. | local client (2026-11-15) |
 | Individual Progression optional files are 7z archives in its repo at the pinned commit: `optional/patch-V.7z` (patch-V.mpq + Spell.dbc), `patch-S.7z` (patch-S.mpq + Spell.dbc), `dbc.7z` (Patch-J.mpq, Patch-U.mpq, SkillLine/SkillLineAbility/SkillRaceClassInfo/SpellItemEnchantment.dbc); sha256 pinned in the module manifest. | module `optional/`, `patch-explanations.txt` (e179555) |
@@ -247,6 +248,12 @@ Update this table when a fact is (re)verified; date it.
   pure decision `upToDate | toSend | toTake | arriving | conflict`; take
   back = other computer's choices (`set_choices`) + restore; conflicts are
   never merged (player picks); not encrypted (personal folder only).
+- **0029** Module settings in tables: an option `target` may be
+  `{database, table, column, where}` and a choice may carry `tables`
+  (`set` columns); content databases the module touches only, plain SQL
+  names, integer values; `rk-runtime` writes them (`UPDATE`) before each
+  start, after `prepare_start`, so they survive world rebuilds. AHBot:
+  auctions per house, quality mix, prices.
 - Scope v1: solo + LAN; Internet later. Linux/macOS later (keep code portable).
 
 Never re-propose rejected options (MariaDB, Docker/WSL2, per-combination builds,

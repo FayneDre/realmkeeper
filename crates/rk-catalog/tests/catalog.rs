@@ -202,3 +202,43 @@ fn party_offers_every_role() {
         (6, "dk", 55)
     );
 }
+
+/// AHBot's settings live in `mod_auctionhousebot` (ADR 0029): the defaults
+/// are those of its SQL, every quality mix sums to 100.
+#[test]
+fn ahbot_settings_are_table_writes() {
+    use rk_core::manifest::{ModuleOption, OptionValue};
+    use std::collections::BTreeMap;
+
+    let catalog = catalog();
+    let ahbot = catalog.module("azerothcore", "mod-ah-bot").unwrap();
+    let writes = ahbot.table_writes(None);
+    // Three houses: auctions, quality mix, prices.
+    assert_eq!(writes.len(), 9);
+    assert!(writes.iter().all(|w| w.table == "mod_auctionhousebot"));
+    let alliance = &writes[0];
+    assert_eq!(
+        alliance.row,
+        BTreeMap::from([("auctionhouse".to_string(), 2)])
+    );
+    assert_eq!(
+        alliance.set,
+        BTreeMap::from([("maxitems".to_string(), 250)])
+    );
+
+    let chosen = BTreeMap::from([("horde-items".to_string(), OptionValue::Integer(3000))]);
+    let writes = ahbot.table_writes(Some(&chosen));
+    assert_eq!(writes[1].set["maxitems"], 3000);
+
+    let mix = ahbot
+        .options
+        .iter()
+        .find(|o| o.id() == "quality-mix")
+        .unwrap();
+    let ModuleOption::Choice { choices, .. } = mix else {
+        panic!("quality-mix is a choice")
+    };
+    for change in choices.iter().flat_map(|c| &c.tables) {
+        assert_eq!(change.set.values().sum::<i64>(), 100, "{change:?}");
+    }
+}

@@ -57,6 +57,8 @@ pub struct Server {
     paths_configs: std::path::PathBuf,
     /// NPCs of the enabled modules (ADR 0023).
     spawns: Vec<rk_core::manifest::Spawn>,
+    /// Module settings kept in tables, written before each start (ADR 0029).
+    table_sql: String,
 }
 
 impl Server {
@@ -102,16 +104,25 @@ impl Server {
                 })
             })
             .collect::<Result<Vec<_>, RuntimeError>>()?;
-        let spawns = crate::modules::enabled_modules(catalog, &record)?
+        let enabled = crate::modules::enabled_modules(catalog, &record)?;
+        let spawns = enabled
             .iter()
             .filter_map(|m| catalog.module(&record.emulator, m))
             .flat_map(|m| m.spawns.iter().cloned())
             .collect();
+        let mut writes = Vec::new();
+        for module in &enabled {
+            if let Some(manifest) = catalog.module(&record.emulator, module) {
+                writes.extend(manifest.table_writes(record.options.get(module)));
+            }
+        }
+        let table_sql = table_sql(&emulator, &writes)?;
         let (logs, _) = broadcast::channel(4096);
         Ok(Self {
             layout: layout.clone(),
             db,
             spawns,
+            table_sql,
             emulator,
             paths_configs: layout.instance(&record.id).configs,
             record,
@@ -257,6 +268,9 @@ impl Server {
                 driver: driver.id().into(),
                 source,
             })?;
+        if !self.table_sql.is_empty() {
+            self.db.execute(&self.table_sql).await?;
+        }
         for config in &self.processes {
             observer(ServerEvent::Starting {
                 process: config.id.clone(),
@@ -581,5 +595,84 @@ impl Running {
                 "the database did not stop cleanly: {error}"
             ))),
         }
+    }
+}
+
+/// The `UPDATE` statements of module settings kept in tables (ADR 0029).
+/// Names are plain identifiers (checked by the catalog validation, again
+/// here) and values integers: nothing to escape.
+fn table_sql(
+    emulator: &EmulatorManifest,
+    writes: &[rk_core::manifest::TableWrite],
+) -> Result<String, RuntimeError> {
+    let plain = |name: &str| {
+        !name.is_empty()
+            && name
+                .bytes()
+                .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_')
+    };
+    let mut sql = String::new();
+    for write in writes {
+        let database = emulator
+            .databases
+            .iter()
+            .find(|d| d.id == write.database)
+            .map(|d| d.name.as_str())
+            .ok_or_else(|| install::PlanError::Unknown(format!("database '{}'", write.database)))?;
+        let names = std::iter::once(write.table.as_str())
+            .chain(write.row.keys().map(String::as_str))
+            .chain(write.set.keys().map(String::as_str));
+        if let Some(bad) = names.clone().find(|n| !plain(n)) {
+            return Err(install::PlanError::Unknown(format!("table name '{bad}'")).into());
+        }
+        let set: Vec<String> = write
+            .set
+            .iter()
+            .map(|(column, value)| format!("`{column}` = {value}"))
+            .collect();
+        let row: Vec<String> = write
+            .row
+            .iter()
+            .map(|(column, value)| format!("`{column}` = {value}"))
+            .collect();
+        sql.push_str(&format!(
+            "UPDATE `{database}`.`{}` SET {} WHERE {};\n",
+            write.table,
+            set.join(", "),
+            row.join(" AND ")
+        ));
+    }
+    Ok(sql)
+}
+
+#[cfg(test)]
+mod table_tests {
+    use super::*;
+
+    #[test]
+    fn module_tables_become_updates() {
+        let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../catalog");
+        let catalog = rk_catalog::load_dir(&root).unwrap();
+        let entry = catalog.emulator("azerothcore").unwrap();
+        let write = rk_core::manifest::TableWrite {
+            database: "world".into(),
+            table: "mod_auctionhousebot".into(),
+            row: [("auctionhouse".to_string(), 2)].into(),
+            set: [
+                ("maxitems".to_string(), 3000),
+                ("minitems".to_string(), 2000),
+            ]
+            .into(),
+        };
+        assert_eq!(
+            table_sql(&entry.manifest, std::slice::from_ref(&write)).unwrap(),
+            "UPDATE `acore_world`.`mod_auctionhousebot` SET `maxitems` = 3000, `minitems` = 2000 WHERE `auctionhouse` = 2;\n"
+        );
+        let mut bad = write.clone();
+        bad.table = "x`; DROP".into();
+        assert!(table_sql(&entry.manifest, &[bad]).is_err());
+        let mut unknown = write;
+        unknown.database = "nowhere".into();
+        assert!(table_sql(&entry.manifest, &[unknown]).is_err());
     }
 }
