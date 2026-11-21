@@ -253,6 +253,8 @@ export type ModuleOption =
       database: string;
       file: string;
       default: boolean;
+      /** Another option that must hold one of `values` (a client patch it needs). */
+      requires?: { option: string; values: string[] } | null;
     };
 
 export interface ModuleOptions {

@@ -389,35 +389,26 @@ pub fn set_options(
         }
     }
     new.options.retain(|_, v| !v.is_empty());
-    // An optional SQL file turned off (ADR 0027): its database is rebuilt
-    // without it, like after removing a module.
     if module != REALM_OPTIONS {
-        let before = old.options.get(module);
-        let after = new.options.get(module);
-        let mut turned_off: Vec<&str> = Vec::new();
-        for spec in &specs {
-            if let rk_core::manifest::ModuleOption::Sql { database, .. } = spec {
-                let on = |values: Option<&std::collections::BTreeMap<_, _>>| {
-                    spec.effective(values.and_then(|v| v.get(spec.id())))
-                        == rk_core::manifest::OptionValue::Bool(true)
-                };
-                if on(before) && !on(after) {
-                    turned_off.push(database);
-                }
+        if let Some(manifest) = entry.modules.get(module) {
+            // A file whose client patch is not chosen cannot apply.
+            if let Some((option, required)) =
+                manifest.unmet_requirements(new.options.get(module)).first()
+            {
+                return Err(module_error(format!(
+                    "option '{option}' needs another value of '{required}': turn it off first"
+                )));
             }
-        }
-        if !turned_off.is_empty() {
-            let selected: Vec<&str> = new.modules.iter().map(String::as_str).collect();
-            let resolution = rk_core::resolve(catalog, &new.emulator, Some(&new.flavor), &selected)
-                .map_err(install::PlanError::from)?;
-            for db in install::databases(catalog, &resolution)? {
-                if turned_off.contains(&db.id.as_str())
-                    && !db.player_data
-                    && !new.regenerate.contains(&db.name)
-                {
-                    new.regenerate.push(db.name);
-                }
-            }
+            // An optional SQL file turned off (ADR 0027): its database is
+            // rebuilt without it, like after removing a module.
+            let after = manifest.selected_sql(new.options.get(module));
+            let turned_off: Vec<&str> = manifest
+                .selected_sql(old.options.get(module))
+                .into_iter()
+                .filter(|file| !after.contains(file))
+                .map(|(database, _)| database)
+                .collect();
+            schedule_rebuild(catalog, &mut new, &turned_off)?;
         }
     }
     install::save_record(layout, &new)?;
@@ -520,7 +511,6 @@ pub fn after_failure(
     attempted: &InstanceRecord,
     old: &InstanceRecord,
 ) -> InstanceRecord {
-    use rk_core::manifest::{ModuleOption, OptionValue};
     let mut restored = old.clone();
     let Some(entry) = catalog.emulator(&attempted.emulator) else {
         return restored;
@@ -536,40 +526,46 @@ pub fn after_failure(
         let Some(manifest) = entry.modules.get(id) else {
             continue;
         };
-        for option in &manifest.options {
-            let ModuleOption::Sql { database, .. } = option else {
-                continue;
-            };
-            let on = |record: &InstanceRecord| {
-                option.effective(record.options.get(id).and_then(|v| v.get(option.id())))
-                    == OptionValue::Bool(true)
-            };
-            if on(attempted) && !(before.contains(id) && on(old)) {
-                turned_on.push(database);
-            }
-        }
+        let applied = if before.contains(id) {
+            manifest.selected_sql(old.options.get(id))
+        } else {
+            Vec::new()
+        };
+        turned_on.extend(
+            manifest
+                .selected_sql(attempted.options.get(id))
+                .into_iter()
+                .filter(|file| !applied.contains(file))
+                .map(|(database, _)| database),
+        );
     }
-    if turned_on.is_empty() {
-        return restored;
-    }
-    let selected: Vec<&str> = attempted.modules.iter().map(String::as_str).collect();
-    let Ok(resolution) = rk_core::resolve(
-        catalog,
-        &attempted.emulator,
-        Some(&attempted.flavor),
-        &selected,
-    ) else {
-        return restored;
-    };
-    for db in install::databases(catalog, &resolution).unwrap_or_default() {
-        if turned_on.contains(&db.id.as_str())
-            && !db.player_data
-            && !restored.regenerate.contains(&db.name)
-        {
-            restored.regenerate.push(db.name);
-        }
-    }
+    // The rebuild uses the restored module set: still a content database.
+    let _ = schedule_rebuild(catalog, &mut restored, &turned_on);
     restored
+}
+
+/// Adds the content databases among `databases` (catalog ids) to the
+/// record's `regenerate` list; player databases are never rebuilt.
+fn schedule_rebuild(
+    catalog: &Catalog,
+    record: &mut InstanceRecord,
+    databases: &[&str],
+) -> Result<(), RuntimeError> {
+    if databases.is_empty() {
+        return Ok(());
+    }
+    let selected: Vec<&str> = record.modules.iter().map(String::as_str).collect();
+    let resolution = rk_core::resolve(catalog, &record.emulator, Some(&record.flavor), &selected)
+        .map_err(install::PlanError::from)?;
+    for db in install::databases(catalog, &resolution)? {
+        if databases.contains(&db.id.as_str())
+            && !db.player_data
+            && !record.regenerate.contains(&db.name)
+        {
+            record.regenerate.push(db.name);
+        }
+    }
+    Ok(())
 }
 
 /// Clears the regeneration request once the operation has completed.

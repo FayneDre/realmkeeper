@@ -522,6 +522,17 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                 // content database it touches (turning it off rebuilds that
                 // database; player data is never rebuilt).
                 if let ModuleOption::Sql {
+                    id,
+                    requires: Some(requirement),
+                    default,
+                    ..
+                } = option
+                {
+                    for issue in requirement_issues(module, id, requirement, *default) {
+                        push(here.clone(), issue);
+                    }
+                }
+                if let ModuleOption::Sql {
                     id, database, file, ..
                 } = option
                 {
@@ -635,6 +646,55 @@ fn placeholders(text: &str) -> Vec<&str> {
         }
     }
     out
+}
+
+/// A requirement names another option of the same module and values it can
+/// take; an option on by default must have its requirement met by default.
+fn requirement_issues(
+    module: &rk_core::manifest::ModuleManifest,
+    id: &str,
+    requirement: &rk_core::manifest::OptionRequirement,
+    default: bool,
+) -> Vec<String> {
+    use rk_core::manifest::ModuleOption;
+    let mut issues = Vec::new();
+    let required = &requirement.option;
+    let Some(target) = module.options.iter().find(|o| o.id() == required) else {
+        return vec![format!(
+            "option '{id}': requires unknown option '{required}'"
+        )];
+    };
+    if required == id {
+        issues.push(format!("option '{id}': requires itself"));
+    }
+    let allowed: Vec<String> = match target {
+        ModuleOption::Choice { choices, .. } => choices.iter().map(|c| c.id.clone()).collect(),
+        ModuleOption::Boolean { .. } | ModuleOption::Sql { .. } => {
+            vec!["true".into(), "false".into()]
+        }
+        _ => {
+            issues.push(format!(
+                "option '{id}': can only require a choice or a boolean option"
+            ));
+            Vec::new()
+        }
+    };
+    if requirement.values.is_empty() {
+        issues.push(format!("option '{id}': requires no value of '{required}'"));
+    }
+    for value in &requirement.values {
+        if !allowed.is_empty() && !allowed.contains(value) {
+            issues.push(format!(
+                "option '{id}': '{value}' is not a value of '{required}'"
+            ));
+        }
+    }
+    if default && !module.requirement_met(requirement, None) {
+        issues.push(format!(
+            "option '{id}': on by default while '{required}' is not"
+        ));
+    }
+    issues
 }
 
 #[cfg(test)]

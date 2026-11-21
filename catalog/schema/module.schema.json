@@ -643,6 +643,29 @@
             },
             "default": {
               "type": "boolean"
+            },
+            "requires": {
+              "description": "Another option of the module that must hold one of 'values' (choice ids, or 'true'/'false') for the file to apply, e.g. the client patch it needs.",
+              "type": "object",
+              "required": [
+                "option",
+                "values"
+              ],
+              "properties": {
+                "option": {
+                  "$ref": "common.schema.json#/$defs/id"
+                },
+                "values": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "additionalProperties": false
             }
           },
           "additionalProperties": false

@@ -579,7 +579,20 @@ pub enum ModuleOption {
         /// Path in the module repository (packaged in the server artifact).
         file: String,
         default: bool,
+        /// Another option of the module that must hold one of some values
+        /// for this file to apply (a client patch it needs).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        requires: Option<OptionRequirement>,
     },
+}
+
+/// `option` (of the same module) must be one of `values` (choice ids, or
+/// `true` / `false` for a boolean).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OptionRequirement {
+    pub option: String,
+    pub values: Vec<String>,
 }
 
 impl ModuleOption {
@@ -728,7 +741,8 @@ impl ModuleManifest {
     }
 
     /// The optional SQL files turned on by the effective option values, as
-    /// `(database, file)`, in manifest order (ADR 0027).
+    /// `(database, file)`, in manifest order (ADR 0027). A file whose
+    /// requirement is not met is not selected.
     pub fn selected_sql(
         &self,
         values: Option<&std::collections::BTreeMap<String, OptionValue>>,
@@ -736,9 +750,59 @@ impl ModuleManifest {
         self.options
             .iter()
             .filter_map(|option| match option {
-                ModuleOption::Sql { database, file, .. } => {
+                ModuleOption::Sql {
+                    database,
+                    file,
+                    requires,
+                    ..
+                } => {
                     let value = option.effective(values.and_then(|v| v.get(option.id())));
-                    (value == OptionValue::Bool(true)).then_some((database.as_str(), file.as_str()))
+                    let met = requires
+                        .as_ref()
+                        .is_none_or(|r| self.requirement_met(r, values));
+                    (value == OptionValue::Bool(true) && met)
+                        .then_some((database.as_str(), file.as_str()))
+                }
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// Whether the effective value of the required option is one of the
+    /// required values.
+    pub fn requirement_met(
+        &self,
+        requirement: &OptionRequirement,
+        values: Option<&std::collections::BTreeMap<String, OptionValue>>,
+    ) -> bool {
+        let Some(option) = self.options.iter().find(|o| o.id() == requirement.option) else {
+            return false;
+        };
+        let value = match option.effective(values.and_then(|v| v.get(option.id()))) {
+            OptionValue::Bool(b) => b.to_string(),
+            OptionValue::Choice(c) => c,
+            OptionValue::Integer(n) => n.to_string(),
+            OptionValue::Number(n) => n.to_string(),
+        };
+        requirement.values.contains(&value)
+    }
+
+    /// Options turned on (away from their default) while their requirement
+    /// is not met, as `(option, required option)`.
+    pub fn unmet_requirements(
+        &self,
+        values: Option<&std::collections::BTreeMap<String, OptionValue>>,
+    ) -> Vec<(&str, &str)> {
+        self.options
+            .iter()
+            .filter_map(|option| match option {
+                ModuleOption::Sql {
+                    requires: Some(requirement),
+                    ..
+                } => {
+                    let value = option.effective(values.and_then(|v| v.get(option.id())));
+                    (value != option.default_value() && !self.requirement_met(requirement, values))
+                        .then_some((option.id(), requirement.option.as_str()))
                 }
                 _ => None,
             })

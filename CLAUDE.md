@@ -235,7 +235,8 @@ Update this table when a fact is (re)verified; date it.
   target `.../db-{database}/rk-optional`), step `optional-sql` before
   dbimport (module + update operations), turning one off schedules the
   database rebuild (ADR 0012); smoke test round B applies them all.
-  Individual Progression: 18 files without client patch, off by default.
+  `requires` (another option's values) for files needing a client patch.
+  Individual Progression: 22 files, off by default (4 need patch-V/S).
 - Scope v1: solo + LAN; Internet later. Linux/macOS later (keep code portable).
 
 Never re-propose rejected options (MariaDB, Docker/WSL2, per-combination builds,

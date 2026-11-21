@@ -48,7 +48,7 @@ files (MPQ) or server DBC overrides, accounts/characters it needs.
 - Optional SQL files the owner is meant to choose (ADR 0027): one `sql` option per
   file (`database` it changes, never player data; `file` path in the repo;
   `default: false` unless upstream applies it). Read each file's header first;
-  leave out files that need a client patch until options can depend on others.
+  a file that needs a client patch gets `requires` on the option that installs it.
 
 ## 3. Validate
 

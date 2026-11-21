@@ -44,8 +44,32 @@
 
   const changed = $derived(module.options.some((o) => draft[o.option.id] !== asText(o.value)));
 
+  /** Whether the option's requirement holds in the draft (none: always). */
+  function met(option: ModuleOption, values: Record<string, string> = draft): boolean {
+    const requires = option.type === "sql" ? option.requires : null;
+    return !requires || requires.values.includes(values[requires.option] ?? "");
+  }
+
+  /** "Needs <option>: <values>", with the required option's labels. */
+  function requirement(option: ModuleOption): string | null {
+    const requires = option.type === "sql" ? option.requires : null;
+    if (!requires) return null;
+    const target = module.options.find((o) => o.option.id === requires.option)?.option;
+    if (!target) return null;
+    const values = requires.values.map((v) => {
+      const choice = target.type === "choice" ? target.choices.find((c) => c.id === v) : undefined;
+      return choice ? localized(choice.label) : v;
+    });
+    return t("settings.requires", { option: localized(target.label), values: values.join(" / ") });
+  }
+
   function set(option: string, value: string) {
-    draft = { ...draft, [option]: value };
+    const next = { ...draft, [option]: value };
+    // Options whose requirement no longer holds turn off with it.
+    for (const { option: o } of module.options) {
+      if (next[o.id] === "true" && !met(o, next)) next[o.id] = "false";
+    }
+    draft = next;
   }
 
   function help(option: ModuleOption): string | null {
@@ -74,11 +98,12 @@
         <span class="label">
           {localized(option.label)}
           {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
+          {#if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
         </span>
         {#if option.type === "boolean" || option.type === "sql"}
           <input
             type="checkbox"
-            disabled={locked}
+            disabled={locked || (!met(option) && value !== "true")}
             checked={value === "true"}
             onchange={(e) => set(option.id, String(e.currentTarget.checked))}
           />
@@ -159,6 +184,13 @@
     color: var(--accent);
     vertical-align: 1px;
     cursor: help;
+  }
+
+  /* Why a box is greyed out: always visible, under the label. */
+  .needs {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
   }
 
   input[type="number"] {

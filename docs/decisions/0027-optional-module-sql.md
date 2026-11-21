@@ -61,11 +61,21 @@ transports, per their own headers).
    applies it on top. If the operation turning a file on fails, the record
    goes back to the previous options **plus** a rebuild of that database
    (`after_failure`): dbimport may have run part of the file.
-6. **Individual Progression** offers the 18 files that need no client
-   patch, all off by default (upstream: optional). Labels say which ones
-   make the game easier. The four files that need patch-V/S wait for a
-   dependency between options.
-7. **Smoke test.** Round B puts every optional file of the enabled modules
+6. **Requirements.** An `sql` option may declare `requires: {option,
+   values}`: another option of the module (a choice or a boolean) must hold
+   one of `values` for the file to apply. `set_options` refuses a file
+   turned on without it, and a change of the required option that would
+   leave such a file on ("turn it off first"); `selected_sql` never selects
+   a file whose requirement does not hold. The UI greys the box out with
+   "Needs <option>: <values>" and unticks it when the required option
+   changes in the same edit.
+7. **Individual Progression** offers all 22 files, off by default
+   (upstream: optional). Labels say which ones make the game easier. The
+   four that need patch-V or patch-S on the client (their headers: spell
+   damage and healing, TBC PvP prices, Vanilla transports; rogue poisons
+   says "the optional files", assumed to mean the same patches) require
+   `mana-costs` = `era-adjusted` or `keep-wotlk`.
+8. **Smoke test.** Round B puts every optional file of the enabled modules
    in place before dbimport, so a file that no longer applies on a pinned
    build fails CI.
 
@@ -84,5 +94,6 @@ transports, per their own headers).
   new commit (CI checks it too, when packaging).
 - A pin bump that drops or renames a file a realm has turned on leaves its
   changes in the world until the next rebuild: `bump-pins` checks the files.
-- Options that depend on another option (the four patch-V/S files) need a
-  later decision.
+- The smoke test applies the four patch-dependent files without the
+  server `Spell.dbc` of the patches: it checks that the SQL applies and
+  that worldserver starts, not their effect in game.

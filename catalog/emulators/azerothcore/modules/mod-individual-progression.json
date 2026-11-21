@@ -267,6 +267,58 @@
       "default": false
     },
     {
+      "id": "sql-restore-rogue-poisons",
+      "type": "sql",
+      "label": { "en": "Restore the Rogue Poisons skill", "fr": "Rétablir la compétence Poisons des voleurs" },
+      "help": {
+        "en": "Rogues craft their poisons again instead of buying them from vendors. Needs patch-V or patch-S (spell mana costs).",
+        "fr": "Les voleurs fabriquent de nouveau leurs poisons au lieu de les acheter aux marchands. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_restore_rogue_poisons.sql",
+      "default": false,
+      "requires": { "option": "mana-costs", "values": ["era-adjusted", "keep-wotlk"] }
+    },
+    {
+      "id": "sql-spell-damage-and-healing",
+      "type": "sql",
+      "label": { "en": "Separate healing and damage bonuses on Vanilla and TBC items", "fr": "Bonus de soins et de dégâts distincts sur les objets Vanilla et TBC" },
+      "help": {
+        "en": "Vanilla items give \"increased healing\" again and TBC items \"increased damage and healing\": WotLK had merged them, blurring caster and healer gear. Needs patch-V or patch-S (spell mana costs).",
+        "fr": "Les objets Vanilla redonnent « soins augmentés » et ceux de TBC « dégâts et soins augmentés » : WotLK les avait fusionnés, confondant équipement de lanceur de sorts et de soigneur. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_spell_damage_and_healing.sql",
+      "default": false,
+      "requires": { "option": "mana-costs", "values": ["era-adjusted", "keep-wotlk"] }
+    },
+    {
+      "id": "sql-tbc-pvp-prices",
+      "type": "sql",
+      "label": { "en": "TBC PvP prices", "fr": "Prix JcJ de TBC" },
+      "help": {
+        "en": "PvP items also cost battleground marks of honor, as in TBC, not just honor. Needs patch-V or patch-S (spell mana costs).",
+        "fr": "Les objets JcJ coûtent aussi des marques d'honneur des champs de bataille, comme dans TBC, pas seulement de l'honneur. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_tbc_pvp_prices.sql",
+      "default": false,
+      "requires": { "option": "mana-costs", "values": ["era-adjusted", "keep-wotlk"] }
+    },
+    {
+      "id": "sql-vanilla-transports",
+      "type": "sql",
+      "label": { "en": "Vanilla boat routes", "fr": "Trajets de bateau de Vanilla" },
+      "help": {
+        "en": "The Auberdine boat sails to Menethil Harbor again instead of Stormwind, and the Howling Fjord boat leaves from Stormwind: crossing continents early means the Wetlands run again. Needs patch-V or patch-S (spell mana costs).",
+        "fr": "Le bateau d'Auberdine rejoint de nouveau Menethil au lieu de Hurlevent, et celui du Fjord hurlant part de Hurlevent : changer de continent tôt redevient la traversée des Paluns. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+      },
+      "database": "world",
+      "file": "optional/sql/world/zz_optional_vanilla_transports.sql",
+      "default": false,
+      "requires": { "option": "mana-costs", "values": ["era-adjusted", "keep-wotlk"] }
+    },
+    {
       "id": "sql-small-group-adjustments",
       "type": "sql",
       "label": { "en": "Raid adjustments for small groups", "fr": "Ajustements de raid pour petits groupes" },

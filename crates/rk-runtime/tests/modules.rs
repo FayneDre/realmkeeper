@@ -178,3 +178,79 @@ fn a_failed_optional_sql_change_rebuilds_the_world_next_time() {
     let same = after_failure(&catalog, &old, &old);
     assert_eq!(same, old);
 }
+
+/// ADR 0027: a file that needs a client patch is refused without it, and
+/// the patch cannot go while the file is on.
+#[test]
+fn optional_sql_requirements_are_enforced() {
+    use rk_runtime::modules::set_options;
+
+    let catalog = catalog();
+    let dir = tempfile::tempdir().unwrap();
+    let layout = Layout::new(dir.path());
+    let module = "mod-individual-progression";
+    let request = NewInstance {
+        id: "t".into(),
+        emulator: "azerothcore".into(),
+        flavor: None,
+        modules: strings(&[module]),
+        network: Network::Solo,
+    };
+    install::open_or_create(&catalog, &layout, &request).unwrap();
+    let pairs = |items: &[(&str, &str)]| -> Vec<(String, String)> {
+        items
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect()
+    };
+    let poisons = ("sql-restore-rogue-poisons", "true");
+
+    let error = set_options(&catalog, &layout, "t", module, &pairs(&[poisons]))
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("mana-costs"), "{error}");
+
+    let (record, _) = set_options(
+        &catalog,
+        &layout,
+        "t",
+        module,
+        &pairs(&[("mana-costs", "era-adjusted"), poisons]),
+    )
+    .unwrap();
+    let manifest = &catalog.emulator("azerothcore").unwrap().modules[module];
+    assert_eq!(
+        manifest.selected_sql(record.options.get(module)),
+        [(
+            "world",
+            "optional/sql/world/zz_optional_restore_rogue_poisons.sql"
+        )]
+    );
+
+    // The patch cannot go alone...
+    let error = set_options(
+        &catalog,
+        &layout,
+        "t",
+        module,
+        &pairs(&[("mana-costs", "unchanged")]),
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(error.contains("sql-restore-rogue-poisons"), "{error}");
+
+    // ...but together with the file, and the world is rebuilt without it.
+    let (record, _) = set_options(
+        &catalog,
+        &layout,
+        "t",
+        module,
+        &pairs(&[
+            ("mana-costs", "unchanged"),
+            ("sql-restore-rogue-poisons", "false"),
+        ]),
+    )
+    .unwrap();
+    assert!(manifest.selected_sql(record.options.get(module)).is_empty());
+    assert_eq!(record.regenerate, strings(&["acore_world"]));
+}

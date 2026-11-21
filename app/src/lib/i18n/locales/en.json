@@ -139,6 +139,7 @@
   "settings.rebuild": "Removing these modules rebuilds {databases} (a few minutes). Characters and accounts are kept.",
   "settings.options": "{module} options",
   "settings.optionsHint": "Applied to the servers and, when needed, to your game folder at the next launch.",
+  "settings.requires": "Needs “{option}”: {values}",
   "settings.sqlHint": "Turning off a world change rebuilds the world database (about 2 minutes); characters are never touched.",
   "modules.title": "Modules",
   "modules.mandatory": "Included",
