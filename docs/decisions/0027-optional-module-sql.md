@@ -78,6 +78,16 @@ transports, per their own headers).
 8. **Smoke test.** Round B puts every optional file of the enabled modules
    in place before dbimport, so a file that no longer applies on a pinned
    build fails CI.
+9. **Presentation.** A module may declare `optionGroups` (id, label,
+   option ids): headings over its options in the UI, options in no group
+   first. Individual Progression: "True to the era", "Challenge", "Makes
+   the game easier". Turning off a file in force swaps the panel's hint for
+   the rebuild warning, as removing a module does.
+10. **Game cache.** Some files change items and recipes the client keeps
+    in its cache (`WDB`; two headers say so). The cache owner key given to
+    `rk_client::prepare` is now the realm id plus a hash of what it serves
+    (build, modules, option values, `cache_owner`): the cache is cleared
+    whenever that changes, not only when another realm was played.
 
 ## Consequences
 

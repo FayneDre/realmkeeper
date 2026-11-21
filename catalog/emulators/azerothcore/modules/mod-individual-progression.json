@@ -367,6 +367,48 @@
       "default": false
     }
   ],
+  "optionGroups": [
+    {
+      "id": "era",
+      "label": { "en": "True to the era", "fr": "Fidèle à l'époque" },
+      "options": [
+        "sql-phasing",
+        "sql-limit-spells-to-expansion",
+        "sql-remove-heirlooms",
+        "sql-vanilla-crafting-requirements",
+        "sql-restore-crafting-cd-timers",
+        "sql-restore-potion-cd",
+        "sql-item-stack-sizes",
+        "sql-ammo-stack-size",
+        "sql-stackable-buff-scrolls",
+        "sql-vanilla-regen-values",
+        "sql-vanilla-models",
+        "sql-restore-rogue-poisons",
+        "sql-spell-damage-and-healing",
+        "sql-tbc-pvp-prices",
+        "sql-vanilla-transports"
+      ]
+    },
+    {
+      "id": "challenge",
+      "label": { "en": "Challenge", "fr": "Défi" },
+      "options": [
+        "sql-creature-stats",
+        "sql-av-landmines",
+        "sql-unobtainable-items"
+      ]
+    },
+    {
+      "id": "easier",
+      "label": { "en": "Makes the game easier", "fr": "Facilite le jeu" },
+      "options": [
+        "sql-small-group-adjustments",
+        "sql-aq-quest-nerf",
+        "sql-tbc-heroic-dungeon-keys-nerf",
+        "sql-wotlk-hp-values-for-tbc-raids"
+      ]
+    }
+  ],
   "assets": [
     {
       "id": "patch-v",

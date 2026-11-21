@@ -248,6 +248,8 @@ pub struct OptionView {
 pub struct ModuleOptions {
     pub module: String,
     pub options: Vec<OptionView>,
+    /// Headings over some of the options (manifest `optionGroups`).
+    pub groups: Vec<rk_core::manifest::OptionGroup>,
 }
 
 /// One section of realm settings with the values in force.

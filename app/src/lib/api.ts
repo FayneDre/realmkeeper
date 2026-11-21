@@ -257,9 +257,17 @@ export type ModuleOption =
       requires?: { option: string; values: string[] } | null;
     };
 
+export interface OptionGroup {
+  id: string;
+  label: LocalizedText;
+  options: string[];
+}
+
 export interface ModuleOptions {
   module: string;
   options: { option: ModuleOption; value: OptionValue }[];
+  /** Headings over some options; options in no group come first. */
+  groups?: OptionGroup[];
 }
 
 /** What an uninstall did. */

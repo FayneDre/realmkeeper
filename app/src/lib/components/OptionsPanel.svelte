@@ -41,6 +41,12 @@
 
   /** Some options apply SQL files: turning one off rebuilds a database. */
   const hasSql = $derived(module.options.some((o) => o.option.type === "sql"));
+  /** Applying the draft turns off a file in force: its database is rebuilt. */
+  const rebuilds = $derived(
+    module.options.some(
+      (o) => o.option.type === "sql" && o.value === true && draft[o.option.id] === "false",
+    ),
+  );
 
   const changed = $derived(module.options.some((o) => draft[o.option.id] !== asText(o.value)));
 
@@ -72,6 +78,18 @@
     draft = next;
   }
 
+  /** The options under their headings: those in no group first, unheaded. */
+  const sections = $derived.by(() => {
+    const groups = module.groups ?? [];
+    const grouped = new Set(groups.flatMap((g) => g.options));
+    const pick = (ids: string[]) =>
+      ids.flatMap((id) => module.options.filter((o) => o.option.id === id).map((o) => o.option));
+    return [
+      { id: "", label: null, options: module.options.map((o) => o.option).filter((o) => !grouped.has(o.id)) },
+      ...groups.map((g) => ({ id: g.id, label: localized(g.label), options: pick(g.options) })),
+    ].filter((s) => s.options.length > 0);
+  });
+
   function help(option: ModuleOption): string | null {
     return option.help ? localized(option.help) : null;
   }
@@ -91,45 +109,52 @@
 
 <section class="panel">
   <h3 class="panel-title">{title}</h3>
-  <ul class="options" style:--columns={columns}>
-    {#each module.options as { option } (option.id)}
-      {@const value = draft[option.id] ?? ""}
-      <li title={help(option) ?? undefined}>
-        <span class="label">
-          {localized(option.label)}
-          {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
-          {#if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
-        </span>
-        {#if option.type === "boolean" || option.type === "sql"}
-          <input
-            type="checkbox"
-            disabled={locked || (!met(option) && value !== "true")}
-            checked={value === "true"}
-            onchange={(e) => set(option.id, String(e.currentTarget.checked))}
-          />
-        {:else if option.type === "integer" || option.type === "number"}
-          <input
-            type="number"
-            disabled={locked}
-            min={option.min ?? undefined}
-            max={option.max ?? undefined}
-            step={option.type === "number" ? "0.1" : "1"}
-            {value}
-            onchange={(e) => set(option.id, e.currentTarget.value)}
-          />
-        {:else}
-          <select disabled={locked} {value} onchange={(e) => set(option.id, e.currentTarget.value)}>
-            {#each option.choices as choice (choice.id)}
-              <option value={choice.id}>{localized(choice.label)}</option>
-            {/each}
-          </select>
-        {/if}
-      </li>
-    {/each}
-  </ul>
+  {#each sections as section (section.id)}
+    {#if section.label}<h4 class="group">{section.label}</h4>{/if}
+    <ul class="options" style:--columns={columns}>
+      {#each section.options as option (option.id)}
+        {@const value = draft[option.id] ?? ""}
+        <li title={help(option) ?? undefined}>
+          <span class="label">
+            {localized(option.label)}
+            {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
+            {#if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
+          </span>
+          {#if option.type === "boolean" || option.type === "sql"}
+            <input
+              type="checkbox"
+              disabled={locked || (!met(option) && value !== "true")}
+              checked={value === "true"}
+              onchange={(e) => set(option.id, String(e.currentTarget.checked))}
+            />
+          {:else if option.type === "integer" || option.type === "number"}
+            <input
+              type="number"
+              disabled={locked}
+              min={option.min ?? undefined}
+              max={option.max ?? undefined}
+              step={option.type === "number" ? "0.1" : "1"}
+              {value}
+              onchange={(e) => set(option.id, e.currentTarget.value)}
+            />
+          {:else}
+            <select disabled={locked} {value} onchange={(e) => set(option.id, e.currentTarget.value)}>
+              {#each option.choices as choice (choice.id)}
+                <option value={choice.id}>{localized(choice.label)}</option>
+              {/each}
+            </select>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+  {/each}
   <div class="apply">
     <p class="muted">{t("settings.optionsHint")}</p>
-    {#if hasSql}<p class="muted">{t("settings.sqlHint")}</p>{/if}
+    {#if rebuilds}
+      <p class="warn">{t("settings.sqlRebuild")}</p>
+    {:else if hasSql}
+      <p class="muted">{t("settings.sqlHint")}</p>
+    {/if}
     <button class="btn" disabled={!changed || locked} onclick={() => (draft = saved())}>
       {t("common.reset")}
     </button>
@@ -153,6 +178,14 @@
     display: grid;
     grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
     column-gap: var(--space-6);
+  }
+
+  .group {
+    margin: var(--space-4) 0 var(--space-1);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
   }
 
   .options li {
@@ -216,6 +249,10 @@
     flex: 1 1 100%;
     margin: 0;
     font-size: 0.82rem;
+  }
+
+  .apply p.warn {
+    color: var(--danger);
   }
 
   .apply .btn {

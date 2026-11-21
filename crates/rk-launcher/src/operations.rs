@@ -542,6 +542,7 @@ impl Launcher {
                 (!options.is_empty()).then(|| ModuleOptions {
                     module: module.clone(),
                     options,
+                    groups: manifest.option_groups.clone(),
                 })
             })
             .collect()

@@ -102,6 +102,35 @@
         "$ref": "#/$defs/option"
       }
     },
+    "optionGroups": {
+      "description": "Headings that gather options in the launcher UI, in this order; options in no group come first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "options"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "label": {
+            "$ref": "common.schema.json#/$defs/localizedText"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "common.schema.json#/$defs/id"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "assets": {
       "description": "Optional packaged files (client MPQ patches, server DBC overrides) built by CI from the module repository.",
       "type": "array",

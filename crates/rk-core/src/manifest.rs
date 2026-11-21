@@ -365,6 +365,10 @@ pub struct ModuleManifest {
     pub config: ModuleConfig,
     #[serde(default)]
     pub options: Vec<ModuleOption>,
+    /// Headings that gather options in the UI (a long list); options in no
+    /// group come first.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub option_groups: Vec<OptionGroup>,
     #[serde(default)]
     pub assets: Vec<Asset>,
     #[serde(default)]
@@ -584,6 +588,15 @@ pub enum ModuleOption {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         requires: Option<OptionRequirement>,
     },
+}
+
+/// A heading over some options of a module, in that order.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OptionGroup {
+    pub id: String,
+    pub label: LocalizedText,
+    pub options: Vec<String>,
 }
 
 /// `option` (of the same module) must be one of `values` (choice ids, or

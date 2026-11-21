@@ -140,6 +140,7 @@
   "settings.options": "Options de {module}",
   "settings.optionsHint": "Appliquées aux serveurs et, si besoin, à ton dossier de jeu au prochain lancement.",
   "settings.requires": "Nécessite « {option} » : {values}",
+  "settings.sqlRebuild": "Appliquer reconstruit la base du monde sans les fichiers désactivés (environ 2 minutes). Les personnages et les comptes sont conservés.",
   "settings.sqlHint": "Désactiver un changement du monde reconstruit la base du monde (environ 2 minutes) ; les personnages ne sont jamais touchés.",
   "modules.title": "Modules",
   "modules.mandatory": "Inclus",

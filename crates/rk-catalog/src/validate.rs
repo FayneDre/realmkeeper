@@ -591,6 +591,32 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                 }
             }
 
+            // Option groups: known options, each in one group at most.
+            let mut group_ids = BTreeSet::new();
+            let mut grouped = BTreeSet::new();
+            for group in &module.option_groups {
+                if !group_ids.insert(group.id.as_str()) {
+                    push(
+                        here.clone(),
+                        format!("duplicate option group '{}'", group.id),
+                    );
+                }
+                for option in &group.options {
+                    if !option_ids.contains(option.as_str()) {
+                        push(
+                            here.clone(),
+                            format!("option group '{}': unknown option '{option}'", group.id),
+                        );
+                    }
+                    if !grouped.insert(option.as_str()) {
+                        push(
+                            here.clone(),
+                            format!("option '{option}' is in several groups"),
+                        );
+                    }
+                }
+            }
+
             let mut bindings = BTreeSet::new();
             for step in &module.post_install {
                 match step {
