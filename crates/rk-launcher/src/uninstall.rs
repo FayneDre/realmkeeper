@@ -90,7 +90,7 @@ impl Launcher {
         let Some(mut state) = rk_client::load(&dir, &manifest.id)? else {
             return Ok(());
         };
-        if state.last_server.as_deref() == Some(record.id.as_str()) && !state.managed.is_empty() {
+        if rk_client::prepared_for(&state, &record.id) && !state.managed.is_empty() {
             rk_client::prepare(
                 &dir,
                 &manifest,

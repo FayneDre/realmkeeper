@@ -278,10 +278,28 @@ pub struct PrepareReport {
     pub warnings: Vec<String>,
 }
 
+/// Cache owner key of `server` serving `content` (anything that changes
+/// what the server sends: build, modules, options). [`prepare`] clears the
+/// cache when it differs from the last one, so items and recipes changed by
+/// a module, an optional SQL file or an update show up fresh.
+pub fn cache_owner(server: &str, content: &str) -> String {
+    use sha2::{Digest, Sha256};
+    let hash = hex::encode(Sha256::digest(content.as_bytes()));
+    format!("{server}@{}", &hash[..16])
+}
+
+/// Whether the client was last prepared for `server` (whatever content).
+pub fn prepared_for(state: &ClientState, server: &str) -> bool {
+    state
+        .last_server
+        .as_deref()
+        .is_some_and(|s| s == server || s.strip_prefix(server).is_some_and(|r| r.starts_with('@')))
+}
+
 /// Points the client at `address` and reconciles its managed files with
 /// `files` (source file, destination relative to the patch directory) and
 /// `addons` (relative to the add-on directory). `server` identifies the
-/// instance (cache ownership).
+/// instance and what it serves (cache ownership, see [`cache_owner`]).
 pub fn prepare(
     dir: &Path,
     manifest: &ClientManifest,
@@ -384,4 +402,30 @@ pub fn launch(
         .stderr(std::process::Stdio::null())
         .spawn()
         .map_err(ClientError::io(&exe))
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+
+    #[test]
+    fn cache_owner_follows_the_content_and_keeps_the_realm() {
+        let a = cache_owner("solo", r#"{"options":{}}"#);
+        assert_eq!(a, cache_owner("solo", r#"{"options":{}}"#));
+        assert_ne!(a, cache_owner("solo", r#"{"options":{"x":1}}"#));
+        let mut state = ClientState {
+            format: 1,
+            client: "c".into(),
+            path: PathBuf::from("game"),
+            locale: "enUS".into(),
+            managed: Vec::new(),
+            last_server: Some(a),
+        };
+        assert!(prepared_for(&state, "solo"));
+        assert!(!prepared_for(&state, "sol"));
+        state.last_server = Some("solo".into());
+        assert!(prepared_for(&state, "solo"));
+        state.last_server = Some("solo-2@0123".into());
+        assert!(!prepared_for(&state, "solo"));
+    }
 }

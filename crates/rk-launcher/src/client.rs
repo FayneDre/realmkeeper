@@ -73,13 +73,22 @@ impl Launcher {
                 }
             }
         }
+        // What the server sends: a new build, module set or option values
+        // (optional SQL changing items or recipes) clears the game's cache.
+        let content = serde_json::json!({
+            "build": record.build,
+            "modules": resolution.modules,
+            "options": record.options,
+        })
+        .to_string();
+        let owner = rk_client::cache_owner(&record.id, &content);
         // The local client always reaches the servers through the loopback.
         let report = rk_client::prepare(
             &dir,
             &manifest,
             &mut state,
             "127.0.0.1",
-            &record.id,
+            &owner,
             &files,
             &addons,
         )?;
