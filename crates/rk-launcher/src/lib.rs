@@ -243,6 +243,9 @@ pub struct InstanceSummary {
 pub struct OptionView {
     pub option: ModuleOption,
     pub value: OptionValue,
+    /// False when the realm's server build lacks what the option needs (an
+    /// optional SQL file packaged by a newer build): a server update first.
+    pub available: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]

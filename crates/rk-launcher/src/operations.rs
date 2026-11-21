@@ -316,6 +316,9 @@ impl Launcher {
     ) -> Result<UpdateOutcome> {
         let (record, _) = install::open_existing(&self.layout, id)?;
         let _lock = install::lock_instance(&self.layout, id)?;
+        // An interrupted module change finishes first (`resume`): saved as
+        // pending, this update would make `resume` wait for itself.
+        install::ensure_finished(&self.layout, &[install::modules_operation_id(id)])?;
         let from = record.build.clone();
         let server = match server {
             Some(server) => server.to_path_buf(),
@@ -348,6 +351,7 @@ impl Launcher {
     ) -> Result<InstanceRecord> {
         let (record, _) = install::open_existing(&self.layout, id)?;
         let _lock = install::lock_instance(&self.layout, id)?;
+        install::ensure_finished(&self.layout, &[install::modules_operation_id(id)])?;
         let (server, _) = self
             .fetch_build(&record, None, false, observer, cancel)
             .await?;
@@ -439,6 +443,18 @@ impl Launcher {
     ) -> Result<InstanceRecord> {
         let (_, secrets) = install::open_existing(&self.layout, &record.id)?;
         let emu = self.emulator(&record.emulator)?;
+        // A catalog newer than the realm's build (a module or option added
+        // since): refuse before any step instead of failing half way.
+        let missing = install::instance_plan(&self.catalog, &self.layout, &record, &secrets)?
+            .missing_from_build();
+        if !missing.is_empty() {
+            if record != *old {
+                install::save_record(&self.layout, old)?;
+            }
+            return Err(LauncherError::ServerUpdateNeeded {
+                files: missing.iter().map(|p| p.display().to_string()).collect(),
+            });
+        }
         let op = rk_runtime::modules::apply_modules_operation(
             &self.catalog,
             &self.layout,
@@ -528,6 +544,8 @@ impl Launcher {
         // Mandatory modules have options too (Playerbots).
         let modules = rk_runtime::modules::enabled_modules(&self.catalog, record)
             .unwrap_or_else(|_| record.modules.clone());
+        let sql = self.layout.instance(&record.id).sql;
+        let spec = entry.manifest.instance.optional_sql.as_ref();
         modules
             .iter()
             .filter_map(|module| {
@@ -538,6 +556,12 @@ impl Launcher {
                     .iter()
                     .map(|option| OptionView {
                         value: option.effective(chosen.and_then(|c| c.get(option.id()))),
+                        available: match (option, spec) {
+                            (rk_core::manifest::ModuleOption::Sql { file, .. }, Some(spec)) => {
+                                sql.join(spec.source_path(module, file)).exists()
+                            }
+                            _ => true,
+                        },
                         option: option.clone(),
                     })
                     .collect();
@@ -570,6 +594,7 @@ impl Launcher {
                     .iter()
                     .map(|option| OptionView {
                         value: option.effective(chosen.and_then(|c| c.get(option.id()))),
+                        available: true,
                         option: option.clone(),
                     })
                     .collect(),

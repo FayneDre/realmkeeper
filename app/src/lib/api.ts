@@ -265,7 +265,9 @@ export interface OptionGroup {
 
 export interface ModuleOptions {
   module: string;
-  options: { option: ModuleOption; value: OptionValue }[];
+  /** `available`: false when the realm's server build lacks what the
+   *  option needs (a newer server brings it). */
+  options: { option: ModuleOption; value: OptionValue; available: boolean }[];
   /** Headings over some options; options in no group come first. */
   groups?: OptionGroup[];
 }
@@ -284,7 +286,9 @@ export const REALM_OPTIONS = "realm";
 export interface SettingsSection {
   id: string;
   label: LocalizedText;
-  options: { option: ModuleOption; value: OptionValue }[];
+  /** `available`: false when the realm's server build lacks what the
+   *  option needs (a newer server brings it). */
+  options: { option: ModuleOption; value: OptionValue; available: boolean }[];
 }
 
 /** A database backup of an instance (`backups/<id>/<name>`). */

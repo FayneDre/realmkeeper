@@ -69,6 +69,11 @@
     return t("settings.requires", { option: localized(target.label), values: values.join(" / ") });
   }
 
+  /** The realm's server build has what the option needs. */
+  function available(option: ModuleOption): boolean {
+    return module.options.find((o) => o.option.id === option.id)?.available ?? true;
+  }
+
   function set(option: string, value: string) {
     const next = { ...draft, [option]: value };
     // Options whose requirement no longer holds turn off with it.
@@ -120,12 +125,14 @@
             <span class="label">
               {localized(option.label)}
               {#if help(option)}<span class="help" aria-hidden="true">?</span>{/if}
-              {#if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
+              {#if !available(option)}
+                <span class="needs">{t("settings.needsServerUpdate")}</span>
+              {:else if !met(option)}<span class="needs">{requirement(option)}</span>{/if}
             </span>
             {#if option.type === "boolean" || option.type === "sql"}
               <input
                 type="checkbox"
-                disabled={locked || (!met(option) && value !== "true")}
+                disabled={locked || ((!met(option) || !available(option)) && value !== "true")}
                 checked={value === "true"}
                 onchange={(e) => set(option.id, String(e.currentTarget.checked))}
               />

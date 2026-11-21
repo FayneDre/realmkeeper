@@ -690,6 +690,27 @@ pub fn instance_plan(
     })
 }
 
+impl InstancePlan {
+    /// Files of the server build this plan reads that the realm's build
+    /// lacks: config templates and optional SQL files of a catalog newer
+    /// than the build (a module or option added since). Checked before a
+    /// module or option change, which would fail half way otherwise.
+    pub fn missing_from_build(&self) -> Vec<PathBuf> {
+        let configs = self
+            .render
+            .files
+            .iter()
+            .map(|f| self.render.dist_dir.join(&f.dist));
+        let sql = self
+            .optional_sql
+            .iter()
+            .flat_map(|s| &s.dirs)
+            .flat_map(|d| &d.files)
+            .map(|f| f.source.clone());
+        configs.chain(sql).filter(|p| !p.exists()).collect()
+    }
+}
+
 /// Every module with `sql` options owns its directories (one per database):
 /// the files its options turn on when it is enabled, none otherwise.
 fn plan_optional_sql(

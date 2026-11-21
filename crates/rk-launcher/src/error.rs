@@ -93,6 +93,12 @@ pub enum LauncherError {
     Firewall(#[from] crate::firewall::FirewallError),
     #[error("{0}")]
     Invalid(String),
+    #[error(
+        "the server of this realm is older than the launcher: it lacks {} ({} file(s)); update the realm first",
+        files.first().map(String::as_str).unwrap_or_default(),
+        files.len()
+    )]
+    ServerUpdateNeeded { files: Vec<String> },
     #[error("the servers of realm {0} are starting or stopping")]
     NotReady(String),
     #[error("{}: {reason}", path.display())]
@@ -275,6 +281,10 @@ impl LauncherError {
                 ("handoff.launcherOlder", vec![("version", version.clone())])
             }
             L::HandoffUpdateFirst => ("handoff.updateFirst", none()),
+            L::ServerUpdateNeeded { files } => (
+                "server.updateNeeded",
+                vec![("count", files.len().to_string())],
+            ),
             L::HandoffUnknown(_) => ("handoff.unknown", none()),
         }
     }
