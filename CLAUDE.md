@@ -517,4 +517,7 @@ clear, enchanter, assistant, reagent bank; bilingual release notes in
 2026-11-21: 0.3.3 (bot party from the launcher, ADR 0025; restore from
 another server, ADR 0026; game language choice; launcher Options window,
 which now holds the launcher language; server update status).
+2026-11-21: 0.3.4 (handoff between computers, ADR 0028; AHBot settings in
+its table, ADR 0029; optional Individual Progression SQL, ADR 0027; many
+more grouped module options; changes an older server build lacks refused).
 Remaining before a wide release: SignPath (maintainer).

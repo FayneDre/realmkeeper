@@ -132,6 +132,10 @@ Durations assume one full-time developer and are rough.
 - [x] RealmKeeper 0.3.3: a party of bots formed from the launcher (mod-realmkeeper), restore of a
   backup made by another server, game language choice, launcher options window, server
   update status (2026-11-21)
+- [x] RealmKeeper 0.3.4: handoff between computers through a synchronised folder (ADR 0028),
+  module settings kept in tables with AHBot quantities, quality mix and prices (ADR 0029),
+  optional module SQL (ADR 0027), many more grouped module options, game cache cleared on
+  content changes (2026-11-21)
 
 ## Phase 7: second emulator prototype (started 2026-11-19, ADR 0024)
 

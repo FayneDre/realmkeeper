@@ -1,4 +1,22 @@
 {
+  "0.3.4": {
+    "en": [
+      "Play the same realm on several computers: choose a folder you already synchronise (Google Drive, OneDrive, Dropbox...) with the Other computer button; your game is sent there at each clean stop, and the other computer offers to take it back. If both computers played, you pick which game to keep: they are never mixed.",
+      "Auction house bot: choose how many auctions each auction house holds (250 was far too few next to thousands of bots), what it sells (as the module ships it, mostly trade goods, more gear, more rare and epic items) and its prices (half price to three times as expensive). The launcher writes them at each start, so they survive a rebuild of the world.",
+      "Many more module settings, grouped by theme: every Assistant shop, flight path and profession tier, transmog rules, AutoBalance per instance size and difficulty, Dungeon Clear rests, loot and bots that complete the Dungeon Finder or battleground queue, Individual Progression starting expansion, limit and race and class unlocks, Playerbots gear, summoning and loot rolls, and the gear of your bot party.",
+      "Individual Progression: its 22 optional changes (era-true crafting, stack sizes, stronger creatures...) can be turned on one by one; those that need a client patch say so. They come with the next server update of your realm.",
+      "The game cache is cleared when the realm's content changes, so the game never shows outdated items or spells.",
+      "A change your realm's server is too old for is refused at once with an explanation, instead of failing half way; option lists scroll as one, with their buttons always in view."
+    ],
+    "fr": [
+      "Jouez le même royaume sur plusieurs ordinateurs : choisissez avec le bouton Autre PC un dossier que vous synchronisez déjà (Google Drive, OneDrive, Dropbox...) ; votre partie y est envoyée à chaque arrêt propre, et l'autre ordinateur propose de la reprendre. Si les deux ordinateurs ont joué, vous choisissez la partie à garder : elles ne sont jamais mélangées.",
+      "Bot de l'hôtel des ventes : choisissez le nombre d'enchères de chaque hôtel des ventes (250, c'était bien trop peu à côté de milliers de bots), ce qu'il vend (comme le module d'origine, surtout des composants, plus d'équipement, plus d'objets rares et épiques) et ses prix (de moitié prix à trois fois plus cher). Le launcher les écrit à chaque démarrage : ils survivent à une reconstruction du monde.",
+      "Beaucoup plus de réglages de modules, rangés par thème : chaque boutique, trajet aérien et palier de métier de l'Assistant, règles de transmogrification, AutoBalance par taille d'instance et difficulté, repos, butin et bots qui complètent la recherche de donjon ou de champ de bataille de Dungeon Clear, extension de départ, limite et déblocage des races et classes d'Individual Progression, équipement, invocation et jets de butin de Playerbots, et l'équipement de votre groupe de bots.",
+      "Individual Progression : ses 22 changements optionnels (artisanat d'époque, taille des piles, créatures plus fortes...) s'activent un par un ; ceux qui demandent un patch du client le disent. Ils arrivent avec la prochaine mise à jour du serveur de votre royaume.",
+      "Le cache du jeu est vidé quand le contenu du royaume change : le jeu n'affiche plus d'objets ou de sorts périmés.",
+      "Un changement trop récent pour le serveur de votre royaume est refusé tout de suite avec une explication, au lieu d'échouer en cours de route ; les listes d'options défilent d'un seul bloc, boutons toujours visibles."
+    ]
+  },
   "0.3.3": {
     "en": [
       "Form a party of bots for the character you play: in Bots > Party, choose a role, class, spec and level (yours by default) for up to four places; the bots join you with random green and blue gear. Your realm's server must be updated first (Update the server, on the Home tab).",
