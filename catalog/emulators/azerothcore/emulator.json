@@ -340,6 +340,59 @@
           "default": 1,
           "min": 0,
           "max": 50
+        },
+        {
+          "id": "skill-crafting",
+          "type": "integer",
+          "label": {
+            "en": "Crafting skill gains",
+            "fr": "Progression des métiers d'artisanat"
+          },
+          "target": {
+            "file": "worldserver.conf",
+            "key": "SkillGain.Crafting"
+          },
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "help": {
+            "en": "Skill points per gain: 2 = twice as fast.",
+            "fr": "Points gagnés à chaque progression : 2 = deux fois plus vite."
+          }
+        },
+        {
+          "id": "skill-gathering",
+          "type": "integer",
+          "label": {
+            "en": "Gathering and fishing skill gains",
+            "fr": "Progression de la cueillette, du minage, du dépeçage et de la pêche"
+          },
+          "target": {
+            "file": "worldserver.conf",
+            "key": "SkillGain.Gathering"
+          },
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "help": {
+            "en": "Skill points per gain: 2 = twice as fast.",
+            "fr": "Points gagnés à chaque progression : 2 = deux fois plus vite."
+          }
+        },
+        {
+          "id": "arena-points",
+          "type": "number",
+          "label": {
+            "en": "Arena points",
+            "fr": "Points d'arène"
+          },
+          "target": {
+            "file": "worldserver.conf",
+            "key": "Rate.ArenaPoints"
+          },
+          "default": 1,
+          "min": 0,
+          "max": 50
         }
       ]
     },
@@ -502,6 +555,57 @@
             "key": "Instance.IgnoreRaid"
           },
           "default": false
+        },
+        {
+          "id": "instance-reset",
+          "type": "choice",
+          "label": {
+            "en": "Raid lockout reset",
+            "fr": "Réinitialisation des raids"
+          },
+          "default": "weekly",
+          "choices": [
+            {
+              "id": "weekly",
+              "label": {
+                "en": "Weekly (normal)",
+                "fr": "Chaque semaine (normal)"
+              },
+              "config": {
+                "worldserver.conf": {
+                  "Rate.InstanceResetTime": 1
+                }
+              }
+            },
+            {
+              "id": "three-days",
+              "label": {
+                "en": "Every 3 days",
+                "fr": "Tous les 3 jours"
+              },
+              "config": {
+                "worldserver.conf": {
+                  "Rate.InstanceResetTime": 0.43
+                }
+              }
+            },
+            {
+              "id": "daily",
+              "label": {
+                "en": "Every day",
+                "fr": "Chaque jour"
+              },
+              "config": {
+                "worldserver.conf": {
+                  "Rate.InstanceResetTime": 0.15
+                }
+              }
+            }
+          ],
+          "help": {
+            "en": "Heroic dungeons already reset every day. A change takes effect after the reset already planned.",
+            "fr": "Les donjons héroïques se réinitialisent déjà chaque jour. Un changement prend effet après la réinitialisation déjà prévue."
+          }
         }
       ]
     },
