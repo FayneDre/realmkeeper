@@ -11,7 +11,7 @@
     type CommandError,
     type FoundClient,
   } from "../api";
-  import { t } from "../i18n/i18n.svelte";
+  import { i18n, t } from "../i18n/i18n.svelte";
   import { refresh } from "../launcher.svelte";
   import ErrorBox from "./ErrorBox.svelte";
   import Modal from "./Modal.svelte";
@@ -36,6 +36,17 @@
       .then((list) => (found = list))
       .catch(() => (found = []));
   });
+
+  /** "Français (frFR)" for a client language code like `frFR`. */
+  function localeName(code: string): string {
+    try {
+      const tag = code.length === 4 ? `${code.slice(0, 2)}-${code.slice(2)}` : code;
+      const name = new Intl.DisplayNames([i18n.locale], { type: "language" }).of(tag);
+      return name && name !== tag ? `${name.charAt(0).toLocaleUpperCase()}${name.slice(1)} (${code})` : code;
+    } catch {
+      return code;
+    }
+  }
 
   async function register(path: string, locale: string | null) {
     busy = true;
@@ -95,19 +106,25 @@
       {#if registered.locales.length > 1}
         <div class="language">
           <span class="muted">{t("client.language")}</span>
-          <div class="segmented" role="group" aria-label={t("client.language")}>
+          <!-- A list, not a segmented bar: a client may hold many languages (issue #6). -->
+          <select
+            aria-label={t("client.language")}
+            title={t("client.languageHint")}
+            disabled={busy}
+            value={registered.locale}
+            onchange={async (e) => {
+              const select = e.currentTarget;
+              const locale = select.value;
+              if (registered.locale === locale) return;
+              await register(registered.path, locale);
+              // Refused: the list shows the language still in use again.
+              if (error) select.value = registered.locale;
+            }}
+          >
             {#each registered.locales as locale (locale)}
-              <button
-                class:active={registered.locale === locale}
-                aria-pressed={registered.locale === locale}
-                disabled={busy}
-                title={t("client.languageHint")}
-                onclick={() => registered.locale !== locale && register(registered.path, locale)}
-              >
-                {locale}
-              </button>
+              <option value={locale}>{localeName(locale)}</option>
             {/each}
-          </div>
+          </select>
         </div>
       {/if}
       <button class="btn" disabled={busy} onclick={choose}>{t("client.change")}</button>
@@ -151,7 +168,9 @@
     <p>{t("client.whichLocale")}</p>
     <div class="locale-buttons">
       {#each pending.locales as locale (locale)}
-        <button class="btn" disabled={busy} onclick={() => pending && register(pending.path, locale)}>{locale}</button>
+        <button class="btn" disabled={busy} onclick={() => pending && register(pending.path, locale)}
+          >{localeName(locale)}</button
+        >
       {/each}
     </div>
   </Modal>
@@ -285,10 +304,8 @@
     flex-wrap: wrap;
   }
 
-  .language .segmented button {
-    padding-inline: var(--space-3);
-    font-size: 0.85rem;
-    /* Language codes keep their case (enUS, frFR). */
-    text-transform: none;
+  .language select {
+    flex: 1;
+    min-width: 0;
   }
 </style>
