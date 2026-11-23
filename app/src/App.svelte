@@ -41,13 +41,14 @@
 
   const ISSUES_URL = "https://github.com/FayneDre/realmkeeper/issues";
 
-  type TabId = "home" | "account" | "settings" | "bots" | "backups";
+  type TabId = "home" | "account" | "settings" | "modules" | "bots" | "backups";
 
   /** Every tab but Home acts on an installed server. */
   const TABS: { id: TabId; label: MessageKey; needsServer: boolean }[] = [
     { id: "home", label: "nav.home", needsServer: false },
     { id: "account", label: "nav.account", needsServer: true },
     { id: "settings", label: "nav.settings", needsServer: true },
+    { id: "modules", label: "nav.modules", needsServer: true },
     { id: "bots", label: "nav.bots", needsServer: true },
     { id: "backups", label: "nav.backups", needsServer: true },
   ];
@@ -140,7 +141,9 @@
       </div>
     </div>
 
-    <nav class="segmented tabs" aria-label={t("nav.sections")}>
+    <!-- Tabs as a strip of the bar itself: the active one is underlined on
+         the bar's lower edge. -->
+    <nav class="tabs" aria-label={t("nav.sections")}>
       {#each TABS as item (item.id)}
         <button
           class:active={tab === item.id}
@@ -153,6 +156,8 @@
         </button>
       {/each}
     </nav>
+
+    <div class="spacer" data-tauri-drag-region></div>
 
     {#if inDesktopApp()}
       <AppUpdate />
@@ -175,6 +180,7 @@
       </button>
     {/if}
 
+    <span class="divider" aria-hidden="true"></span>
     <WindowControls />
   </header>
 
@@ -197,7 +203,9 @@
         {:else if !realm}
           <p class="muted">{t("modules.empty")}</p>
         {:else if tab === "settings"}
-          <ServerSettings {realm} />
+          <ServerSettings {realm} view="settings" />
+        {:else if tab === "modules"}
+          <ServerSettings {realm} view="modules" />
         {:else if tab === "account"}
           <Account {realm} />
         {:else if tab === "bots"}
@@ -314,19 +322,19 @@
     flex: none;
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     padding: 0;
     background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius, 4px);
+    border: none;
+    border-radius: 50%;
     color: var(--text-muted);
     cursor: pointer;
   }
 
   .options-button:hover {
     color: var(--title);
-    border-color: var(--accent);
+    background: var(--shade);
   }
 
   .options-button svg {
@@ -339,9 +347,11 @@
   }
 
   .titlebar {
+    flex: none;
+    height: 60px;
     display: flex;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-2);
     background: linear-gradient(180deg, var(--shade), transparent);
     border-bottom: 2px solid var(--frame);
     box-shadow: 0 1px 0 color-mix(in srgb, var(--frame-light) 50%, transparent);
@@ -356,7 +366,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-2) 0;
+    padding-right: var(--space-3);
   }
 
   /* Clicks fall through to the drag region. */
@@ -372,7 +382,7 @@
 
   .brand h1 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 600;
     letter-spacing: 0.05em;
 
@@ -411,7 +421,73 @@
 
   .tabs {
     flex: none;
-    margin-left: auto;
+    align-self: stretch;
+    display: flex;
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--frame);
+  }
+
+  .tabs button {
+    position: relative;
+    padding: 0 var(--space-4);
+    background: transparent;
+    border: none;
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  /* The underline sits on the bar's lower border. */
+  .tabs button::after {
+    content: "";
+    position: absolute;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: -2px;
+    height: 2px;
+    background: var(--accent-strong);
+    box-shadow: 0 0 8px var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.15s ease;
+  }
+
+  .tabs button:hover:not(:disabled) {
+    color: var(--title);
+  }
+
+  .tabs button.active {
+    color: var(--title);
+    text-shadow: var(--text-shadow);
+    background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+  }
+
+  .tabs button.active::after {
+    transform: scaleX(1);
+  }
+
+  .tabs button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  .spacer {
+    flex: 1;
+    align-self: stretch;
+    min-width: var(--space-4);
+  }
+
+  .divider {
+    flex: none;
+    width: 1px;
+    height: 28px;
+    margin-left: var(--space-2);
+    background: var(--frame);
   }
 
   /* Narrower windows (down to the 1024 px minimum): the tagline goes, then
@@ -431,9 +507,9 @@
     .titlebar {
       gap: var(--space-3);
     }
-    .titlebar :global(.segmented button) {
-      padding-inline: var(--space-2);
-      letter-spacing: 0.04em;
+    .tabs button {
+      padding-inline: var(--space-3);
+      letter-spacing: 0.05em;
     }
   }
 

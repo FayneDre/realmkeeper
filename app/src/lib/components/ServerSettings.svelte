@@ -1,8 +1,8 @@
 <script lang="ts">
-  // "Server settings" tab. A sub-navigation picks one page:
-  // - a section of realm settings (rates, realm type, characters), from the
-  //   emulator manifest (ADR 0017);
-  // - the modules: the list on the left (mandatory ones always on, optional
+  // "Server" and "Modules" tabs (`view`):
+  // - settings: a sub-navigation picks a section of realm settings (rates,
+  //   realm type, characters), from the emulator manifest (ADR 0017);
+  // - modules: the list on the left (mandatory ones always on, optional
   //   ones toggled with the servers stopped), the options of the selected
   //   module on the right. Bot modules have their own tab.
   import { untrack } from "svelte";
@@ -21,7 +21,7 @@
   import Notify from "./Notify.svelte";
   import OptionsPanel from "./OptionsPanel.svelte";
 
-  let { realm }: { realm: EmulatorOverview } = $props();
+  let { realm, view }: { realm: EmulatorOverview; view: "settings" | "modules" } = $props();
 
   const instance = $derived<InstanceView | null>(
     launcher.instanceFor(realm.id),
@@ -40,11 +40,11 @@
   /** Module whose options are shown on the right. */
   let selected = $state<string | null>(null);
   let sections = $state<SettingsSection[]>([]);
-  /** Page picked: a realm settings section id, or "modules"; the first
-   *  section until one is picked. */
+  /** Realm settings section picked; the first one until one is picked. */
   let picked = $state<string | null>(null);
-  const page = $derived(picked ?? sections[0]?.id ?? "modules");
-  const section = $derived(sections.find((s) => s.id === page) ?? null);
+  const section = $derived(
+    view === "settings" ? (sections.find((s) => s.id === picked) ?? sections[0] ?? null) : null,
+  );
 
   const installed = $derived(instance?.record.modules ?? []);
   const toEnable = $derived(selection.filter((m) => !installed.includes(m)));
@@ -57,7 +57,7 @@
     selection = [...installed];
     try {
       sections = await api.realmSettings(id);
-      if (picked !== "modules" && !sections.some((s) => s.id === picked)) picked = null;
+      if (!sections.some((s) => s.id === picked)) picked = null;
       options = (await api.options(id)).filter((m) => modules.some((x) => x.id === m.module));
       if (!options.some((m) => m.module === selected)) selected = options[0]?.module ?? null;
     } catch (raw) {
@@ -115,16 +115,16 @@
 
 <Notify {error} />
 
-{#if sections.length > 0}
+{#if view === "settings" && sections.length > 1}
   <nav class="segmented pages" aria-label={t("settings.pages")}>
     {#each sections as item (item.id)}
-      <button class:active={page === item.id} onclick={() => (picked = item.id)}>{localized(item.label)}</button>
+      <button class:active={section?.id === item.id} onclick={() => (picked = item.id)}>{localized(item.label)}</button>
     {/each}
-    <button class:active={page === "modules"} onclick={() => (picked = "modules")}>{t("modules.title")}</button>
   </nav>
 {/if}
 
-{#if section && id}
+{#if view === "settings"}
+  {#if section && id}
   <OptionsPanel
     instanceId={id}
     module={{ module: REALM_OPTIONS, options: section.options }}
@@ -133,6 +133,11 @@
     {locked}
     onerror={(e) => (error = e)}
   />
+  {:else}
+    <section class="panel">
+      <p class="muted">{instance ? t("settings.noRealmSettings") : t("settings.installFirst")}</p>
+    </section>
+  {/if}
 {:else}
 <div class="split">
   <section class="panel side">

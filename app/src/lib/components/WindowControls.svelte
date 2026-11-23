@@ -42,14 +42,13 @@
     flex: none;
     display: flex;
     align-self: stretch;
-    align-items: flex-start;
   }
 
+  /* Full height of the bar, icons centred on it. */
   button {
     display: grid;
     place-items: center;
-    width: 42px;
-    height: 32px;
+    width: 46px;
     padding: 0;
     background: transparent;
     border: none;
