@@ -78,13 +78,18 @@ async function run() {
     check(await page.evaluate(`document.title.includes("RealmKeeper")`), "window title");
 
     // The launcher language is chosen in the Options window (title bar).
-    for (const [locale, label, wanted] of [
-      ["EN", "English", ["Import a realm", "Home"]],
-      ["FR", "Français", ["Importer un royaume", "Accueil"]],
+    for (const [locale, wanted] of [
+      ["EN", ["Import a realm", "Home"]],
+      ["DE", ["Realm importieren", "Startseite"]],
+      ["ES", ["Importar un reino", "Inicio"]],
+      // Last: the checks below read French text.
+      ["FR", ["Importer un royaume", "Accueil"]],
     ]) {
       await page.evaluate(`document.querySelector(".options-button")?.click()`);
       await page.waitFor(`document.querySelector('[role="dialog"] .languages')`, { what: "the Options window" });
-      await page.click(label);
+      await page.evaluate(
+        `(() => { const s = document.querySelector('[role="dialog"] select.languages'); s.value = ${JSON.stringify(locale.toLowerCase())}; s.dispatchEvent(new Event("change", { bubbles: true })); })()`,
+      );
       await page.evaluate(
         `document.querySelector('[role="dialog"]').dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`,
       );

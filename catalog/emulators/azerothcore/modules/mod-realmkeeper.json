@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "RealmKeeper party",
-    "fr": "Groupe RealmKeeper"
+    "fr": "Groupe RealmKeeper",
+    "de": "RealmKeeper-Gruppe",
+    "es": "Grupo RealmKeeper"
   },
   "description": {
     "en": "Lets the launcher form a party of bots for the character you play: role, class, spec and level of each bot.",
-    "fr": "Permet au launcher de former un groupe de bots pour le personnage que tu joues : rôle, classe, spé et niveau de chaque bot."
+    "fr": "Permet au launcher de former un groupe de bots pour le personnage que tu joues : rôle, classe, spé et niveau de chaque bot.",
+    "de": "Ermöglicht dem Launcher, eine Bot-Gruppe für den Charakter zu bilden, den du spielst: Rolle, Klasse, Spezialisierung und Stufe jedes Bots.",
+    "es": "Permite al launcher formar un grupo de bots para el personaje con el que juegas: rol, clase, especialización y nivel de cada bot."
   },
   "category": "bots",
   "homepage": "https://github.com/FayneDre/mod-realmkeeper",
@@ -46,22 +50,22 @@
     {
       "id": "party-gear-quality",
       "type": "choice",
-      "label": { "en": "Gear of party bots", "fr": "Équipement des bots du groupe" },
+      "label": { "en": "Gear of party bots", "fr": "Équipement des bots du groupe", "de": "Ausrüstung der Gruppen-Bots", "es": "Equipo de los bots del grupo" },
       "default": "rare",
       "choices": [
         {
           "id": "uncommon",
-          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)", "de": "Selten (grün)", "es": "Poco común (verde)" },
           "config": { "modules/mod_realmkeeper.conf": { "RealmKeeper.Party.GearQuality": 2 } }
         },
         {
           "id": "rare",
-          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)", "de": "Rar (blau)", "es": "Raro (azul)" },
           "config": { "modules/mod_realmkeeper.conf": { "RealmKeeper.Party.GearQuality": 3 } }
         },
         {
           "id": "epic",
-          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)", "de": "Episch (lila)", "es": "Épico (morado)" },
           "config": { "modules/mod_realmkeeper.conf": { "RealmKeeper.Party.GearQuality": 4 } }
         }
       ]
@@ -71,7 +75,9 @@
       "type": "number",
       "label": {
         "en": "Share of pieces one quality lower",
-        "fr": "Part des pièces d'une qualité en dessous"
+        "fr": "Part des pièces d'une qualité en dessous",
+        "de": "Anteil der Teile eine Qualitätsstufe niedriger",
+        "es": "Proporción de piezas de una calidad inferior"
       },
       "target": {
         "file": "modules/mod_realmkeeper.conf",
@@ -82,7 +88,9 @@
       "max": 1.0,
       "help": {
         "en": "0 = every piece of the chosen quality, 0.35 = about a third one quality lower.",
-        "fr": "0 = toutes les pièces de la qualité choisie, 0,35 = environ un tiers d'une qualité en dessous."
+        "fr": "0 = toutes les pièces de la qualité choisie, 0,35 = environ un tiers d'une qualité en dessous.",
+        "de": "0 = jedes Teil in der gewählten Qualität, 0,35 = etwa ein Drittel eine Stufe niedriger.",
+        "es": "0 = todas las piezas de la calidad elegida, 0,35 = alrededor de un tercio de una calidad inferior."
       }
     },
     {
@@ -90,7 +98,9 @@
       "type": "boolean",
       "label": {
         "en": "Same General and Trade channels as the bots",
-        "fr": "Mêmes canaux Général et Commerce que les bots"
+        "fr": "Mêmes canaux Général et Commerce que les bots",
+        "de": "Dieselben Kanäle „Allgemein“ und „Handel“ wie die Bots",
+        "es": "Mismos canales General y Comercio que los bots"
       },
       "target": {
         "file": "modules/mod_realmkeeper.conf",
@@ -99,7 +109,9 @@
       "default": true,
       "help": {
         "en": "A game in another language than the server joins the bots' channels.",
-        "fr": "Un jeu dans une autre langue que le serveur rejoint les canaux des bots."
+        "fr": "Un jeu dans une autre langue que le serveur rejoint les canaux des bots.",
+        "de": "Ein Spiel in einer anderen Sprache als der Server tritt den Kanälen der Bots bei.",
+        "es": "Un juego en otro idioma que el servidor se une a los canales de los bots."
       }
     }
   ],
@@ -117,7 +129,9 @@
         "token": "warrior",
         "name": {
           "en": "Warrior",
-          "fr": "Guerrier"
+          "fr": "Guerrier",
+          "de": "Krieger",
+          "es": "Guerrero"
         },
         "specs": [
           {
@@ -125,7 +139,9 @@
             "role": "tank",
             "name": {
               "en": "Protection",
-              "fr": "Protection"
+              "fr": "Protection",
+              "de": "Schutz",
+              "es": "Protección"
             }
           },
           {
@@ -133,7 +149,9 @@
             "role": "dps",
             "name": {
               "en": "Arms",
-              "fr": "Armes"
+              "fr": "Armes",
+              "de": "Waffen",
+              "es": "Armas"
             }
           },
           {
@@ -141,7 +159,9 @@
             "role": "dps",
             "name": {
               "en": "Fury",
-              "fr": "Fureur"
+              "fr": "Fureur",
+              "de": "Furor",
+              "es": "Furia"
             }
           }
         ]
@@ -152,7 +172,9 @@
         "token": "paladin",
         "name": {
           "en": "Paladin",
-          "fr": "Paladin"
+          "fr": "Paladin",
+          "de": "Paladin",
+          "es": "Paladín"
         },
         "specs": [
           {
@@ -160,7 +182,9 @@
             "role": "tank",
             "name": {
               "en": "Protection",
-              "fr": "Protection"
+              "fr": "Protection",
+              "de": "Schutz",
+              "es": "Protección"
             }
           },
           {
@@ -168,7 +192,9 @@
             "role": "healer",
             "name": {
               "en": "Holy",
-              "fr": "Sacré"
+              "fr": "Sacré",
+              "de": "Heilig",
+              "es": "Sagrado"
             }
           },
           {
@@ -176,7 +202,9 @@
             "role": "dps",
             "name": {
               "en": "Retribution",
-              "fr": "Vindicte"
+              "fr": "Vindicte",
+              "de": "Vergeltung",
+              "es": "Reprensión"
             }
           }
         ]
@@ -187,7 +215,9 @@
         "token": "hunter",
         "name": {
           "en": "Hunter",
-          "fr": "Chasseur"
+          "fr": "Chasseur",
+          "de": "Jäger",
+          "es": "Cazador"
         },
         "specs": [
           {
@@ -195,7 +225,9 @@
             "role": "dps",
             "name": {
               "en": "Beast Mastery",
-              "fr": "Maîtrise des bêtes"
+              "fr": "Maîtrise des bêtes",
+              "de": "Tierherrschaft",
+              "es": "Dominio de bestias"
             }
           },
           {
@@ -203,7 +235,9 @@
             "role": "dps",
             "name": {
               "en": "Marksmanship",
-              "fr": "Précision"
+              "fr": "Précision",
+              "de": "Treffsicherheit",
+              "es": "Puntería"
             }
           },
           {
@@ -211,7 +245,9 @@
             "role": "dps",
             "name": {
               "en": "Survival",
-              "fr": "Survie"
+              "fr": "Survie",
+              "de": "Überleben",
+              "es": "Supervivencia"
             }
           }
         ]
@@ -222,7 +258,9 @@
         "token": "rogue",
         "name": {
           "en": "Rogue",
-          "fr": "Voleur"
+          "fr": "Voleur",
+          "de": "Schurke",
+          "es": "Pícaro"
         },
         "specs": [
           {
@@ -230,7 +268,9 @@
             "role": "dps",
             "name": {
               "en": "Assassination",
-              "fr": "Assassinat"
+              "fr": "Assassinat",
+              "de": "Meucheln",
+              "es": "Asesinato"
             }
           },
           {
@@ -238,7 +278,9 @@
             "role": "dps",
             "name": {
               "en": "Combat",
-              "fr": "Combat"
+              "fr": "Combat",
+              "de": "Kampf",
+              "es": "Combate"
             }
           },
           {
@@ -246,7 +288,9 @@
             "role": "dps",
             "name": {
               "en": "Subtlety",
-              "fr": "Finesse"
+              "fr": "Finesse",
+              "de": "Täuschung",
+              "es": "Sutileza"
             }
           }
         ]
@@ -257,7 +301,9 @@
         "token": "priest",
         "name": {
           "en": "Priest",
-          "fr": "Prêtre"
+          "fr": "Prêtre",
+          "de": "Priester",
+          "es": "Sacerdote"
         },
         "specs": [
           {
@@ -265,7 +311,9 @@
             "role": "healer",
             "name": {
               "en": "Discipline",
-              "fr": "Discipline"
+              "fr": "Discipline",
+              "de": "Disziplin",
+              "es": "Disciplina"
             }
           },
           {
@@ -273,7 +321,9 @@
             "role": "healer",
             "name": {
               "en": "Holy",
-              "fr": "Sacré"
+              "fr": "Sacré",
+              "de": "Heilig",
+              "es": "Sagrado"
             }
           },
           {
@@ -281,7 +331,9 @@
             "role": "dps",
             "name": {
               "en": "Shadow",
-              "fr": "Ombre"
+              "fr": "Ombre",
+              "de": "Schatten",
+              "es": "Sombra"
             }
           }
         ]
@@ -292,7 +344,9 @@
         "token": "dk",
         "name": {
           "en": "Death Knight",
-          "fr": "Chevalier de la mort"
+          "fr": "Chevalier de la mort",
+          "de": "Todesritter",
+          "es": "Caballero de la Muerte"
         },
         "minLevel": 55,
         "specs": [
@@ -301,7 +355,9 @@
             "role": "tank",
             "name": {
               "en": "Blood",
-              "fr": "Sang"
+              "fr": "Sang",
+              "de": "Blut",
+              "es": "Sangre"
             }
           },
           {
@@ -309,7 +365,9 @@
             "role": "dps",
             "name": {
               "en": "Frost",
-              "fr": "Givre"
+              "fr": "Givre",
+              "de": "Frost",
+              "es": "Escarcha"
             }
           },
           {
@@ -317,7 +375,9 @@
             "role": "dps",
             "name": {
               "en": "Unholy",
-              "fr": "Impie"
+              "fr": "Impie",
+              "de": "Unheilig",
+              "es": "Profano"
             }
           }
         ]
@@ -328,7 +388,9 @@
         "token": "shaman",
         "name": {
           "en": "Shaman",
-          "fr": "Chaman"
+          "fr": "Chaman",
+          "de": "Schamane",
+          "es": "Chamán"
         },
         "specs": [
           {
@@ -336,7 +398,9 @@
             "role": "healer",
             "name": {
               "en": "Restoration",
-              "fr": "Restauration"
+              "fr": "Restauration",
+              "de": "Wiederherstellung",
+              "es": "Restauración"
             }
           },
           {
@@ -344,7 +408,9 @@
             "role": "dps",
             "name": {
               "en": "Elemental",
-              "fr": "Élémentaire"
+              "fr": "Élémentaire",
+              "de": "Elementar",
+              "es": "Elemental"
             }
           },
           {
@@ -352,7 +418,9 @@
             "role": "dps",
             "name": {
               "en": "Enhancement",
-              "fr": "Amélioration"
+              "fr": "Amélioration",
+              "de": "Verstärkung",
+              "es": "Mejora"
             }
           }
         ]
@@ -363,7 +431,9 @@
         "token": "mage",
         "name": {
           "en": "Mage",
-          "fr": "Mage"
+          "fr": "Mage",
+          "de": "Magier",
+          "es": "Mago"
         },
         "specs": [
           {
@@ -371,7 +441,9 @@
             "role": "dps",
             "name": {
               "en": "Arcane",
-              "fr": "Arcanes"
+              "fr": "Arcanes",
+              "de": "Arkan",
+              "es": "Arcano"
             }
           },
           {
@@ -379,7 +451,9 @@
             "role": "dps",
             "name": {
               "en": "Fire",
-              "fr": "Feu"
+              "fr": "Feu",
+              "de": "Feuer",
+              "es": "Fuego"
             }
           },
           {
@@ -387,7 +461,9 @@
             "role": "dps",
             "name": {
               "en": "Frost",
-              "fr": "Givre"
+              "fr": "Givre",
+              "de": "Frost",
+              "es": "Escarcha"
             }
           }
         ]
@@ -398,7 +474,9 @@
         "token": "warlock",
         "name": {
           "en": "Warlock",
-          "fr": "Démoniste"
+          "fr": "Démoniste",
+          "de": "Hexenmeister",
+          "es": "Brujo"
         },
         "specs": [
           {
@@ -406,7 +484,9 @@
             "role": "dps",
             "name": {
               "en": "Affliction",
-              "fr": "Affliction"
+              "fr": "Affliction",
+              "de": "Gebrechen",
+              "es": "Aflicción"
             }
           },
           {
@@ -414,7 +494,9 @@
             "role": "dps",
             "name": {
               "en": "Demonology",
-              "fr": "Démonologie"
+              "fr": "Démonologie",
+              "de": "Dämonologie",
+              "es": "Demonología"
             }
           },
           {
@@ -422,7 +504,9 @@
             "role": "dps",
             "name": {
               "en": "Destruction",
-              "fr": "Destruction"
+              "fr": "Destruction",
+              "de": "Zerstörung",
+              "es": "Destrucción"
             }
           }
         ]
@@ -433,7 +517,9 @@
         "token": "druid",
         "name": {
           "en": "Druid",
-          "fr": "Druide"
+          "fr": "Druide",
+          "de": "Druide",
+          "es": "Druida"
         },
         "specs": [
           {
@@ -441,7 +527,9 @@
             "role": "tank",
             "name": {
               "en": "Feral (bear)",
-              "fr": "Combat farouche (ours)"
+              "fr": "Combat farouche (ours)",
+              "de": "Wilder Kampf (Bär)",
+              "es": "Combate feral (oso)"
             }
           },
           {
@@ -449,7 +537,9 @@
             "role": "healer",
             "name": {
               "en": "Restoration",
-              "fr": "Restauration"
+              "fr": "Restauration",
+              "de": "Wiederherstellung",
+              "es": "Restauración"
             }
           },
           {
@@ -457,7 +547,9 @@
             "role": "dps",
             "name": {
               "en": "Balance",
-              "fr": "Équilibre"
+              "fr": "Équilibre",
+              "de": "Gleichgewicht",
+              "es": "Equilibrio"
             }
           },
           {
@@ -465,7 +557,9 @@
             "role": "dps",
             "name": {
               "en": "Feral (cat)",
-              "fr": "Combat farouche (félin)"
+              "fr": "Combat farouche (félin)",
+              "de": "Wilder Kampf (Katze)",
+              "es": "Combate feral (gato)"
             }
           }
         ]

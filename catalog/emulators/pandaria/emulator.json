@@ -5,7 +5,9 @@
   "name": "LoA Pandaria",
   "description": {
     "en": "Open-source World of Warcraft: Mists of Pandaria (5.4.8) server emulator with Playerbots. Prototype of a second emulator (ADR 0024), not offered to players yet.",
-    "fr": "Émulateur de serveur open source pour World of Warcraft: Mists of Pandaria (5.4.8), avec Playerbots. Prototype d'un second émulateur (ADR 0024), pas encore proposé aux joueurs."
+    "fr": "Émulateur de serveur open source pour World of Warcraft: Mists of Pandaria (5.4.8), avec Playerbots. Prototype d'un second émulateur (ADR 0024), pas encore proposé aux joueurs.",
+    "de": "Open-Source-Serveremulator für World of Warcraft: Mists of Pandaria (5.4.8) mit Playerbots. Prototyp eines zweiten Emulators (ADR 0024), noch nicht für Spieler angeboten.",
+    "es": "Emulador de servidor de código abierto de World of Warcraft: Mists of Pandaria (5.4.8) con Playerbots. Prototipo de un segundo emulador (ADR 0024), aún no ofrecido a los jugadores."
   },
   "homepage": "https://github.com/1LineAtaTime/LoA-Pandaria-Playerbots",
   "license": "GPL-2.0",
@@ -149,7 +151,9 @@
         "weight": 0.05,
         "label": {
           "en": "Reading maps and game tables",
-          "fr": "Lecture des cartes et des tables du jeu"
+          "fr": "Lecture des cartes et des tables du jeu",
+          "de": "Karten und Spieltabellen werden gelesen",
+          "es": "Leyendo mapas y tablas del juego"
         }
       },
       {
@@ -159,7 +163,9 @@
         "weight": 0.05,
         "label": {
           "en": "Reading buildings and objects",
-          "fr": "Lecture des bâtiments et des objets"
+          "fr": "Lecture des bâtiments et des objets",
+          "de": "Gebäude und Objekte werden gelesen",
+          "es": "Leyendo edificios y objetos"
         }
       },
       {
@@ -170,7 +176,9 @@
         "weight": 0.05,
         "label": {
           "en": "Building line of sight",
-          "fr": "Calcul des lignes de vue"
+          "fr": "Calcul des lignes de vue",
+          "de": "Sichtlinien werden berechnet",
+          "es": "Calculando la línea de visión"
         }
       },
       {
@@ -181,7 +189,9 @@
         "weight": 0.85,
         "label": {
           "en": "Building movement maps for the bots (several hours)",
-          "fr": "Calcul des cartes de déplacement des bots (plusieurs heures)"
+          "fr": "Calcul des cartes de déplacement des bots (plusieurs heures)",
+          "de": "Bewegungskarten für die Bots werden erstellt (mehrere Stunden)",
+          "es": "Creando los mapas de movimiento de los bots (varias horas)"
         }
       }
     ],

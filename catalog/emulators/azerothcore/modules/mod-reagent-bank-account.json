@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Reagent Bank (add-on)",
-    "fr": "Banque de composants (add-on)"
+    "fr": "Banque de composants (add-on)",
+    "de": "Reagenzienbank (Add-on)",
+    "es": "Banco de componentes (accesorio)"
   },
   "description": {
     "en": "Stores trade goods, gems and crafting materials on the server, without any NPC: a Reagent Bank UI add-on opens it from the character window, withdraws what a recipe needs and keeps an auction house shopping list.",
-    "fr": "Garde les matières premières, gemmes et composants d'artisanat sur le serveur, sans PNJ : l'add-on Reagent Bank UI l'ouvre depuis la fenêtre du personnage, retire ce qu'il faut pour une recette et tient une liste de courses pour l'hôtel des ventes."
+    "fr": "Garde les matières premières, gemmes et composants d'artisanat sur le serveur, sans PNJ : l'add-on Reagent Bank UI l'ouvre depuis la fenêtre du personnage, retire ce qu'il faut pour une recette et tient une liste de courses pour l'hôtel des ventes.",
+    "de": "Lagert Handwerkswaren, Edelsteine und Herstellungsmaterialien auf dem Server, ganz ohne NSC: Das Add-on Reagent Bank UI öffnet sie im Charakterfenster, entnimmt, was ein Rezept braucht, und führt eine Einkaufsliste fürs Auktionshaus.",
+    "es": "Guarda objetos comerciables, gemas y materiales de fabricación en el servidor, sin ningún PNJ: el accesorio Reagent Bank UI lo abre desde la ventana del personaje, saca lo que necesita una receta y lleva una lista de la compra para la casa de subastas."
   },
   "category": "quality-of-life",
   "homepage": "https://github.com/Day36512/mod-reagent-bank-account",
@@ -59,11 +63,15 @@
       "type": "choice",
       "label": {
         "en": "Reagent Bank UI add-on in the game",
-        "fr": "Add-on Reagent Bank UI dans le jeu"
+        "fr": "Add-on Reagent Bank UI dans le jeu",
+        "de": "Add-on Reagent Bank UI im Spiel",
+        "es": "Accesorio Reagent Bank UI en el juego"
       },
       "help": {
         "en": "The bank is used through this add-on (shipped with the module): without it there is no window to open it. Installed in Interface/AddOns, removed when turned off.",
-        "fr": "La banque s'utilise par cet add-on (fourni avec le module) : sans lui, aucune fenêtre ne l'ouvre. Installé dans Interface/AddOns, retiré une fois désactivé."
+        "fr": "La banque s'utilise par cet add-on (fourni avec le module) : sans lui, aucune fenêtre ne l'ouvre. Installé dans Interface/AddOns, retiré une fois désactivé.",
+        "de": "Die Bank wird über dieses Add-on genutzt (liegt dem Modul bei): Ohne es gibt es kein Fenster, um sie zu öffnen. Wird in Interface/AddOns installiert und beim Ausschalten entfernt.",
+        "es": "El banco se usa con este accesorio (incluido con el módulo): sin él no hay ventana para abrirlo. Se instala en Interface/AddOns y se quita al desactivarlo."
       },
       "default": "on",
       "choices": [
@@ -71,14 +79,18 @@
           "id": "off",
           "label": {
             "en": "Off",
-            "fr": "Désactivé"
+            "fr": "Désactivé",
+            "de": "Aus",
+            "es": "Desactivado"
           }
         },
         {
           "id": "on",
           "label": {
             "en": "On",
-            "fr": "Activé"
+            "fr": "Activé",
+            "de": "An",
+            "es": "Activado"
           },
           "assets": [
             "reagent-bank-ui"
@@ -91,11 +103,15 @@
       "type": "boolean",
       "label": {
         "en": "Shared by all characters of the account",
-        "fr": "Partagée par tous les personnages du compte"
+        "fr": "Partagée par tous les personnages du compte",
+        "de": "Gemeinsam für alle Charaktere des Accounts",
+        "es": "Compartido por todos los personajes de la cuenta"
       },
       "help": {
         "en": "Off: each character has its own bank. Changing it moves the stored items at the next start (character to account: added up; account to character: everything goes to the account's oldest character).",
-        "fr": "Désactivé : chaque personnage a sa propre banque. Le changer déplace les objets rangés au prochain démarrage (personnage vers compte : additionnés ; compte vers personnage : tout va au plus ancien personnage du compte)."
+        "fr": "Désactivé : chaque personnage a sa propre banque. Le changer déplace les objets rangés au prochain démarrage (personnage vers compte : additionnés ; compte vers personnage : tout va au plus ancien personnage du compte).",
+        "de": "Aus: Jeder Charakter hat seine eigene Bank. Eine Änderung verschiebt die eingelagerten Gegenstände beim nächsten Start (Charakter zu Account: zusammengezählt; Account zu Charakter: alles geht an den ältesten Charakter des Accounts).",
+        "es": "Desactivado: cada personaje tiene su propio banco. Cambiarlo mueve los objetos guardados en el próximo inicio (de personaje a cuenta: se suman; de cuenta a personaje: todo va al personaje más antiguo de la cuenta)."
       },
       "target": {
         "file": "modules/mod_reagent_bank_account.conf",
@@ -108,11 +124,15 @@
       "type": "boolean",
       "label": {
         "en": "Share a bank with other players",
-        "fr": "Partager une banque avec d'autres joueurs"
+        "fr": "Partager une banque avec d'autres joueurs",
+        "de": "Eine Bank mit anderen Spielern teilen",
+        "es": "Compartir un banco con otros jugadores"
       },
       "help": {
         "en": "Players invite each other from the add-on; a member's items join the owner's bank and stay there if the member leaves. Changing \"Shared by all characters of the account\" clears every share.",
-        "fr": "Les joueurs s'invitent depuis l'add-on ; les objets d'un membre rejoignent la banque du propriétaire et y restent s'il part. Changer « Partagée par tous les personnages du compte » efface tous les partages."
+        "fr": "Les joueurs s'invitent depuis l'add-on ; les objets d'un membre rejoignent la banque du propriétaire et y restent s'il part. Changer « Partagée par tous les personnages du compte » efface tous les partages.",
+        "de": "Spieler laden sich über das Add-on ein; die Gegenstände eines Mitglieds gehen in die Bank des Besitzers über und bleiben dort, wenn das Mitglied geht. Eine Änderung von „Gemeinsam für alle Charaktere des Accounts“ löscht alle Freigaben.",
+        "es": "Los jugadores se invitan desde el accesorio; los objetos de un miembro pasan al banco del propietario y se quedan allí si el miembro se va. Cambiar «Compartido por todos los personajes de la cuenta» borra todos los compartidos."
       },
       "target": {
         "file": "modules/mod_reagent_bank_account.conf",

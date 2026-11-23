@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Individual Progression",
-    "fr": "Progression individuelle"
+    "fr": "Progression individuelle",
+    "de": "Individual Progression",
+    "es": "Individual Progression"
   },
   "description": {
     "en": "Each character progresses through Vanilla, The Burning Crusade and Wrath of the Lich King content in order, with era-accurate tuning.",
-    "fr": "Chaque personnage progresse dans l'ordre à travers le contenu Vanilla, The Burning Crusade puis Wrath of the Lich King, avec un équilibrage fidèle à chaque époque."
+    "fr": "Chaque personnage progresse dans l'ordre à travers le contenu Vanilla, The Burning Crusade puis Wrath of the Lich King, avec un équilibrage fidèle à chaque époque.",
+    "de": "Jeder Charakter durchläuft die Inhalte von Vanilla, The Burning Crusade und Wrath of the Lich King nacheinander, mit der Abstimmung der jeweiligen Epoche.",
+    "es": "Cada personaje avanza por el contenido de Vanilla, The Burning Crusade y Wrath of the Lich King en orden, con el ajuste fiel de cada época."
   },
   "category": "progression",
   "homepage": "https://github.com/ZhengPeiRu21/mod-individual-progression",
@@ -51,28 +55,28 @@
     {
       "id": "enforce-group-rules",
       "type": "boolean",
-      "label": { "en": "Enforce group progression rules", "fr": "Imposer les règles de progression en groupe" },
+      "label": { "en": "Enforce group progression rules", "fr": "Imposer les règles de progression en groupe", "de": "Fortschrittsregeln in Gruppen durchsetzen", "es": "Aplicar las reglas de progresión en grupo" },
       "target": { "file": "modules/individualProgression.conf", "key": "IndividualProgression.EnforceGroupRules" },
       "default": false
     },
     {
       "id": "mana-costs",
       "type": "choice",
-      "label": { "en": "Spell mana costs during Vanilla and TBC", "fr": "Coût en mana des sorts pendant Vanilla et TBC" },
+      "label": { "en": "Spell mana costs during Vanilla and TBC", "fr": "Coût en mana des sorts pendant Vanilla et TBC", "de": "Manakosten von Zaubern in Vanilla und TBC", "es": "Coste de maná de los hechizos en Vanilla y TBC" },
       "default": "unchanged",
       "choices": [
         {
           "id": "unchanged",
-          "label": { "en": "No patch (module default)", "fr": "Aucun patch (par défaut du module)" }
+          "label": { "en": "No patch (module default)", "fr": "Aucun patch (par défaut du module)", "de": "Kein Patch (Standard des Moduls)", "es": "Sin parche (valor por defecto del módulo)" }
         },
         {
           "id": "era-adjusted",
-          "label": { "en": "Era-adjusted mana costs (patch-V)", "fr": "Coûts adaptés à l'époque (patch-V)" },
+          "label": { "en": "Era-adjusted mana costs (patch-V)", "fr": "Coûts adaptés à l'époque (patch-V)", "de": "An die Epoche angepasste Manakosten (patch-V)", "es": "Coste de maná adaptado a la época (patch-V)" },
           "assets": ["patch-v"]
         },
         {
           "id": "keep-wotlk",
-          "label": { "en": "Keep WotLK mana costs (patch-S)", "fr": "Conserver les coûts de WotLK (patch-S)" },
+          "label": { "en": "Keep WotLK mana costs (patch-S)", "fr": "Conserver les coûts de WotLK (patch-S)", "de": "Manakosten von WotLK behalten (patch-S)", "es": "Mantener el coste de maná de WotLK (patch-S)" },
           "assets": ["patch-s"]
         }
       ]
@@ -80,31 +84,33 @@
     {
       "id": "vanilla-visuals",
       "type": "choice",
-      "label": { "en": "Vanilla login and loading screens", "fr": "Écrans de connexion et de chargement Vanilla" },
+      "label": { "en": "Vanilla login and loading screens", "fr": "Écrans de connexion et de chargement Vanilla", "de": "Anmelde- und Ladebildschirme von Vanilla", "es": "Pantallas de inicio y de carga de Vanilla" },
       "default": "off",
       "choices": [
-        { "id": "off", "label": { "en": "Off", "fr": "Désactivé" } },
-        { "id": "on", "label": { "en": "On", "fr": "Activé" }, "assets": ["vanilla-visuals"] }
+        { "id": "off", "label": { "en": "Off", "fr": "Désactivé", "de": "Aus", "es": "Desactivado" } },
+        { "id": "on", "label": { "en": "On", "fr": "Activé", "de": "An", "es": "Activado" }, "assets": ["vanilla-visuals"] }
       ]
     },
     {
       "id": "classic-spells",
       "type": "choice",
-      "label": { "en": "Restore Vanilla/TBC spells, recipes and reagents", "fr": "Restaurer les sorts, recettes et composants de Vanilla/TBC" },
+      "label": { "en": "Restore Vanilla/TBC spells, recipes and reagents", "fr": "Restaurer les sorts, recettes et composants de Vanilla/TBC", "de": "Zauber, Rezepte und Reagenzien von Vanilla/TBC wiederherstellen", "es": "Restaurar hechizos, recetas y componentes de Vanilla/TBC" },
       "default": "off",
       "choices": [
-        { "id": "off", "label": { "en": "Off", "fr": "Désactivé" } },
-        { "id": "on", "label": { "en": "On", "fr": "Activé" }, "assets": ["classic-spells"] }
+        { "id": "off", "label": { "en": "Off", "fr": "Désactivé", "de": "Aus", "es": "Desactivado" } },
+        { "id": "on", "label": { "en": "On", "fr": "Activé", "de": "An", "es": "Activado" }, "assets": ["classic-spells"] }
       ]
     }
 ,
     {
       "id": "sql-phasing",
       "type": "sql",
-      "label": { "en": "Phase later NPCs and objects until their era", "fr": "Phaser les PNJ et objets ajoutés plus tard jusqu'à leur époque" },
+      "label": { "en": "Phase later NPCs and objects until their era", "fr": "Phaser les PNJ et objets ajoutés plus tard jusqu'à leur époque", "de": "Spätere NSCs und Objekte bis zu ihrer Epoche ausblenden", "es": "Ocultar los PNJ y objetos posteriores hasta su época" },
       "help": {
         "en": "Quest givers, flight paths, meeting stones and other NPCs or objects added to the old world by later patches only appear once your character reaches the matching phase.",
-        "fr": "Les donneurs de quêtes, maîtres de vol, pierres de rencontre et autres PNJ ou objets ajoutés au monde d'origine par des patchs ultérieurs n'apparaissent qu'une fois ton personnage arrivé à la phase correspondante."
+        "fr": "Les donneurs de quêtes, maîtres de vol, pierres de rencontre et autres PNJ ou objets ajoutés au monde d'origine par des patchs ultérieurs n'apparaissent qu'une fois ton personnage arrivé à la phase correspondante.",
+        "de": "Questgeber, Flugrouten, Versammlungssteine und andere NSCs oder Objekte, die spätere Patches in die alte Welt gebracht haben, erscheinen erst, wenn dein Charakter die passende Phase erreicht.",
+        "es": "Los que dan misiones, las rutas de vuelo, las piedras de encuentro y otros PNJ u objetos añadidos al viejo mundo por parches posteriores solo aparecen cuando tu personaje alcanza la fase correspondiente."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_phasing.sql",
@@ -113,10 +119,12 @@
     {
       "id": "sql-limit-spells-to-expansion",
       "type": "sql",
-      "label": { "en": "Train class spells in their own expansion", "fr": "Apprendre les sorts de classe à leur extension" },
+      "label": { "en": "Train class spells in their own expansion", "fr": "Apprendre les sorts de classe à leur extension", "de": "Klassenzauber in ihrer eigenen Erweiterung lernen", "es": "Aprender los hechizos de clase en su propia expansión" },
       "help": {
         "en": "Spells added by TBC or WotLK (Victory Rush, Aspect of the Viper, Water Shield...) are taught only from level 61 or 71. Random bots are not affected: they do not learn from trainers.",
-        "fr": "Les sorts ajoutés par TBC ou WotLK (Frappe de la victoire, Aspect de la vipère, Bouclier d'eau...) ne s'apprennent qu'à partir du niveau 61 ou 71. Sans effet sur les bots aléatoires, qui n'apprennent pas chez les maîtres."
+        "fr": "Les sorts ajoutés par TBC ou WotLK (Frappe de la victoire, Aspect de la vipère, Bouclier d'eau...) ne s'apprennent qu'à partir du niveau 61 ou 71. Sans effet sur les bots aléatoires, qui n'apprennent pas chez les maîtres.",
+        "de": "Mit TBC oder WotLK hinzugekommene Zauber (Siegesrausch, Aspekt der Viper, Wasserschild...) werden erst ab Stufe 61 bzw. 71 gelehrt. Zufallsbots sind nicht betroffen: Sie lernen nicht bei Lehrern.",
+        "es": "Los hechizos añadidos por TBC o WotLK (Ataque de la victoria, Aspecto de la víbora, Escudo de agua...) solo se enseñan a partir del nivel 61 o 71. Los bots aleatorios no se ven afectados: no aprenden de los instructores."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_limit_spells_to_expansion.sql",
@@ -125,10 +133,12 @@
     {
       "id": "sql-remove-heirlooms",
       "type": "sql",
-      "label": { "en": "Remove heirlooms", "fr": "Retirer les objets hérités" },
+      "label": { "en": "Remove heirlooms", "fr": "Retirer les objets hérités", "de": "Erbstücke entfernen", "es": "Quitar las reliquias" },
       "help": {
         "en": "Removes the heirloom vendors and items, made to skip progression.",
-        "fr": "Retire les vendeurs et les objets hérités, conçus pour sauter la progression."
+        "fr": "Retire les vendeurs et les objets hérités, conçus pour sauter la progression.",
+        "de": "Entfernt die Händler und Gegenstände für Erbstücke, die dazu dienen, den Fortschritt zu überspringen.",
+        "es": "Quita los vendedores y objetos de reliquias, pensados para saltarse la progresión."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_remove_heirlooms.sql",
@@ -137,10 +147,12 @@
     {
       "id": "sql-vanilla-crafting-requirements",
       "type": "sql",
-      "label": { "en": "Vanilla crafting specializations", "fr": "Spécialisations d'artisanat de Vanilla" },
+      "label": { "en": "Vanilla crafting specializations", "fr": "Spécialisations d'artisanat de Vanilla", "de": "Handwerksspezialisierungen von Vanilla", "es": "Especializaciones de fabricación de Vanilla" },
       "help": {
         "en": "Vanilla recipes require their specialization again (Dragonscale Leatherworking...). The game's item cache may need clearing.",
-        "fr": "Les recettes de Vanilla exigent de nouveau leur spécialisation (Travail du cuir d'écailles de dragon...). Le cache d'objets du jeu peut devoir être vidé."
+        "fr": "Les recettes de Vanilla exigent de nouveau leur spécialisation (Travail du cuir d'écailles de dragon...). Le cache d'objets du jeu peut devoir être vidé.",
+        "de": "Vanilla-Rezepte erfordern wieder ihre Spezialisierung (Drachenschuppenlederverarbeitung...). Eventuell muss der Gegenstandscache des Spiels geleert werden.",
+        "es": "Las recetas de Vanilla vuelven a requerir su especialización (Peletería de escamas de dragón...). Puede que haya que vaciar la caché de objetos del juego."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_vanilla_crafting_requirements.sql",
@@ -149,10 +161,12 @@
     {
       "id": "sql-restore-crafting-cd-timers",
       "type": "sql",
-      "label": { "en": "Vanilla and TBC crafting cooldowns", "fr": "Temps de recharge d'artisanat de Vanilla et TBC" },
+      "label": { "en": "Vanilla and TBC crafting cooldowns", "fr": "Temps de recharge d'artisanat de Vanilla et TBC", "de": "Abklingzeiten der Herstellung in Vanilla und TBC", "es": "Tiempos de reutilización de fabricación de Vanilla y TBC" },
       "help": {
         "en": "Transmutes and other crafts get their original cooldowns back (Iron to Gold: one day). The game's item cache may need clearing.",
-        "fr": "Les transmutations et autres fabrications retrouvent leur temps de recharge d'origine (Fer en or : un jour). Le cache d'objets du jeu peut devoir être vidé."
+        "fr": "Les transmutations et autres fabrications retrouvent leur temps de recharge d'origine (Fer en or : un jour). Le cache d'objets du jeu peut devoir être vidé.",
+        "de": "Transmutationen und andere Herstellungen erhalten ihre ursprünglichen Abklingzeiten zurück (Eisen in Gold: ein Tag). Eventuell muss der Gegenstandscache des Spiels geleert werden.",
+        "es": "Las transmutaciones y otras fabricaciones recuperan sus tiempos de reutilización originales (Hierro en oro: un día). Puede que haya que vaciar la caché de objetos del juego."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_restore_crafting_cd_timers.sql",
@@ -161,10 +175,12 @@
     {
       "id": "sql-restore-potion-cd",
       "type": "sql",
-      "label": { "en": "Two-minute potion cooldown", "fr": "Recharge des potions à deux minutes" },
+      "label": { "en": "Two-minute potion cooldown", "fr": "Recharge des potions à deux minutes", "de": "Zwei Minuten Abklingzeit für Tränke", "es": "Tiempo de reutilización de pociones de dos minutos" },
       "help": {
         "en": "Vanilla and TBC potions share a two-minute cooldown again.",
-        "fr": "Les potions de Vanilla et TBC retrouvent leur recharge commune de deux minutes."
+        "fr": "Les potions de Vanilla et TBC retrouvent leur recharge commune de deux minutes.",
+        "de": "Tränke aus Vanilla und TBC teilen wieder eine Abklingzeit von zwei Minuten.",
+        "es": "Las pociones de Vanilla y TBC vuelven a compartir un tiempo de reutilización de dos minutos."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_restore_potion_cd.sql",
@@ -173,10 +189,12 @@
     {
       "id": "sql-item-stack-sizes",
       "type": "sql",
-      "label": { "en": "Vanilla and TBC stack sizes", "fr": "Taille des piles de Vanilla et TBC" },
+      "label": { "en": "Vanilla and TBC stack sizes", "fr": "Taille des piles de Vanilla et TBC", "de": "Stapelgrößen von Vanilla und TBC", "es": "Tamaños de pila de Vanilla y TBC" },
       "help": {
         "en": "Vanilla and TBC items stack as they did then (healing potions by 5...): less room in bags.",
-        "fr": "Les objets de Vanilla et TBC s'empilent comme à l'époque (potions de soins par 5...) : moins de place dans les sacs."
+        "fr": "Les objets de Vanilla et TBC s'empilent comme à l'époque (potions de soins par 5...) : moins de place dans les sacs.",
+        "de": "Gegenstände aus Vanilla und TBC stapeln sich wie damals (Heiltränke zu 5...): weniger Platz in den Taschen.",
+        "es": "Los objetos de Vanilla y TBC se apilan como entonces (pociones de sanación de 5 en 5...): menos espacio en las bolsas."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_item_stack_sizes.sql",
@@ -185,10 +203,12 @@
     {
       "id": "sql-ammo-stack-size",
       "type": "sql",
-      "label": { "en": "Ammunition in stacks of 200", "fr": "Munitions par piles de 200" },
+      "label": { "en": "Ammunition in stacks of 200", "fr": "Munitions par piles de 200", "de": "Munition in Stapeln zu 200", "es": "Munición en pilas de 200" },
       "help": {
         "en": "Vanilla and TBC arrows and bullets stack to 200 instead of 1000: quivers and ammo pouches matter again.",
-        "fr": "Les flèches et balles de Vanilla et TBC s'empilent par 200 au lieu de 1000 : carquois et gibernes redeviennent utiles."
+        "fr": "Les flèches et balles de Vanilla et TBC s'empilent par 200 au lieu de 1000 : carquois et gibernes redeviennent utiles.",
+        "de": "Pfeile und Kugeln aus Vanilla und TBC stapeln sich zu 200 statt 1000: Köcher und Munitionsbeutel zählen wieder.",
+        "es": "Las flechas y balas de Vanilla y TBC se apilan de 200 en 200 en vez de 1000: los carcajes y las bolsas de munición vuelven a importar."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_ammo_stack_size.sql",
@@ -197,10 +217,12 @@
     {
       "id": "sql-stackable-buff-scrolls",
       "type": "sql",
-      "label": { "en": "Stackable buff scrolls", "fr": "Parchemins d'amélioration cumulables" },
+      "label": { "en": "Stackable buff scrolls", "fr": "Parchemins d'amélioration cumulables", "de": "Stapelbare Buff-Rollen", "es": "Pergaminos de mejora acumulables" },
       "help": {
         "en": "Scrolls of different stats stack again, as in Vanilla (also in TBC and WotLK: upstream has no way to limit it to Vanilla yet).",
-        "fr": "Les parchemins de caractéristiques différentes se cumulent de nouveau, comme dans Vanilla (aussi pendant TBC et WotLK : le module ne sait pas encore le limiter à Vanilla)."
+        "fr": "Les parchemins de caractéristiques différentes se cumulent de nouveau, comme dans Vanilla (aussi pendant TBC et WotLK : le module ne sait pas encore le limiter à Vanilla).",
+        "de": "Rollen verschiedener Werte wirken wieder gleichzeitig, wie in Vanilla (auch in TBC und WotLK: Upstream kann das noch nicht auf Vanilla beschränken).",
+        "es": "Los pergaminos de distintas estadísticas vuelven a acumularse, como en Vanilla (también en TBC y WotLK: el proyecto original aún no puede limitarlo a Vanilla)."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_stackable_buff_scrolls.sql",
@@ -209,10 +231,12 @@
     {
       "id": "sql-vanilla-regen-values",
       "type": "sql",
-      "label": { "en": "Vanilla health and mana regeneration", "fr": "Régénération de vie et de mana de Vanilla" },
+      "label": { "en": "Vanilla health and mana regeneration", "fr": "Régénération de vie et de mana de Vanilla", "de": "Gesundheits- und Manaregeneration von Vanilla", "es": "Regeneración de salud y maná de Vanilla" },
       "help": {
         "en": "Health and mana regeneration values of Vanilla. Upstream says some values are uncertain.",
-        "fr": "Valeurs de régénération de vie et de mana de Vanilla. Selon le module, certaines valeurs sont incertaines."
+        "fr": "Valeurs de régénération de vie et de mana de Vanilla. Selon le module, certaines valeurs sont incertaines.",
+        "de": "Werte der Gesundheits- und Manaregeneration aus Vanilla. Laut Upstream sind manche Werte unsicher.",
+        "es": "Valores de regeneración de salud y maná de Vanilla. Según el proyecto original, algunos valores son inciertos."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_vanilla_regen_values.sql",
@@ -221,10 +245,12 @@
     {
       "id": "sql-vanilla-models",
       "type": "sql",
-      "label": { "en": "Vanilla creature models", "fr": "Apparences des créatures de Vanilla" },
+      "label": { "en": "Vanilla creature models", "fr": "Apparences des créatures de Vanilla", "de": "Kreaturenmodelle von Vanilla", "es": "Modelos de criaturas de Vanilla" },
       "help": {
         "en": "Creatures whose model changed after Vanilla get their original one back, when the game files still have it.",
-        "fr": "Les créatures dont l'apparence a changé après Vanilla retrouvent l'originale, quand les fichiers du jeu l'ont encore."
+        "fr": "Les créatures dont l'apparence a changé après Vanilla retrouvent l'originale, quand les fichiers du jeu l'ont encore.",
+        "de": "Kreaturen, deren Modell sich nach Vanilla geändert hat, erhalten ihr ursprüngliches zurück, wenn die Spieldateien es noch enthalten.",
+        "es": "Las criaturas cuyo modelo cambió después de Vanilla recuperan el original, si los archivos del juego aún lo tienen."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_vanilla_models.sql",
@@ -233,10 +259,12 @@
     {
       "id": "sql-creature-stats",
       "type": "sql",
-      "label": { "en": "Stronger low-level creatures (VMaNGOS stats)", "fr": "Créatures de bas niveau plus fortes (stats VMaNGOS)" },
+      "label": { "en": "Stronger low-level creatures (VMaNGOS stats)", "fr": "Créatures de bas niveau plus fortes (stats VMaNGOS)", "de": "Stärkere niedrigstufige Kreaturen (VMaNGOS-Werte)", "es": "Criaturas de nivel bajo más fuertes (estadísticas de VMaNGOS)" },
       "help": {
         "en": "Low-level creatures use VMaNGOS stats: stronger than originally intended. For more challenge.",
-        "fr": "Les créatures de bas niveau prennent les stats de VMaNGOS : plus fortes que prévu à l'origine. Pour plus de difficulté."
+        "fr": "Les créatures de bas niveau prennent les stats de VMaNGOS : plus fortes que prévu à l'origine. Pour plus de difficulté.",
+        "de": "Niedrigstufige Kreaturen nutzen die Werte von VMaNGOS: stärker als ursprünglich vorgesehen. Für mehr Herausforderung.",
+        "es": "Las criaturas de nivel bajo usan las estadísticas de VMaNGOS: más fuertes de lo previsto originalmente. Para más desafío."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_creature_stats.sql",
@@ -245,10 +273,12 @@
     {
       "id": "sql-av-landmines",
       "type": "sql",
-      "label": { "en": "Landmines in Vanilla Alterac Valley", "fr": "Mines terrestres dans l'Alterac de Vanilla" },
+      "label": { "en": "Landmines in Vanilla Alterac Valley", "fr": "Mines terrestres dans l'Alterac de Vanilla", "de": "Landminen im Alteractal von Vanilla", "es": "Minas terrestres en el Valle de Alterac de Vanilla" },
       "help": {
         "en": "Adds the landmines of Vanilla Alterac Valley; each side sees only its own. Bots do not avoid them.",
-        "fr": "Ajoute les mines de la vallée d'Alterac de Vanilla ; chaque camp ne voit que les siennes. Les bots ne les évitent pas."
+        "fr": "Ajoute les mines de la vallée d'Alterac de Vanilla ; chaque camp ne voit que les siennes. Les bots ne les évitent pas.",
+        "de": "Fügt die Landminen des Alteractals von Vanilla hinzu; jede Seite sieht nur ihre eigenen. Bots weichen ihnen nicht aus.",
+        "es": "Añade las minas terrestres del Valle de Alterac de Vanilla; cada bando solo ve las suyas. Los bots no las esquivan."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_av_landmines.sql",
@@ -257,10 +287,12 @@
     {
       "id": "sql-unobtainable-items",
       "type": "sql",
-      "label": { "en": "Promotional items obtainable in the world", "fr": "Objets promotionnels obtenables en jeu" },
+      "label": { "en": "Promotional items obtainable in the world", "fr": "Objets promotionnels obtenables en jeu", "de": "Werbegegenstände in der Welt erhältlich", "es": "Objetos promocionales obtenibles en el mundo" },
       "help": {
         "en": "Mostly cosmetic items once given outside the game (card game, events) drop in fitting places, such as the Tabard of Flame from Ragnaros.",
-        "fr": "Des objets surtout cosmétiques autrefois obtenus hors du jeu (jeu de cartes, événements) tombent à des endroits adaptés, comme le Tabard de flammes sur Ragnaros."
+        "fr": "Des objets surtout cosmétiques autrefois obtenus hors du jeu (jeu de cartes, événements) tombent à des endroits adaptés, comme le Tabard de flammes sur Ragnaros.",
+        "de": "Meist kosmetische Gegenstände, die einst außerhalb des Spiels vergeben wurden (Sammelkartenspiel, Events), fallen an passenden Orten, etwa der Wappenrock der Flamme bei Ragnaros.",
+        "es": "Objetos sobre todo estéticos que antes se daban fuera del juego (juego de cartas, eventos) caen en lugares adecuados, como el Tabardo de llamas de Ragnaros."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_unobtainable_items.sql",
@@ -269,10 +301,12 @@
     {
       "id": "sql-restore-rogue-poisons",
       "type": "sql",
-      "label": { "en": "Restore the Rogue Poisons skill", "fr": "Rétablir la compétence Poisons des voleurs" },
+      "label": { "en": "Restore the Rogue Poisons skill", "fr": "Rétablir la compétence Poisons des voleurs", "de": "Fertigkeit „Gifte“ der Schurken wiederherstellen", "es": "Restaurar la habilidad Venenos de los pícaros" },
       "help": {
         "en": "Rogues craft their poisons again instead of buying them from vendors. Needs patch-V or patch-S (spell mana costs).",
-        "fr": "Les voleurs fabriquent de nouveau leurs poisons au lieu de les acheter aux marchands. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+        "fr": "Les voleurs fabriquent de nouveau leurs poisons au lieu de les acheter aux marchands. Nécessite patch-V ou patch-S (coût en mana des sorts).",
+        "de": "Schurken stellen ihre Gifte wieder selbst her, statt sie bei Händlern zu kaufen. Benötigt patch-V oder patch-S (Manakosten von Zaubern).",
+        "es": "Los pícaros vuelven a fabricar sus venenos en vez de comprarlos a vendedores. Requiere patch-V o patch-S (coste de maná de los hechizos)."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_restore_rogue_poisons.sql",
@@ -282,10 +316,12 @@
     {
       "id": "sql-spell-damage-and-healing",
       "type": "sql",
-      "label": { "en": "Separate healing and damage bonuses on Vanilla and TBC items", "fr": "Bonus de soins et de dégâts distincts sur les objets Vanilla et TBC" },
+      "label": { "en": "Separate healing and damage bonuses on Vanilla and TBC items", "fr": "Bonus de soins et de dégâts distincts sur les objets Vanilla et TBC", "de": "Getrennte Heil- und Schadensboni auf Gegenständen aus Vanilla und TBC", "es": "Bonificaciones de sanación y daño separadas en objetos de Vanilla y TBC" },
       "help": {
         "en": "Vanilla items give \"increased healing\" again and TBC items \"increased damage and healing\": WotLK had merged them, blurring caster and healer gear. Needs patch-V or patch-S (spell mana costs).",
-        "fr": "Les objets Vanilla redonnent « soins augmentés » et ceux de TBC « dégâts et soins augmentés » : WotLK les avait fusionnés, confondant équipement de lanceur de sorts et de soigneur. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+        "fr": "Les objets Vanilla redonnent « soins augmentés » et ceux de TBC « dégâts et soins augmentés » : WotLK les avait fusionnés, confondant équipement de lanceur de sorts et de soigneur. Nécessite patch-V ou patch-S (coût en mana des sorts).",
+        "de": "Gegenstände aus Vanilla geben wieder „erhöhte Heilung“ und aus TBC „erhöhten Schaden und erhöhte Heilung“: WotLK hatte sie zusammengelegt und so Zauberer- und Heilerausrüstung vermischt. Benötigt patch-V oder patch-S (Manakosten von Zaubern).",
+        "es": "Los objetos de Vanilla vuelven a dar «sanación aumentada» y los de TBC «daño y sanación aumentados»: WotLK los había fusionado, mezclando el equipo de lanzadores y sanadores. Requiere patch-V o patch-S (coste de maná de los hechizos)."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_spell_damage_and_healing.sql",
@@ -295,10 +331,12 @@
     {
       "id": "sql-tbc-pvp-prices",
       "type": "sql",
-      "label": { "en": "TBC PvP prices", "fr": "Prix JcJ de TBC" },
+      "label": { "en": "TBC PvP prices", "fr": "Prix JcJ de TBC", "de": "PvP-Preise von TBC", "es": "Precios JcJ de TBC" },
       "help": {
         "en": "PvP items also cost battleground marks of honor, as in TBC, not just honor. Needs patch-V or patch-S (spell mana costs).",
-        "fr": "Les objets JcJ coûtent aussi des marques d'honneur des champs de bataille, comme dans TBC, pas seulement de l'honneur. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+        "fr": "Les objets JcJ coûtent aussi des marques d'honneur des champs de bataille, comme dans TBC, pas seulement de l'honneur. Nécessite patch-V ou patch-S (coût en mana des sorts).",
+        "de": "PvP-Gegenstände kosten wie in TBC auch Ehrenabzeichen der Schlachtfelder, nicht nur Ehre. Benötigt patch-V oder patch-S (Manakosten von Zaubern).",
+        "es": "Los objetos JcJ también cuestan marcas de honor de los campos de batalla, como en TBC, no solo honor. Requiere patch-V o patch-S (coste de maná de los hechizos)."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_tbc_pvp_prices.sql",
@@ -308,10 +346,12 @@
     {
       "id": "sql-vanilla-transports",
       "type": "sql",
-      "label": { "en": "Vanilla boat routes", "fr": "Trajets de bateau de Vanilla" },
+      "label": { "en": "Vanilla boat routes", "fr": "Trajets de bateau de Vanilla", "de": "Schiffsrouten von Vanilla", "es": "Rutas de barco de Vanilla" },
       "help": {
         "en": "The Auberdine boat sails to Menethil Harbor again instead of Stormwind, and the Howling Fjord boat leaves from Stormwind: crossing continents early means the Wetlands run again. Needs patch-V or patch-S (spell mana costs).",
-        "fr": "Le bateau d'Auberdine rejoint de nouveau Menethil au lieu de Hurlevent, et celui du Fjord hurlant part de Hurlevent : changer de continent tôt redevient la traversée des Paluns. Nécessite patch-V ou patch-S (coût en mana des sorts)."
+        "fr": "Le bateau d'Auberdine rejoint de nouveau Menethil au lieu de Hurlevent, et celui du Fjord hurlant part de Hurlevent : changer de continent tôt redevient la traversée des Paluns. Nécessite patch-V ou patch-S (coût en mana des sorts).",
+        "de": "Das Schiff aus Auberdine fährt wieder nach Hafen von Menethil statt nach Sturmwind, und das Schiff zum Heulenden Fjord legt in Sturmwind ab: Wer früh den Kontinent wechselt, reist wieder durchs Sumpfland. Benötigt patch-V oder patch-S (Manakosten von Zaubern).",
+        "es": "El barco de Auberdine vuelve a navegar a Puerto de Menethil en vez de a Ventormenta, y el barco del Fiordo Aquilonal sale de Ventormenta: cruzar de continente pronto vuelve a pasar por Los Humedales. Requiere patch-V o patch-S (coste de maná de los hechizos)."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_vanilla_transports.sql",
@@ -321,10 +361,12 @@
     {
       "id": "sql-small-group-adjustments",
       "type": "sql",
-      "label": { "en": "Raid adjustments for small groups", "fr": "Ajustements de raid pour petits groupes" },
+      "label": { "en": "Raid adjustments for small groups", "fr": "Ajustements de raid pour petits groupes", "de": "Schlachtzugsanpassungen für kleine Gruppen", "es": "Ajustes de banda para grupos pequeños" },
       "help": {
         "en": "Eases raid requirements meant for 40 players (Eternal Quintessence earlier, without cooldown...). Makes the game easier.",
-        "fr": "Allège des exigences de raid prévues pour 40 joueurs (Quintessence éternelle plus tôt, sans recharge...). Rend le jeu plus facile."
+        "fr": "Allège des exigences de raid prévues pour 40 joueurs (Quintessence éternelle plus tôt, sans recharge...). Rend le jeu plus facile.",
+        "de": "Lockert Schlachtzugsanforderungen für 40 Spieler (Ewige Quintessenz früher, ohne Abklingzeit...). Macht das Spiel leichter.",
+        "es": "Suaviza requisitos de banda pensados para 40 jugadores (Quintaesencia eterna antes, sin tiempo de reutilización...). Hace el juego más fácil."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_small_group_adjustments.sql",
@@ -333,10 +375,12 @@
     {
       "id": "sql-aq-quest-nerf",
       "type": "sql",
-      "label": { "en": "Lighter Ahn'Qiraj quests", "fr": "Quêtes d'Ahn'Qiraj allégées" },
+      "label": { "en": "Lighter Ahn'Qiraj quests", "fr": "Quêtes d'Ahn'Qiraj allégées", "de": "Leichtere Quests von Ahn'Qiraj", "es": "Misiones de Ahn'Qiraj más ligeras" },
       "help": {
         "en": "The Ahn'Qiraj quests, made for a whole server, need far fewer turn-ins. Makes the game easier.",
-        "fr": "Les quêtes d'Ahn'Qiraj, prévues pour tout un serveur, demandent beaucoup moins de remises. Rend le jeu plus facile."
+        "fr": "Les quêtes d'Ahn'Qiraj, prévues pour tout un serveur, demandent beaucoup moins de remises. Rend le jeu plus facile.",
+        "de": "Die Quests von Ahn'Qiraj, gedacht für einen ganzen Server, verlangen viel weniger Abgaben. Macht das Spiel leichter.",
+        "es": "Las misiones de Ahn'Qiraj, pensadas para todo un servidor, piden muchas menos entregas. Hace el juego más fácil."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_aq_quest_nerf.sql",
@@ -345,10 +389,12 @@
     {
       "id": "sql-tbc-heroic-dungeon-keys-nerf",
       "type": "sql",
-      "label": { "en": "TBC heroic keys at Honored", "fr": "Clés héroïques de TBC à Honoré" },
+      "label": { "en": "TBC heroic keys at Honored", "fr": "Clés héroïques de TBC à Honoré", "de": "Heroische Schlüssel von TBC ab „Wohlwollend“", "es": "Llaves heroicas de TBC con Honorable" },
       "help": {
         "en": "TBC heroic dungeon keys need Honored instead of Revered, as from patch 2.3. Makes the game easier.",
-        "fr": "Les clés des donjons héroïques de TBC demandent Honoré au lieu de Révéré, comme depuis le patch 2.3. Rend le jeu plus facile."
+        "fr": "Les clés des donjons héroïques de TBC demandent Honoré au lieu de Révéré, comme depuis le patch 2.3. Rend le jeu plus facile.",
+        "de": "Schlüssel für heroische TBC-Dungeons erfordern „Wohlwollend“ statt „Respektvoll“, wie ab Patch 2.3. Macht das Spiel leichter.",
+        "es": "Las llaves de las mazmorras heroicas de TBC requieren Honorable en vez de Reverenciado, como a partir del parche 2.3. Hace el juego más fácil."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_tbc_heroic_dungeon_keys_nerf.sql",
@@ -357,10 +403,12 @@
     {
       "id": "sql-wotlk-hp-values-for-tbc-raids",
       "type": "sql",
-      "label": { "en": "Weaker TBC raid bosses (patch 3.0.2)", "fr": "Boss de raid TBC affaiblis (patch 3.0.2)" },
+      "label": { "en": "Weaker TBC raid bosses (patch 3.0.2)", "fr": "Boss de raid TBC affaiblis (patch 3.0.2)", "de": "Schwächere Schlachtzugsbosse von TBC (Patch 3.0.2)", "es": "Jefes de banda de TBC más débiles (parche 3.0.2)" },
       "help": {
         "en": "Applies the patch 3.0.2 health nerf to TBC raid creatures. Makes the game easier.",
-        "fr": "Applique la baisse de points de vie du patch 3.0.2 aux créatures des raids TBC. Rend le jeu plus facile."
+        "fr": "Applique la baisse de points de vie du patch 3.0.2 aux créatures des raids TBC. Rend le jeu plus facile.",
+        "de": "Wendet die Lebenspunktsenkung von Patch 3.0.2 auf die Schlachtzugskreaturen von TBC an. Macht das Spiel leichter.",
+        "es": "Aplica la reducción de salud del parche 3.0.2 a las criaturas de banda de TBC. Hace el juego más fácil."
       },
       "database": "world",
       "file": "optional/sql/world/zz_optional_wotlk_hp_values_for_tbc_raids.sql",
@@ -369,12 +417,12 @@
     {
       "id": "starting-progression",
       "type": "choice",
-      "label": { "en": "New characters start in", "fr": "Les nouveaux personnages commencent en" },
+      "label": { "en": "New characters start in", "fr": "Les nouveaux personnages commencent en", "de": "Neue Charaktere beginnen in", "es": "Los personajes nuevos empiezan en" },
       "default": "vanilla",
       "choices": [
         {
           "id": "vanilla",
-          "label": { "en": "Vanilla", "fr": "Vanilla" },
+          "label": { "en": "Vanilla", "fr": "Vanilla", "de": "Vanilla", "es": "Vanilla" },
           "config": {
             "modules/individualProgression.conf": {
               "IndividualProgression.StartingProgression": 0
@@ -383,7 +431,7 @@
         },
         {
           "id": "tbc",
-          "label": { "en": "The Burning Crusade", "fr": "The Burning Crusade" },
+          "label": { "en": "The Burning Crusade", "fr": "The Burning Crusade", "de": "The Burning Crusade", "es": "The Burning Crusade" },
           "config": {
             "modules/individualProgression.conf": {
               "IndividualProgression.StartingProgression": 8
@@ -392,7 +440,7 @@
         },
         {
           "id": "wotlk",
-          "label": { "en": "Wrath of the Lich King", "fr": "Wrath of the Lich King" },
+          "label": { "en": "Wrath of the Lich King", "fr": "Wrath of the Lich King", "de": "Wrath of the Lich King", "es": "Wrath of the Lich King" },
           "config": {
             "modules/individualProgression.conf": {
               "IndividualProgression.StartingProgression": 13
@@ -404,26 +452,26 @@
     {
       "id": "progression-limit",
       "type": "choice",
-      "label": { "en": "Progression stops after", "fr": "La progression s'arrête après" },
+      "label": { "en": "Progression stops after", "fr": "La progression s'arrête après", "de": "Fortschritt endet nach", "es": "La progresión se detiene tras" },
       "default": "none",
       "choices": [
         {
           "id": "none",
-          "label": { "en": "No limit", "fr": "Aucune limite" },
+          "label": { "en": "No limit", "fr": "Aucune limite", "de": "Keine Grenze", "es": "Sin límite" },
           "config": {
             "modules/individualProgression.conf": { "IndividualProgression.ProgressionLimit": 0 }
           }
         },
         {
           "id": "vanilla",
-          "label": { "en": "Vanilla", "fr": "Vanilla" },
+          "label": { "en": "Vanilla", "fr": "Vanilla", "de": "Vanilla", "es": "Vanilla" },
           "config": {
             "modules/individualProgression.conf": { "IndividualProgression.ProgressionLimit": 7 }
           }
         },
         {
           "id": "tbc",
-          "label": { "en": "The Burning Crusade", "fr": "The Burning Crusade" },
+          "label": { "en": "The Burning Crusade", "fr": "The Burning Crusade", "de": "The Burning Crusade", "es": "The Burning Crusade" },
           "config": {
             "modules/individualProgression.conf": { "IndividualProgression.ProgressionLimit": 12 }
           }
@@ -433,12 +481,12 @@
     {
       "id": "tbc-races",
       "type": "choice",
-      "label": { "en": "Draenei and Blood Elves", "fr": "Draeneï et elfes de sang" },
+      "label": { "en": "Draenei and Blood Elves", "fr": "Draeneï et elfes de sang", "de": "Draenei und Blutelfen", "es": "Draenei y elfos de sangre" },
       "default": "always",
       "choices": [
         {
           "id": "always",
-          "label": { "en": "Always available", "fr": "Toujours disponibles" },
+          "label": { "en": "Always available", "fr": "Toujours disponibles", "de": "Immer verfügbar", "es": "Siempre disponibles" },
           "config": {
             "modules/individualProgression.conf": {
               "IndividualProgression.TbcRacesUnlockProgression": 0
@@ -447,7 +495,7 @@
         },
         {
           "id": "after-vanilla",
-          "label": { "en": "Once Vanilla is completed", "fr": "Une fois Vanilla terminé" },
+          "label": { "en": "Once Vanilla is completed", "fr": "Une fois Vanilla terminé", "de": "Nach Abschluss von Vanilla", "es": "Tras completar Vanilla" },
           "config": {
             "modules/individualProgression.conf": {
               "IndividualProgression.TbcRacesUnlockProgression": 8
@@ -459,12 +507,12 @@
     {
       "id": "death-knights",
       "type": "choice",
-      "label": { "en": "Death Knights", "fr": "Chevaliers de la mort" },
+      "label": { "en": "Death Knights", "fr": "Chevaliers de la mort", "de": "Todesritter", "es": "Caballeros de la Muerte" },
       "default": "after-tbc",
       "choices": [
         {
           "id": "always",
-          "label": { "en": "Always available", "fr": "Toujours disponibles" },
+          "label": { "en": "Always available", "fr": "Toujours disponibles", "de": "Immer verfügbar", "es": "Siempre disponibles" },
           "config": {
             "modules/individualProgression.conf": {
               "IndividualProgression.DeathKnightUnlockProgression": 0
@@ -475,7 +523,9 @@
           "id": "after-tbc",
           "label": {
             "en": "Once The Burning Crusade is completed",
-            "fr": "Une fois The Burning Crusade terminé"
+            "fr": "Une fois The Burning Crusade terminé",
+            "de": "Nach Abschluss von The Burning Crusade",
+            "es": "Tras completar The Burning Crusade"
           },
           "config": {
             "modules/individualProgression.conf": {
@@ -488,7 +538,7 @@
     {
       "id": "quest-xp-fix",
       "type": "boolean",
-      "label": { "en": "Original quest experience", "fr": "Expérience des quêtes d'origine" },
+      "label": { "en": "Original quest experience", "fr": "Expérience des quêtes d'origine", "de": "Ursprüngliche Questerfahrung", "es": "Experiencia de misiones original" },
       "target": {
         "file": "modules/individualProgression.conf",
         "key": "IndividualProgression.QuestXPFix"
@@ -500,7 +550,9 @@
       "type": "boolean",
       "label": {
         "en": "No quest object sparkles (as before 2.3)",
-        "fr": "Pas de scintillement des objets de quête (comme avant 2.3)"
+        "fr": "Pas de scintillement des objets de quête (comme avant 2.3)",
+        "de": "Kein Funkeln an Questobjekten (wie vor 2.3)",
+        "es": "Sin destellos en los objetos de misión (como antes de la 2.3)"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -513,7 +565,9 @@
       "type": "boolean",
       "label": {
         "en": "Fishing levelled zone by zone (as before 3.1)",
-        "fr": "Pêche montée zone par zone (comme avant 3.1)"
+        "fr": "Pêche montée zone par zone (comme avant 3.1)",
+        "de": "Angeln Gebiet für Gebiet steigern (wie vor 3.1)",
+        "es": "Pesca que se sube zona por zona (como antes de la 3.1)"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -526,7 +580,9 @@
       "type": "boolean",
       "label": {
         "en": "Extra quest money at the stage's level cap",
-        "fr": "Argent en plus des quêtes au niveau maximum de l'étape"
+        "fr": "Argent en plus des quêtes au niveau maximum de l'étape",
+        "de": "Zusätzliches Questgeld auf der Höchststufe der Phase",
+        "es": "Dinero extra de misiones en el nivel máximo de la etapa"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -539,7 +595,9 @@
       "type": "boolean",
       "label": {
         "en": "Disable the random dungeon finder",
-        "fr": "Désactiver la recherche de donjon aléatoire"
+        "fr": "Désactiver la recherche de donjon aléatoire",
+        "de": "Zufälligen Dungeonbrowser deaktivieren",
+        "es": "Desactivar el buscador de mazmorras aleatorio"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -552,7 +610,9 @@
       "type": "boolean",
       "label": {
         "en": "Naxxramas 40: first entry through Stratholme",
-        "fr": "Naxxramas 40 : première entrée par Stratholme"
+        "fr": "Naxxramas 40 : première entrée par Stratholme",
+        "de": "Naxxramas 40: erster Zutritt über Stratholme",
+        "es": "Naxxramas 40: primer acceso por Stratholme"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -565,7 +625,9 @@
       "type": "boolean",
       "label": {
         "en": "Keep every spell rank in Wrath of the Lich King",
-        "fr": "Garder tous les rangs de sorts dans Wrath of the Lich King"
+        "fr": "Garder tous les rangs de sorts dans Wrath of the Lich King",
+        "de": "In Wrath of the Lich King alle Zauberränge behalten",
+        "es": "Conservar todos los rangos de hechizos en Wrath of the Lich King"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -576,7 +638,7 @@
     {
       "id": "vanilla-power",
       "type": "number",
-      "label": { "en": "Player damage during Vanilla", "fr": "Dégâts des joueurs pendant Vanilla" },
+      "label": { "en": "Player damage during Vanilla", "fr": "Dégâts des joueurs pendant Vanilla", "de": "Schaden der Spieler in Vanilla", "es": "Daño de los jugadores en Vanilla" },
       "target": {
         "file": "modules/individualProgression.conf",
         "key": "IndividualProgression.VanillaPowerAdjustment"
@@ -586,13 +648,15 @@
       "max": 1.0,
       "help": {
         "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
-        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque.",
+        "de": "1 = unverändert; das Modul empfiehlt 0,5 bis 0,6 für ein authentisches Gefühl.",
+        "es": "1 = sin cambios; el módulo sugiere de 0,5 a 0,6 para una sensación auténtica."
       }
     },
     {
       "id": "vanilla-healing",
       "type": "number",
-      "label": { "en": "Player healing during Vanilla", "fr": "Soins des joueurs pendant Vanilla" },
+      "label": { "en": "Player healing during Vanilla", "fr": "Soins des joueurs pendant Vanilla", "de": "Heilung der Spieler in Vanilla", "es": "Sanación de los jugadores en Vanilla" },
       "target": {
         "file": "modules/individualProgression.conf",
         "key": "IndividualProgression.VanillaHealingAdjustment"
@@ -602,7 +666,9 @@
       "max": 1.0,
       "help": {
         "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
-        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque.",
+        "de": "1 = unverändert; das Modul empfiehlt 0,5 bis 0,6 für ein authentisches Gefühl.",
+        "es": "1 = sin cambios; el módulo sugiere de 0,5 a 0,6 para una sensación auténtica."
       }
     },
     {
@@ -610,7 +676,9 @@
       "type": "number",
       "label": {
         "en": "Player damage during The Burning Crusade",
-        "fr": "Dégâts des joueurs pendant The Burning Crusade"
+        "fr": "Dégâts des joueurs pendant The Burning Crusade",
+        "de": "Schaden der Spieler in The Burning Crusade",
+        "es": "Daño de los jugadores en The Burning Crusade"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -621,7 +689,9 @@
       "max": 1.0,
       "help": {
         "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
-        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque.",
+        "de": "1 = unverändert; das Modul empfiehlt 0,5 bis 0,6 für ein authentisches Gefühl.",
+        "es": "1 = sin cambios; el módulo sugiere de 0,5 a 0,6 para una sensación auténtica."
       }
     },
     {
@@ -629,7 +699,9 @@
       "type": "number",
       "label": {
         "en": "Player healing during The Burning Crusade",
-        "fr": "Soins des joueurs pendant The Burning Crusade"
+        "fr": "Soins des joueurs pendant The Burning Crusade",
+        "de": "Heilung der Spieler in The Burning Crusade",
+        "es": "Sanación de los jugadores en The Burning Crusade"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -640,7 +712,9 @@
       "max": 1.0,
       "help": {
         "en": "1 = unchanged; the module suggests 0.5 to 0.6 for an authentic feel.",
-        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque."
+        "fr": "1 = inchangé ; le module conseille 0,5 à 0,6 pour retrouver l'époque.",
+        "de": "1 = unverändert; das Modul empfiehlt 0,5 bis 0,6 für ein authentisches Gefühl.",
+        "es": "1 = sin cambios; el módulo sugiere de 0,5 a 0,6 para una sensación auténtica."
       }
     },
     {
@@ -648,7 +722,9 @@
       "type": "boolean",
       "label": {
         "en": "Apply those adjustments to random bots only",
-        "fr": "Appliquer ces ajustements aux bots aléatoires seulement"
+        "fr": "Appliquer ces ajustements aux bots aléatoires seulement",
+        "de": "Diese Anpassungen nur auf Zufallsbots anwenden",
+        "es": "Aplicar esos ajustes solo a los bots aleatorios"
       },
       "target": {
         "file": "modules/individualProgression.conf",
@@ -660,12 +736,12 @@
   "optionGroups": [
     {
       "id": "progression",
-      "label": { "en": "Progression", "fr": "Progression" },
+      "label": { "en": "Progression", "fr": "Progression", "de": "Fortschritt", "es": "Progresión" },
       "options": ["starting-progression", "progression-limit", "tbc-races", "death-knights"]
     },
     {
       "id": "era",
-      "label": { "en": "True to the era", "fr": "Fidèle à l'époque" },
+      "label": { "en": "True to the era", "fr": "Fidèle à l'époque", "de": "Getreu der Epoche", "es": "Fiel a la época" },
       "options": [
         "sql-phasing",
         "sql-limit-spells-to-expansion",
@@ -693,7 +769,7 @@
     },
     {
       "id": "challenge",
-      "label": { "en": "Challenge", "fr": "Défi" },
+      "label": { "en": "Challenge", "fr": "Défi", "de": "Herausforderung", "es": "Desafío" },
       "options": [
         "sql-creature-stats",
         "sql-av-landmines",
@@ -707,7 +783,7 @@
     },
     {
       "id": "easier",
-      "label": { "en": "Makes the game easier", "fr": "Facilite le jeu" },
+      "label": { "en": "Makes the game easier", "fr": "Facilite le jeu", "de": "Macht das Spiel leichter", "es": "Hace el juego más fácil" },
       "options": [
         "sql-small-group-adjustments",
         "sql-aq-quest-nerf",

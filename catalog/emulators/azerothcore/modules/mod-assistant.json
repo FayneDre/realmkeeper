@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Assistant",
-    "fr": "Assistant"
+    "fr": "Assistant",
+    "de": "Assistentin",
+    "es": "Asistente"
   },
   "description": {
     "en": "An NPC in the main cities that sells heirlooms, glyphs, gems, elixirs and food, and offers name, race and faction changes, flight paths, professions and instance resets.",
-    "fr": "Un PNJ dans les capitales qui vend héritages, glyphes, gemmes, élixirs et nourriture, et propose changements de nom, de race et de faction, trajets aériens, métiers et réinitialisations d'instances."
+    "fr": "Un PNJ dans les capitales qui vend héritages, glyphes, gemmes, élixirs et nourriture, et propose changements de nom, de race et de faction, trajets aériens, métiers et réinitialisations d'instances.",
+    "de": "Ein NSC in den Hauptstädten, der Erbstücke, Glyphen, Edelsteine, Elixiere und Essen verkauft und Namens-, Volks- und Fraktionswechsel, Flugrouten, Berufe und das Zurücksetzen von Instanzen anbietet.",
+    "es": "Un PNJ en las capitales que vende reliquias, glifos, gemas, elixires y comida, y ofrece cambios de nombre, raza y facción, rutas de vuelo, profesiones y reinicios de instancias."
   },
   "category": "quality-of-life",
   "homepage": "https://github.com/noisiver/mod-assistant",
@@ -74,7 +78,9 @@
       "type": "boolean",
       "label": {
         "en": "Sell heirlooms",
-        "fr": "Vendre les héritages"
+        "fr": "Vendre les héritages",
+        "de": "Erbstücke verkaufen",
+        "es": "Vender reliquias"
       },
       "target": {
         "file": "modules/mod_assistant.conf",
@@ -87,7 +93,9 @@
       "type": "boolean",
       "label": {
         "en": "Name, race and faction changes",
-        "fr": "Changements de nom, de race et de faction"
+        "fr": "Changements de nom, de race et de faction",
+        "de": "Namens-, Volks- und Fraktionswechsel",
+        "es": "Cambios de nombre, raza y facción"
       },
       "target": {
         "file": "modules/mod_assistant.conf",
@@ -100,7 +108,9 @@
       "type": "boolean",
       "label": {
         "en": "Instance resets",
-        "fr": "Réinitialisation des instances"
+        "fr": "Réinitialisation des instances",
+        "de": "Zurücksetzen von Instanzen",
+        "es": "Reinicio de instancias"
       },
       "target": {
         "file": "modules/mod_assistant.conf",
@@ -111,42 +121,42 @@
     {
       "id": "glyphs",
       "type": "boolean",
-      "label": { "en": "Sell glyphs", "fr": "Vendre les glyphes" },
+      "label": { "en": "Sell glyphs", "fr": "Vendre les glyphes", "de": "Glyphen verkaufen", "es": "Vender glifos" },
       "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Glyphs.Enabled" },
       "default": true
     },
     {
       "id": "gems",
       "type": "boolean",
-      "label": { "en": "Sell gems", "fr": "Vendre les gemmes" },
+      "label": { "en": "Sell gems", "fr": "Vendre les gemmes", "de": "Edelsteine verkaufen", "es": "Vender gemas" },
       "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Gems.Enabled" },
       "default": true
     },
     {
       "id": "elixirs",
       "type": "boolean",
-      "label": { "en": "Sell elixirs", "fr": "Vendre les élixirs" },
+      "label": { "en": "Sell elixirs", "fr": "Vendre les élixirs", "de": "Elixiere verkaufen", "es": "Vender elixires" },
       "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Elixirs.Enabled" },
       "default": true
     },
     {
       "id": "food",
       "type": "boolean",
-      "label": { "en": "Sell buff food", "fr": "Vendre la nourriture qui donne des bonus" },
+      "label": { "en": "Sell buff food", "fr": "Vendre la nourriture qui donne des bonus", "de": "Buff-Essen verkaufen", "es": "Vender comida con bonificaciones" },
       "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Food.Enabled" },
       "default": true
     },
     {
       "id": "enchants",
       "type": "boolean",
-      "label": { "en": "Sell enchantments", "fr": "Vendre les enchantements" },
+      "label": { "en": "Sell enchantments", "fr": "Vendre les enchantements", "de": "Verzauberungen verkaufen", "es": "Vender encantamientos" },
       "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Enchants.Enabled" },
       "default": true
     },
     {
       "id": "containers",
       "type": "boolean",
-      "label": { "en": "Sell bags", "fr": "Vendre les sacs" },
+      "label": { "en": "Sell bags", "fr": "Vendre les sacs", "de": "Taschen verkaufen", "es": "Vender bolsas" },
       "target": { "file": "modules/mod_assistant.conf", "key": "Assistant.Containers.Enabled" },
       "default": true
     },
@@ -155,7 +165,9 @@
       "type": "boolean",
       "label": {
         "en": "Unlock classic flight paths (level 60)",
-        "fr": "Débloquer les trajets aériens classiques (niveau 60)"
+        "fr": "Débloquer les trajets aériens classiques (niveau 60)",
+        "de": "Klassische Flugrouten freischalten (Stufe 60)",
+        "es": "Desbloquear las rutas de vuelo clásicas (nivel 60)"
       },
       "target": {
         "file": "modules/mod_assistant.conf",
@@ -168,7 +180,9 @@
       "type": "boolean",
       "label": {
         "en": "Unlock Outland flight paths (level 70)",
-        "fr": "Débloquer les trajets aériens de l'Outreterre (niveau 70)"
+        "fr": "Débloquer les trajets aériens de l'Outreterre (niveau 70)",
+        "de": "Flugrouten der Scherbenwelt freischalten (Stufe 70)",
+        "es": "Desbloquear las rutas de vuelo de Terrallende (nivel 70)"
       },
       "target": {
         "file": "modules/mod_assistant.conf",
@@ -181,7 +195,9 @@
       "type": "boolean",
       "label": {
         "en": "Unlock Northrend flight paths (level 80)",
-        "fr": "Débloquer les trajets aériens du Norfendre (niveau 80)"
+        "fr": "Débloquer les trajets aériens du Norfendre (niveau 80)",
+        "de": "Flugrouten von Nordend freischalten (Stufe 80)",
+        "es": "Desbloquear las rutas de vuelo de Rasganorte (nivel 80)"
       },
       "target": {
         "file": "modules/mod_assistant.conf",
@@ -192,7 +208,7 @@
     {
       "id": "professions-apprentice",
       "type": "boolean",
-      "label": { "en": "Apprentice (75)", "fr": "Apprenti (75)" },
+      "label": { "en": "Apprentice (75)", "fr": "Apprenti (75)", "de": "Lehrling (75)", "es": "Aprendiz (75)" },
       "target": {
         "file": "modules/mod_assistant.conf",
         "key": "Assistant.Professions.Apprentice.Enabled"
@@ -202,7 +218,7 @@
     {
       "id": "professions-journeyman",
       "type": "boolean",
-      "label": { "en": "Journeyman (150)", "fr": "Compagnon (150)" },
+      "label": { "en": "Journeyman (150)", "fr": "Compagnon (150)", "de": "Geselle (150)", "es": "Oficial (150)" },
       "target": {
         "file": "modules/mod_assistant.conf",
         "key": "Assistant.Professions.Journeyman.Enabled"
@@ -212,7 +228,7 @@
     {
       "id": "professions-expert",
       "type": "boolean",
-      "label": { "en": "Expert (225)", "fr": "Expert (225)" },
+      "label": { "en": "Expert (225)", "fr": "Expert (225)", "de": "Experte (225)", "es": "Experto (225)" },
       "target": {
         "file": "modules/mod_assistant.conf",
         "key": "Assistant.Professions.Expert.Enabled"
@@ -222,7 +238,7 @@
     {
       "id": "professions-artisan",
       "type": "boolean",
-      "label": { "en": "Artisan (300)", "fr": "Artisan (300)" },
+      "label": { "en": "Artisan (300)", "fr": "Artisan (300)", "de": "Fachmann (300)", "es": "Artesano (300)" },
       "target": {
         "file": "modules/mod_assistant.conf",
         "key": "Assistant.Professions.Artisan.Enabled"
@@ -232,7 +248,7 @@
     {
       "id": "professions-master",
       "type": "boolean",
-      "label": { "en": "Master (375)", "fr": "Maître (375)" },
+      "label": { "en": "Master (375)", "fr": "Maître (375)", "de": "Meister (375)", "es": "Maestro (375)" },
       "target": {
         "file": "modules/mod_assistant.conf",
         "key": "Assistant.Professions.Master.Enabled"
@@ -242,7 +258,7 @@
     {
       "id": "professions-grand-master",
       "type": "boolean",
-      "label": { "en": "Grand Master (450)", "fr": "Grand maître (450)" },
+      "label": { "en": "Grand Master (450)", "fr": "Grand maître (450)", "de": "Großmeister (450)", "es": "Gran maestro (450)" },
       "target": {
         "file": "modules/mod_assistant.conf",
         "key": "Assistant.Professions.GrandMaster.Enabled"
@@ -253,22 +269,22 @@
   "optionGroups": [
     {
       "id": "shop",
-      "label": { "en": "Items for sale", "fr": "Objets en vente" },
+      "label": { "en": "Items for sale", "fr": "Objets en vente", "de": "Angebotene Gegenstände", "es": "Objetos a la venta" },
       "options": ["heirlooms", "glyphs", "gems", "elixirs", "food", "enchants", "containers"]
     },
     {
       "id": "services",
-      "label": { "en": "Services", "fr": "Services" },
+      "label": { "en": "Services", "fr": "Services", "de": "Dienste", "es": "Servicios" },
       "options": ["utilities", "instances"]
     },
     {
       "id": "flight-paths",
-      "label": { "en": "Flight paths for gold", "fr": "Trajets aériens contre de l'or" },
+      "label": { "en": "Flight paths for gold", "fr": "Trajets aériens contre de l'or", "de": "Flugrouten gegen Gold", "es": "Rutas de vuelo a cambio de oro" },
       "options": ["flight-paths-vanilla", "flight-paths-tbc", "flight-paths-wotlk"]
     },
     {
       "id": "professions",
-      "label": { "en": "Profession levels for gold", "fr": "Niveaux de métier contre de l'or" },
+      "label": { "en": "Profession levels for gold", "fr": "Niveaux de métier contre de l'or", "de": "Berufsstufen gegen Gold", "es": "Niveles de profesión a cambio de oro" },
       "options": [
         "professions-apprentice",
         "professions-journeyman",

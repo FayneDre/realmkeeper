@@ -160,6 +160,8 @@ mod tests {
         LocalizedText {
             en: "x".into(),
             fr: None,
+            de: None,
+            es: None,
         }
     }
 

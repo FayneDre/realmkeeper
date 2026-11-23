@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Enchanter NPC",
-    "fr": "PNJ enchanteur"
+    "fr": "PNJ enchanteur",
+    "de": "Verzauberer-NSC",
+    "es": "PNJ encantador"
   },
   "description": {
     "en": "An NPC that enchants your gear. A GM places it with .npc add 601015.",
-    "fr": "Un PNJ qui enchante ton équipement. Un MJ le place avec .npc add 601015."
+    "fr": "Un PNJ qui enchante ton équipement. Un MJ le place avec .npc add 601015.",
+    "de": "Ein NSC, der deine Ausrüstung verzaubert. Ein Spielleiter platziert ihn mit .npc add 601015.",
+    "es": "Un PNJ que encanta tu equipo. Un maestro de juego lo coloca con .npc add 601015."
   },
   "category": "quality-of-life",
   "homepage": "https://github.com/azerothcore/mod-npc-enchanter",
@@ -58,7 +62,9 @@
       "type": "boolean",
       "label": {
         "en": "Announce the module at login",
-        "fr": "Annoncer le module à la connexion"
+        "fr": "Annoncer le module à la connexion",
+        "de": "Modul bei der Anmeldung ankündigen",
+        "es": "Anunciar el módulo al conectarse"
       },
       "target": {
         "file": "modules/npc_enchanter.conf",

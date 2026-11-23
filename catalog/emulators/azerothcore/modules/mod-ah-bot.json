@@ -3,10 +3,12 @@
   "schemaVersion": 1,
   "id": "mod-ah-bot",
   "emulator": "azerothcore",
-  "name": { "en": "Auction House Bot", "fr": "Bot de l'hôtel des ventes" },
+  "name": { "en": "Auction House Bot", "fr": "Bot de l'hôtel des ventes", "de": "Auktionshaus-Bot", "es": "Bot de la casa de subastas" },
   "description": {
     "en": "Fills the auction houses with items and buys player auctions, so the economy feels alive.",
-    "fr": "Remplit les hôtels des ventes d'objets et achète les enchères des joueurs pour une économie vivante."
+    "fr": "Remplit les hôtels des ventes d'objets et achète les enchères des joueurs pour une économie vivante.",
+    "de": "Füllt die Auktionshäuser mit Gegenständen und kauft Auktionen von Spielern, damit die Wirtschaft lebendig wirkt.",
+    "es": "Llena las casas de subastas de objetos y compra las subastas de los jugadores para que la economía parezca viva."
   },
   "category": "economy",
   "homepage": "https://github.com/azerothcore/mod-ah-bot",
@@ -43,28 +45,30 @@
     {
       "id": "seller",
       "type": "boolean",
-      "label": { "en": "Bot posts auctions", "fr": "Le bot met des objets en vente" },
+      "label": { "en": "Bot posts auctions", "fr": "Le bot met des objets en vente", "de": "Bot stellt Auktionen ein", "es": "El bot publica subastas" },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.EnableSeller" },
       "default": true
     },
     {
       "id": "buyer",
       "type": "boolean",
-      "label": { "en": "Bot buys player auctions", "fr": "Le bot achète les enchères des joueurs" },
+      "label": { "en": "Bot buys player auctions", "fr": "Le bot achète les enchères des joueurs", "de": "Bot kauft Auktionen von Spielern", "es": "El bot compra subastas de jugadores" },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.EnableBuyer" },
       "default": true
     },
     {
       "id": "items-per-cycle",
       "type": "integer",
-      "label": { "en": "Items posted per cycle", "fr": "Objets mis en vente par cycle" },
+      "label": { "en": "Items posted per cycle", "fr": "Objets mis en vente par cycle", "de": "Eingestellte Gegenstände pro Durchgang", "es": "Objetos publicados por ciclo" },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.ItemsPerCycle" },
       "default": 200,
       "min": 1,
       "max": 5000,
       "help": {
         "en": "How many auctions the bot adds at most each time it fills an auction house.",
-        "fr": "Nombre maximum d'enchères ajoutées chaque fois que le bot remplit un hôtel des ventes."
+        "fr": "Nombre maximum d'enchères ajoutées chaque fois que le bot remplit un hôtel des ventes.",
+        "de": "Wie viele Auktionen der Bot höchstens hinzufügt, wenn er ein Auktionshaus auffüllt.",
+        "es": "Cuántas subastas añade el bot como máximo cada vez que llena una casa de subastas."
       }
     },
     {
@@ -72,11 +76,15 @@
       "type": "integer",
       "label": {
         "en": "Auctions in the Alliance auction house",
-        "fr": "Enchères à l'hôtel des ventes Alliance"
+        "fr": "Enchères à l'hôtel des ventes Alliance",
+        "de": "Auktionen im Auktionshaus der Allianz",
+        "es": "Subastas en la casa de subastas de la Alianza"
       },
       "help": {
         "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
-        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module)."
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module).",
+        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250).",
+        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250)."
       },
       "target": {
         "database": "world",
@@ -93,11 +101,15 @@
       "type": "integer",
       "label": {
         "en": "Auctions in the Horde auction house",
-        "fr": "Enchères à l'hôtel des ventes Horde"
+        "fr": "Enchères à l'hôtel des ventes Horde",
+        "de": "Auktionen im Auktionshaus der Horde",
+        "es": "Subastas en la casa de subastas de la Horda"
       },
       "help": {
         "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
-        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module)."
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module).",
+        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250).",
+        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250)."
       },
       "target": {
         "database": "world",
@@ -114,11 +126,15 @@
       "type": "integer",
       "label": {
         "en": "Auctions in the Neutral (Booty Bay, Gadgetzan, Everlook) auction house",
-        "fr": "Enchères à l'hôtel des ventes Neutre (Baie-du-Butin, Gadgetzan, Long-guet)"
+        "fr": "Enchères à l'hôtel des ventes Neutre (Baie-du-Butin, Gadgetzan, Long-guet)",
+        "de": "Auktionen im neutralen Auktionshaus (Beutebucht, Gadgetzan, Ewige Warte)",
+        "es": "Subastas en la casa de subastas neutral (Bahía del Botín, Gadgetzan, Vista Eterna)"
       },
       "help": {
         "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
-        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module)."
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module).",
+        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250).",
+        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250)."
       },
       "target": {
         "database": "world",
@@ -133,19 +149,23 @@
     {
       "id": "quality-mix",
       "type": "choice",
-      "label": { "en": "What the bot sells", "fr": "Ce que le bot vend" },
+      "label": { "en": "What the bot sells", "fr": "Ce que le bot vend", "de": "Was der Bot verkauft", "es": "Qué vende el bot" },
       "help": {
         "en": "Share of trade goods (cloth, ore, herbs...) and gear, by quality.",
-        "fr": "Part des composants (tissu, minerai, herbes...) et de l'équipement, par qualité."
+        "fr": "Part des composants (tissu, minerai, herbes...) et de l'équipement, par qualité.",
+        "de": "Anteil von Handwerkswaren (Stoff, Erz, Kräuter...) und Ausrüstung, nach Qualität.",
+        "es": "Proporción de objetos comerciables (tela, mineral, hierbas...) y equipo, según la calidad."
       },
       "default": "original",
       "choices": [
         {
           "id": "original",
-          "label": { "en": "As the module ships it", "fr": "Comme le module d'origine" },
+          "label": { "en": "As the module ships it", "fr": "Comme le module d'origine", "de": "Wie vom Modul ausgeliefert", "es": "Como lo trae el módulo" },
           "help": {
             "en": "Half trade goods, half gear; few rare items.",
-            "fr": "Moitié composants, moitié équipement ; peu d'objets rares."
+            "fr": "Moitié composants, moitié équipement ; peu d'objets rares.",
+            "de": "Halb Handwerkswaren, halb Ausrüstung; wenige rare Gegenstände.",
+            "es": "Mitad objetos comerciables, mitad equipo; pocos objetos raros."
           },
           "tables": [
             {
@@ -215,10 +235,12 @@
         },
         {
           "id": "crafting",
-          "label": { "en": "Mostly trade goods", "fr": "Surtout des composants d'artisanat" },
+          "label": { "en": "Mostly trade goods", "fr": "Surtout des composants d'artisanat", "de": "Hauptsächlich Handwerkswaren", "es": "Sobre todo objetos comerciables" },
           "help": {
             "en": "Four fifths trade goods: for players who level professions.",
-            "fr": "Quatre cinquièmes de composants : pour monter les métiers."
+            "fr": "Quatre cinquièmes de composants : pour monter les métiers.",
+            "de": "Vier Fünftel Handwerkswaren: für Spieler, die Berufe leveln.",
+            "es": "Cuatro quintos de objetos comerciables: para jugadores que suben profesiones."
           },
           "tables": [
             {
@@ -288,10 +310,12 @@
         },
         {
           "id": "gear",
-          "label": { "en": "More gear", "fr": "Plus d'équipement" },
+          "label": { "en": "More gear", "fr": "Plus d'équipement", "de": "Mehr Ausrüstung", "es": "Más equipo" },
           "help": {
             "en": "Four fifths gear, mostly uncommon (green).",
-            "fr": "Quatre cinquièmes d'équipement, surtout peu commun (vert)."
+            "fr": "Quatre cinquièmes d'équipement, surtout peu commun (vert).",
+            "de": "Vier Fünftel Ausrüstung, meist selten (grün).",
+            "es": "Cuatro quintos de equipo, sobre todo poco común (verde)."
           },
           "tables": [
             {
@@ -361,10 +385,12 @@
         },
         {
           "id": "rare",
-          "label": { "en": "More rare and epic items", "fr": "Plus d'objets rares et épiques" },
+          "label": { "en": "More rare and epic items", "fr": "Plus d'objets rares et épiques", "de": "Mehr rare und epische Gegenstände", "es": "Más objetos raros y épicos" },
           "help": {
             "en": "A third of the auctions are rare (blue) or epic (purple).",
-            "fr": "Un tiers des enchères sont rares (bleues) ou épiques (violettes)."
+            "fr": "Un tiers des enchères sont rares (bleues) ou épiques (violettes).",
+            "de": "Ein Drittel der Auktionen ist rar (blau) oder episch (lila).",
+            "es": "Un tercio de las subastas son raras (azules) o épicas (moradas)."
           },
           "tables": [
             {
@@ -437,16 +463,18 @@
     {
       "id": "prices",
       "type": "choice",
-      "label": { "en": "Prices of the bot's auctions", "fr": "Prix des enchères du bot" },
+      "label": { "en": "Prices of the bot's auctions", "fr": "Prix des enchères du bot", "de": "Preise der Auktionen des Bots", "es": "Precios de las subastas del bot" },
       "help": {
         "en": "Buyout prices compared with the module's own (a multiple of what a vendor pays for the item, by quality).",
-        "fr": "Prix d'achat immédiat comparés à ceux du module (un multiple de ce qu'un marchand paie l'objet, selon sa qualité)."
+        "fr": "Prix d'achat immédiat comparés à ceux du module (un multiple de ce qu'un marchand paie l'objet, selon sa qualité).",
+        "de": "Sofortkaufpreise im Vergleich zu denen des Moduls (ein Vielfaches dessen, was ein Händler für den Gegenstand zahlt, je nach Qualität).",
+        "es": "Precios de compra inmediata comparados con los del módulo (un múltiplo de lo que paga un vendedor por el objeto, según la calidad)."
       },
       "default": "original",
       "choices": [
         {
           "id": "low",
-          "label": { "en": "Half price", "fr": "Moitié prix" },
+          "label": { "en": "Half price", "fr": "Moitié prix", "de": "Halber Preis", "es": "Mitad de precio" },
           "tables": [
             {
               "database": "world",
@@ -515,7 +543,7 @@
         },
         {
           "id": "original",
-          "label": { "en": "As the module ships it", "fr": "Comme le module d'origine" },
+          "label": { "en": "As the module ships it", "fr": "Comme le module d'origine", "de": "Wie vom Modul ausgeliefert", "es": "Como lo trae el módulo" },
           "tables": [
             {
               "database": "world",
@@ -584,7 +612,7 @@
         },
         {
           "id": "high",
-          "label": { "en": "Twice as expensive", "fr": "Deux fois plus cher" },
+          "label": { "en": "Twice as expensive", "fr": "Deux fois plus cher", "de": "Doppelt so teuer", "es": "El doble de caro" },
           "tables": [
             {
               "database": "world",
@@ -653,7 +681,7 @@
         },
         {
           "id": "very-high",
-          "label": { "en": "Three times as expensive", "fr": "Trois fois plus cher" },
+          "label": { "en": "Three times as expensive", "fr": "Trois fois plus cher", "de": "Dreimal so teuer", "es": "El triple de caro" },
           "tables": [
             {
               "database": "world",
@@ -727,7 +755,9 @@
       "type": "boolean",
       "label": {
         "en": "Count only the bot's auctions",
-        "fr": "Ne compter que les enchères du bot"
+        "fr": "Ne compter que les enchères du bot",
+        "de": "Nur die Auktionen des Bots zählen",
+        "es": "Contar solo las subastas del bot"
       },
       "target": {
         "file": "modules/mod_ahbot.conf",
@@ -736,28 +766,30 @@
       "default": false,
       "help": {
         "en": "When on, auctions posted by players (and player bots) do not count towards the number above.",
-        "fr": "Si activé, les enchères des joueurs (et de leurs bots) ne comptent pas dans les nombres ci-dessus."
+        "fr": "Si activé, les enchères des joueurs (et de leurs bots) ne comptent pas dans les nombres ci-dessus.",
+        "de": "Wenn aktiv, zählen Auktionen von Spielern (und Spieler-Bots) nicht zur obigen Anzahl.",
+        "es": "Si está activado, las subastas publicadas por jugadores (y bots de jugadores) no cuentan para el número de arriba."
       }
     },
     {
       "id": "auction-duration",
       "type": "choice",
-      "label": { "en": "Duration of the bot's auctions", "fr": "Durée des enchères du bot" },
+      "label": { "en": "Duration of the bot's auctions", "fr": "Durée des enchères du bot", "de": "Dauer der Auktionen des Bots", "es": "Duración de las subastas del bot" },
       "default": "medium",
       "choices": [
         {
           "id": "long",
-          "label": { "en": "1 to 3 days", "fr": "1 à 3 jours" },
+          "label": { "en": "1 to 3 days", "fr": "1 à 3 jours", "de": "1 bis 3 Tage", "es": "De 1 a 3 días" },
           "config": { "modules/mod_ahbot.conf": { "AuctionHouseBot.ElapsingTimeClass": 0 } }
         },
         {
           "id": "medium",
-          "label": { "en": "1 to 24 hours", "fr": "1 à 24 heures" },
+          "label": { "en": "1 to 24 hours", "fr": "1 à 24 heures", "de": "1 bis 24 Stunden", "es": "De 1 a 24 horas" },
           "config": { "modules/mod_ahbot.conf": { "AuctionHouseBot.ElapsingTimeClass": 1 } }
         },
         {
           "id": "short",
-          "label": { "en": "10 to 60 minutes", "fr": "10 à 60 minutes" },
+          "label": { "en": "10 to 60 minutes", "fr": "10 à 60 minutes", "de": "10 bis 60 Minuten", "es": "De 10 a 60 minutos" },
           "config": { "modules/mod_ahbot.conf": { "AuctionHouseBot.ElapsingTimeClass": 2 } }
         }
       ]
@@ -767,7 +799,9 @@
       "type": "boolean",
       "label": {
         "en": "Also sell items vendors sell",
-        "fr": "Vendre aussi des objets vendus par les marchands"
+        "fr": "Vendre aussi des objets vendus par les marchands",
+        "de": "Auch Gegenstände verkaufen, die Händler verkaufen",
+        "es": "Vender también objetos que venden los vendedores"
       },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.VendorItems" },
       "default": false
@@ -777,7 +811,9 @@
       "type": "boolean",
       "label": {
         "en": "Also sell trade goods vendors sell",
-        "fr": "Vendre aussi des composants vendus par les marchands"
+        "fr": "Vendre aussi des composants vendus par les marchands",
+        "de": "Auch Handwerkswaren verkaufen, die Händler verkaufen",
+        "es": "Vender también objetos comerciables que venden los vendedores"
       },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.VendorTradeGoods" },
       "default": false
@@ -787,7 +823,9 @@
       "type": "boolean",
       "label": {
         "en": "Also sell items professions need",
-        "fr": "Vendre aussi des objets nécessaires aux métiers"
+        "fr": "Vendre aussi des objets nécessaires aux métiers",
+        "de": "Auch Gegenstände verkaufen, die Berufe brauchen",
+        "es": "Vender también objetos que necesitan las profesiones"
       },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.ProfessionItems" },
       "default": false
@@ -795,14 +833,14 @@
     {
       "id": "other-items",
       "type": "boolean",
-      "label": { "en": "Also sell miscellaneous items", "fr": "Vendre aussi des objets divers" },
+      "label": { "en": "Also sell miscellaneous items", "fr": "Vendre aussi des objets divers", "de": "Auch verschiedene Gegenstände verkaufen", "es": "Vender también objetos diversos" },
       "target": { "file": "modules/mod_ahbot.conf", "key": "AuctionHouseBot.OtherItems" },
       "default": false
     },
     {
       "id": "market-price",
       "type": "boolean",
-      "label": { "en": "Follow the market price", "fr": "Suivre le prix du marché" },
+      "label": { "en": "Follow the market price", "fr": "Suivre le prix du marché", "de": "Dem Marktpreis folgen", "es": "Seguir el precio de mercado" },
       "target": {
         "file": "modules/mod_ahbot.conf",
         "key": "AuctionHouseBot.UseMarketPriceForSeller"
@@ -810,14 +848,16 @@
       "default": false,
       "help": {
         "en": "The bot adjusts its prices to what the same item sells for.",
-        "fr": "Le bot ajuste ses prix sur ceux auxquels se vend le même objet."
+        "fr": "Le bot ajuste ses prix sur ceux auxquels se vend le même objet.",
+        "de": "Der Bot passt seine Preise an den Verkaufspreis desselben Gegenstands an.",
+        "es": "El bot ajusta sus precios a lo que se paga por el mismo objeto."
       }
     }
   ],
   "optionGroups": [
     {
       "id": "quantity",
-      "label": { "en": "How many auctions", "fr": "Nombre d'enchères" },
+      "label": { "en": "How many auctions", "fr": "Nombre d'enchères", "de": "Wie viele Auktionen", "es": "Cuántas subastas" },
       "options": [
         "alliance-items",
         "horde-items",
@@ -831,7 +871,9 @@
       "id": "content",
       "label": {
         "en": "What is sold, and at what price",
-        "fr": "Ce qui est vendu, et à quel prix"
+        "fr": "Ce qui est vendu, et à quel prix",
+        "de": "Was verkauft wird und zu welchem Preis",
+        "es": "Qué se vende y a qué precio"
       },
       "options": [
         "quality-mix",

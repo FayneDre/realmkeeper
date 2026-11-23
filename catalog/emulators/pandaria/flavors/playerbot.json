@@ -5,11 +5,15 @@
   "emulator": "pandaria",
   "name": {
     "en": "LoA Pandaria (Playerbots)",
-    "fr": "LoA Pandaria (Playerbots)"
+    "fr": "LoA Pandaria (Playerbots)",
+    "de": "LoA Pandaria (Playerbots)",
+    "es": "LoA Pandaria (Playerbots)"
   },
   "description": {
     "en": "Legends of Azeroth Pandaria 5.4.8 fork with Playerbots built in. Pinned to release v1.1.1, whose database dumps match this commit.",
-    "fr": "Fork de Legends of Azeroth Pandaria 5.4.8 avec Playerbots intégré. Épinglé sur la release v1.1.1, dont les dumps de base correspondent à ce commit."
+    "fr": "Fork de Legends of Azeroth Pandaria 5.4.8 avec Playerbots intégré. Épinglé sur la release v1.1.1, dont les dumps de base correspondent à ce commit.",
+    "de": "Fork von Legends of Azeroth Pandaria 5.4.8 mit integrierten Playerbots. Festgelegt auf Release v1.1.1, deren Datenbank-Dumps zu diesem Commit passen.",
+    "es": "Fork de Legends of Azeroth Pandaria 5.4.8 con Playerbots integrado. Fijado en la versión v1.1.1, cuyos volcados de base de datos corresponden a este commit."
   },
   "source": {
     "repo": "https://github.com/1LineAtaTime/LoA-Pandaria-Playerbots",

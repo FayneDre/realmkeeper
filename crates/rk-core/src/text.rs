@@ -7,6 +7,10 @@ pub struct LocalizedText {
     pub en: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fr: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub de: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub es: Option<String>,
 }
 
 impl LocalizedText {
@@ -14,9 +18,12 @@ impl LocalizedText {
     pub fn get(&self, locale: &str) -> &str {
         let language = locale.split(['-', '_']).next().unwrap_or(locale);
         match language {
-            "fr" => self.fr.as_deref().unwrap_or(&self.en),
-            _ => &self.en,
+            "fr" => self.fr.as_deref(),
+            "de" => self.de.as_deref(),
+            "es" => self.es.as_deref(),
+            _ => None,
         }
+        .unwrap_or(&self.en)
     }
 }
 
@@ -29,13 +36,18 @@ mod tests {
         let text = LocalizedText {
             en: "Hello".into(),
             fr: None,
+            de: None,
+            es: None,
         };
         assert_eq!(text.get("fr"), "Hello");
         let text = LocalizedText {
             en: "Hello".into(),
             fr: Some("Bonjour".into()),
+            de: None,
+            es: Some("Hola".into()),
         };
         assert_eq!(text.get("fr-FR"), "Bonjour");
         assert_eq!(text.get("de"), "Hello");
+        assert_eq!(text.get("es-ES"), "Hola");
     }
 }

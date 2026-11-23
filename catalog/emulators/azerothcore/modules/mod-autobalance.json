@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Auto Balance",
-    "fr": "Équilibrage automatique"
+    "fr": "Équilibrage automatique",
+    "de": "Auto Balance",
+    "es": "Auto Balance"
   },
   "description": {
     "en": "Scales dungeon and raid creatures to the number of players in the group, so a small group can clear group content.",
-    "fr": "Adapte les créatures des donjons et des raids au nombre de joueurs du groupe, pour qu'un petit groupe puisse en venir à bout."
+    "fr": "Adapte les créatures des donjons et des raids au nombre de joueurs du groupe, pour qu'un petit groupe puisse en venir à bout.",
+    "de": "Passt Kreaturen in Dungeons und Schlachtzügen an die Zahl der Spieler in der Gruppe an, damit auch eine kleine Gruppe Gruppeninhalte schafft.",
+    "es": "Ajusta las criaturas de mazmorras y bandas al número de jugadores del grupo, para que un grupo pequeño pueda superar contenido de grupo."
   },
   "category": "gameplay",
   "homepage": "https://github.com/azerothcore/mod-autobalance",
@@ -56,7 +60,9 @@
       "type": "boolean",
       "label": {
         "en": "Balance 5-player dungeons",
-        "fr": "Équilibrer les donjons à 5"
+        "fr": "Équilibrer les donjons à 5",
+        "de": "5-Spieler-Dungeons anpassen",
+        "es": "Ajustar las mazmorras de 5 jugadores"
       },
       "target": {
         "file": "modules/AutoBalance.conf",
@@ -69,7 +75,9 @@
       "type": "boolean",
       "label": {
         "en": "Balance 10-player raids",
-        "fr": "Équilibrer les raids à 10"
+        "fr": "Équilibrer les raids à 10",
+        "de": "10-Spieler-Schlachtzüge anpassen",
+        "es": "Ajustar las bandas de 10 jugadores"
       },
       "target": {
         "file": "modules/AutoBalance.conf",
@@ -82,7 +90,9 @@
       "type": "boolean",
       "label": {
         "en": "Balance 25-player raids",
-        "fr": "Équilibrer les raids à 25"
+        "fr": "Équilibrer les raids à 25",
+        "de": "25-Spieler-Schlachtzüge anpassen",
+        "es": "Ajustar las bandas de 25 jugadores"
       },
       "target": {
         "file": "modules/AutoBalance.conf",
@@ -95,7 +105,9 @@
       "type": "integer",
       "label": {
         "en": "Balance for at least this many players",
-        "fr": "Équilibrer pour au moins ce nombre de joueurs"
+        "fr": "Équilibrer pour au moins ce nombre de joueurs",
+        "de": "Für mindestens so viele Spieler anpassen",
+        "es": "Ajustar para al menos este número de jugadores"
       },
       "target": {
         "file": "modules/AutoBalance.conf",
@@ -108,28 +120,28 @@
     {
       "id": "raids-15",
       "type": "boolean",
-      "label": { "en": "Balance 15-player raids", "fr": "Équilibrer les raids à 15" },
+      "label": { "en": "Balance 15-player raids", "fr": "Équilibrer les raids à 15", "de": "15-Spieler-Schlachtzüge anpassen", "es": "Ajustar las bandas de 15 jugadores" },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.Enable.15M" },
       "default": true
     },
     {
       "id": "raids-20",
       "type": "boolean",
-      "label": { "en": "Balance 20-player raids", "fr": "Équilibrer les raids à 20" },
+      "label": { "en": "Balance 20-player raids", "fr": "Équilibrer les raids à 20", "de": "20-Spieler-Schlachtzüge anpassen", "es": "Ajustar las bandas de 20 jugadores" },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.Enable.20M" },
       "default": true
     },
     {
       "id": "raids-40",
       "type": "boolean",
-      "label": { "en": "Balance 40-player raids", "fr": "Équilibrer les raids à 40" },
+      "label": { "en": "Balance 40-player raids", "fr": "Équilibrer les raids à 40", "de": "40-Spieler-Schlachtzüge anpassen", "es": "Ajustar las bandas de 40 jugadores" },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.Enable.40M" },
       "default": true
     },
     {
       "id": "heroic-dungeons",
       "type": "boolean",
-      "label": { "en": "Balance heroic dungeons", "fr": "Équilibrer les donjons héroïques" },
+      "label": { "en": "Balance heroic dungeons", "fr": "Équilibrer les donjons héroïques", "de": "Heroische Dungeons anpassen", "es": "Ajustar las mazmorras heroicas" },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.Enable.5MHeroic" },
       "default": true
     },
@@ -138,7 +150,9 @@
       "type": "boolean",
       "label": {
         "en": "Balance heroic 10-player raids",
-        "fr": "Équilibrer les raids héroïques à 10"
+        "fr": "Équilibrer les raids héroïques à 10",
+        "de": "Heroische 10-Spieler-Schlachtzüge anpassen",
+        "es": "Ajustar las bandas heroicas de 10 jugadores"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.Enable.10MHeroic" },
       "default": true
@@ -148,7 +162,9 @@
       "type": "boolean",
       "label": {
         "en": "Balance heroic 25-player raids",
-        "fr": "Équilibrer les raids héroïques à 25"
+        "fr": "Équilibrer les raids héroïques à 25",
+        "de": "Heroische 25-Spieler-Schlachtzüge anpassen",
+        "es": "Ajustar las bandas heroicas de 25 jugadores"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.Enable.25MHeroic" },
       "default": true
@@ -158,7 +174,9 @@
       "type": "integer",
       "label": {
         "en": "Heroic dungeons: balance for at least",
-        "fr": "Donjons héroïques : équilibrer pour au moins"
+        "fr": "Donjons héroïques : équilibrer pour au moins",
+        "de": "Heroische Dungeons: anpassen für mindestens",
+        "es": "Mazmorras heroicas: ajustar para al menos"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.MinPlayers.Heroic" },
       "default": 1,
@@ -168,7 +186,7 @@
     {
       "id": "min-players-raid",
       "type": "integer",
-      "label": { "en": "Raids: balance for at least", "fr": "Raids : équilibrer pour au moins" },
+      "label": { "en": "Raids: balance for at least", "fr": "Raids : équilibrer pour au moins", "de": "Schlachtzüge: anpassen für mindestens", "es": "Bandas: ajustar para al menos" },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.MinPlayers.Raid" },
       "default": 1,
       "min": 1,
@@ -179,7 +197,9 @@
       "type": "number",
       "label": {
         "en": "Difficulty of creatures (dungeons)",
-        "fr": "Difficulté des créatures (donjons)"
+        "fr": "Difficulté des créatures (donjons)",
+        "de": "Stärke der Kreaturen (Dungeons)",
+        "es": "Dificultad de las criaturas (mazmorras)"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.StatModifier.Global" },
       "default": 1.0,
@@ -187,13 +207,15 @@
       "max": 5.0,
       "help": {
         "en": "Multiplies the strength of balanced creatures in 5-player dungeons: 1 = as balanced, 1.5 = harder.",
-        "fr": "Multiplie la force des créatures équilibrées des donjons à 5 : 1 = équilibré, 1,5 = plus dur."
+        "fr": "Multiplie la force des créatures équilibrées des donjons à 5 : 1 = équilibré, 1,5 = plus dur.",
+        "de": "Multipliziert die Stärke angepasster Kreaturen in 5-Spieler-Dungeons: 1 = wie angepasst, 1,5 = schwerer.",
+        "es": "Multiplica la fuerza de las criaturas ajustadas en mazmorras de 5 jugadores: 1 = tal cual, 1,5 = más difícil."
       }
     },
     {
       "id": "boss-difficulty",
       "type": "number",
-      "label": { "en": "Difficulty of bosses (dungeons)", "fr": "Difficulté des boss (donjons)" },
+      "label": { "en": "Difficulty of bosses (dungeons)", "fr": "Difficulté des boss (donjons)", "de": "Stärke der Bosse (Dungeons)", "es": "Dificultad de los jefes (mazmorras)" },
       "target": {
         "file": "modules/AutoBalance.conf",
         "key": "AutoBalance.StatModifier.Boss.Global"
@@ -207,7 +229,9 @@
       "type": "boolean",
       "label": {
         "en": "Adjust creature levels to the group",
-        "fr": "Ajuster le niveau des créatures au groupe"
+        "fr": "Ajuster le niveau des créatures au groupe",
+        "de": "Stufen der Kreaturen an die Gruppe anpassen",
+        "es": "Ajustar el nivel de las criaturas al grupo"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.LevelScaling" },
       "default": true
@@ -217,7 +241,9 @@
       "type": "boolean",
       "label": {
         "en": "Scale experience with difficulty",
-        "fr": "Adapter l'expérience à la difficulté"
+        "fr": "Adapter l'expérience à la difficulté",
+        "de": "Erfahrung an die Schwierigkeit anpassen",
+        "es": "Ajustar la experiencia a la dificultad"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.RewardScaling.XP" },
       "default": true
@@ -225,7 +251,7 @@
     {
       "id": "scale-money",
       "type": "boolean",
-      "label": { "en": "Scale money with difficulty", "fr": "Adapter l'argent à la difficulté" },
+      "label": { "en": "Scale money with difficulty", "fr": "Adapter l'argent à la difficulté", "de": "Geld an die Schwierigkeit anpassen", "es": "Ajustar el dinero a la dificultad" },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.RewardScaling.Money" },
       "default": true
     },
@@ -234,7 +260,9 @@
       "type": "boolean",
       "label": {
         "en": "Announce changes in the instance",
-        "fr": "Annoncer les changements dans l'instance"
+        "fr": "Annoncer les changements dans l'instance",
+        "de": "Änderungen in der Instanz ankündigen",
+        "es": "Anunciar los cambios en la instancia"
       },
       "target": { "file": "modules/AutoBalance.conf", "key": "AutoBalance.PlayerChangeNotify" },
       "default": true
@@ -243,7 +271,7 @@
   "optionGroups": [
     {
       "id": "instances",
-      "label": { "en": "Which instances", "fr": "Quelles instances" },
+      "label": { "en": "Which instances", "fr": "Quelles instances", "de": "Welche Instanzen", "es": "Qué instancias" },
       "options": [
         "dungeons",
         "heroic-dungeons",
@@ -258,7 +286,7 @@
     },
     {
       "id": "balance",
-      "label": { "en": "How", "fr": "Comment" },
+      "label": { "en": "How", "fr": "Comment", "de": "Wie", "es": "Cómo" },
       "options": [
         "min-players",
         "min-players-heroic",

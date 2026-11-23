@@ -3,7 +3,7 @@
   // what happens when the game starts and closes, automatic backups. Each
   // change is saved at once in preferences.json.
   import { asCommandError, type CommandError, type Preferences } from "../api";
-  import { i18n, LOCALES, t, type MessageKey } from "../i18n/i18n.svelte";
+  import { i18n, LOCALES, t, type Locale, type MessageKey } from "../i18n/i18n.svelte";
   import { preferences } from "../preferences.svelte";
   import Modal from "./Modal.svelte";
   import Notify from "./Notify.svelte";
@@ -41,17 +41,17 @@
 
 <Modal title={t("options.title")} {onclose} width="560px">
   <h4>{t("options.language")}</h4>
-  <div class="segmented languages" role="group" aria-label={t("nav.language")}>
+  <!-- A list: any number of languages fits. -->
+  <select
+    class="languages"
+    aria-label={t("nav.language")}
+    value={i18n.locale}
+    onchange={(e) => (i18n.locale = e.currentTarget.value as Locale)}
+  >
     {#each LOCALES as locale (locale.id)}
-      <button
-        class:active={i18n.locale === locale.id}
-        aria-pressed={i18n.locale === locale.id}
-        onclick={() => (i18n.locale = locale.id)}
-      >
-        {locale.label}
-      </button>
+      <option value={locale.id}>{locale.label}</option>
     {/each}
-  </div>
+  </select>
   {#if preferences.value}
     {@const value = preferences.value}
     {#each SECTIONS as section (section.title)}
@@ -90,7 +90,7 @@
   }
 
   .languages {
-    width: fit-content;
+    min-width: 14rem;
     margin-bottom: var(--space-2);
   }
 

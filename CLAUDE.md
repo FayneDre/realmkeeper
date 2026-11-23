@@ -16,7 +16,9 @@ emulators, clients and modules later **as data + a small driver**, never as rewr
 
 - The maintainer speaks **French**: answer in French. Code, comments, commit
   messages, docs and this file are in **English**.
-- User-facing strings exist in **English and French** (English is the fallback).
+- User-facing strings exist in **English, French, German and Spanish** (English
+  is the fallback; German and Spanish use the informal du / tú like the French tu,
+  and the official terms of those game clients). Catalog text has `de`/`es` too.
 - Verify upstream facts (versions, config keys, repos) with `gh api` or official
   docs before writing them; say clearly when something is assumed.
 - **Privacy (public repository):** never write the maintainer's first name, real
@@ -287,7 +289,7 @@ reduced in-game settings) unless the user asks.
 │  └─ src-tauri/             thin Tauri adapter (commands.rs)
 ├─ tools/
 │  ├─ validate-catalog.mjs   JSON Schema + layout validation of the catalog
-│  ├─ check-i18n.mjs         FR/EN key and placeholder parity
+│  ├─ check-i18n.mjs         key and placeholder parity of every locale with en.json
 │  ├─ test-guard.mjs         regression cases for the shell guard hook (npm run test:hooks)
 │  ├─ ci/cdp.mjs, ci/ui-smoke.mjs   DevTools driver + UI smoke test (npm run test:ui)
 │  └─ git-hooks/             pre-commit / commit-msg logic (Node, cross-platform)
@@ -344,7 +346,7 @@ npm run dev                                   # Tauri dev mode (needs Rust)
 npm run check                                 # svelte-check + unit tests + catalog schema + i18n parity
 npm run test:unit                             # vitest: pure TypeScript of the app (`app/src/**/*.test.ts`)
 npm run validate:catalog                      # catalog JSON Schema + layout only
-npm run check:i18n                            # FR/EN locale parity only
+npm run check:i18n                            # locale parity only (every locale vs en.json)
 npm run test:ui                               # UI smoke test (debug app built with the ui-smoke.mjs config)
 cargo test --workspace                        # Rust tests, incl. the real catalog
 cargo clippy --workspace --all-targets -- -D warnings
@@ -414,7 +416,9 @@ installers: `cd app && npx tauri build --debug --no-bundle`.
 
 ### UI (Svelte 5 + TS)
 - Runes (`$state`, `$derived`, `$effect`), strict TypeScript.
-- Every string through `t()`; add keys to **both** `en.json` and `fr.json`.
+- Every string through `t()`; add keys to **every** locale (`en`, `fr`, `de`, `es`).
+  New locales: `Locale` + `LOCALES` in `i18n.svelte.ts`, `LocalizedText` in
+  `rk-core/src/text.rs` and `common.schema.json`.
   Catalog text through `localized()`.
 - Styling only via CSS variables in `app/src/app.css` (light + dark).
 - Layout: left rail of game versions (one emblem per catalog client) + tabs +

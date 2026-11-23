@@ -195,6 +195,8 @@ mod tests {
         let name = |en: &str| LocalizedText {
             en: en.into(),
             fr: None,
+            de: None,
+            es: None,
         };
         Party {
             size: 5,

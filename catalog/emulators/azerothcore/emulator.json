@@ -5,7 +5,9 @@
   "name": "AzerothCore",
   "description": {
     "en": "Open-source World of Warcraft: Wrath of the Lich King (3.3.5a) server emulator.",
-    "fr": "Émulateur de serveur open source pour World of Warcraft: Wrath of the Lich King (3.3.5a)."
+    "fr": "Émulateur de serveur open source pour World of Warcraft: Wrath of the Lich King (3.3.5a).",
+    "de": "Open-Source-Serveremulator für World of Warcraft: Wrath of the Lich King (3.3.5a).",
+    "es": "Emulador de servidor de código abierto de World of Warcraft: Wrath of the Lich King (3.3.5a)."
   },
   "homepage": "https://www.azerothcore.org",
   "license": "GPL-2.0",
@@ -108,7 +110,9 @@
           "progress": 0.02,
           "label": {
             "en": "Loading the world",
-            "fr": "Chargement du monde"
+            "fr": "Chargement du monde",
+            "de": "Welt wird geladen",
+            "es": "Cargando el mundo"
           }
         },
         {
@@ -116,7 +120,9 @@
           "progress": 0.05,
           "label": {
             "en": "Loading spells",
-            "fr": "Chargement des sorts"
+            "fr": "Chargement des sorts",
+            "de": "Zauber werden geladen",
+            "es": "Cargando los hechizos"
           }
         },
         {
@@ -124,7 +130,9 @@
           "progress": 0.08,
           "label": {
             "en": "Loading items",
-            "fr": "Chargement des objets"
+            "fr": "Chargement des objets",
+            "de": "Gegenstände werden geladen",
+            "es": "Cargando los objetos"
           }
         },
         {
@@ -132,7 +140,9 @@
           "progress": 0.11,
           "label": {
             "en": "Loading creatures",
-            "fr": "Chargement des créatures"
+            "fr": "Chargement des créatures",
+            "de": "Kreaturen werden geladen",
+            "es": "Cargando las criaturas"
           }
         },
         {
@@ -140,7 +150,9 @@
           "progress": 0.14,
           "label": {
             "en": "Loading quests",
-            "fr": "Chargement des quêtes"
+            "fr": "Chargement des quêtes",
+            "de": "Quests werden geladen",
+            "es": "Cargando las misiones"
           }
         },
         {
@@ -148,7 +160,9 @@
           "progress": 0.17,
           "label": {
             "en": "Starting the maps",
-            "fr": "Démarrage des cartes"
+            "fr": "Démarrage des cartes",
+            "de": "Karten werden gestartet",
+            "es": "Iniciando los mapas"
           }
         },
         {
@@ -156,7 +170,9 @@
           "progress": 0.19,
           "label": {
             "en": "Loading boats and zeppelins",
-            "fr": "Chargement des bateaux et zeppelins"
+            "fr": "Chargement des bateaux et zeppelins",
+            "de": "Schiffe und Zeppeline werden geladen",
+            "es": "Cargando barcos y zepelines"
           }
         },
         {
@@ -164,7 +180,9 @@
           "progress": 0.24,
           "label": {
             "en": "Preparing the bots",
-            "fr": "Préparation des bots"
+            "fr": "Préparation des bots",
+            "de": "Bots werden vorbereitet",
+            "es": "Preparando los bots"
           }
         },
         {
@@ -172,7 +190,9 @@
           "progress": 0.8,
           "label": {
             "en": "Equipping the bots",
-            "fr": "Équipement des bots"
+            "fr": "Équipement des bots",
+            "de": "Bots werden ausgerüstet",
+            "es": "Equipando a los bots"
           }
         },
         {
@@ -180,7 +200,9 @@
           "progress": 0.95,
           "label": {
             "en": "Bots ready",
-            "fr": "Bots prêts"
+            "fr": "Bots prêts",
+            "de": "Bots bereit",
+            "es": "Bots listos"
           }
         },
         {
@@ -188,7 +210,9 @@
           "progress": 0.98,
           "label": {
             "en": "Opening the realm",
-            "fr": "Ouverture du royaume"
+            "fr": "Ouverture du royaume",
+            "de": "Realm wird geöffnet",
+            "es": "Abriendo el reino"
           }
         }
       ]
@@ -199,7 +223,9 @@
       "id": "rates",
       "label": {
         "en": "Rates",
-        "fr": "Taux"
+        "fr": "Taux",
+        "de": "Raten",
+        "es": "Tasas"
       },
       "options": [
         {
@@ -207,7 +233,9 @@
           "type": "number",
           "label": {
             "en": "Experience from kills",
-            "fr": "Expérience des monstres tués"
+            "fr": "Expérience des monstres tués",
+            "de": "Erfahrung durch getötete Monster",
+            "es": "Experiencia por monstruos muertos"
           },
           "target": {
             "file": "worldserver.conf",
@@ -218,7 +246,9 @@
           "max": 50,
           "help": {
             "en": "1 = normal speed, 2 = twice as fast. 0 turns it off.",
-            "fr": "1 = vitesse normale, 2 = deux fois plus vite. 0 la désactive."
+            "fr": "1 = vitesse normale, 2 = deux fois plus vite. 0 la désactive.",
+            "de": "1 = normale Geschwindigkeit, 2 = doppelt so schnell. 0 schaltet sie ab.",
+            "es": "1 = velocidad normal, 2 = el doble de rápido. 0 la desactiva."
           }
         },
         {
@@ -226,7 +256,9 @@
           "type": "number",
           "label": {
             "en": "Experience from quests",
-            "fr": "Expérience des quêtes"
+            "fr": "Expérience des quêtes",
+            "de": "Erfahrung durch Quests",
+            "es": "Experiencia por misiones"
           },
           "target": {
             "file": "worldserver.conf",
@@ -241,7 +273,9 @@
           "type": "number",
           "label": {
             "en": "Experience from exploration",
-            "fr": "Expérience d'exploration"
+            "fr": "Expérience d'exploration",
+            "de": "Erfahrung durch Erkundung",
+            "es": "Experiencia por exploración"
           },
           "target": {
             "file": "worldserver.conf",
@@ -256,7 +290,9 @@
           "type": "number",
           "label": {
             "en": "Reputation gains",
-            "fr": "Gains de réputation"
+            "fr": "Gains de réputation",
+            "de": "Rufgewinn",
+            "es": "Ganancia de reputación"
           },
           "target": {
             "file": "worldserver.conf",
@@ -271,7 +307,9 @@
           "type": "number",
           "label": {
             "en": "Honor gains",
-            "fr": "Gains d'honneur"
+            "fr": "Gains d'honneur",
+            "de": "Ehregewinn",
+            "es": "Ganancia de honor"
           },
           "target": {
             "file": "worldserver.conf",
@@ -286,7 +324,9 @@
           "type": "number",
           "label": {
             "en": "Money looted",
-            "fr": "Argent ramassé"
+            "fr": "Argent ramassé",
+            "de": "Erbeutetes Geld",
+            "es": "Dinero despojado"
           },
           "target": {
             "file": "worldserver.conf",
@@ -301,7 +341,9 @@
           "type": "number",
           "label": {
             "en": "Uncommon item drops (green)",
-            "fr": "Butin d'objets inhabituels (verts)"
+            "fr": "Butin d'objets inhabituels (verts)",
+            "de": "Beute: seltene Gegenstände (grün)",
+            "es": "Botín: objetos poco comunes (verdes)"
           },
           "target": {
             "file": "worldserver.conf",
@@ -316,7 +358,9 @@
           "type": "number",
           "label": {
             "en": "Rare item drops (blue)",
-            "fr": "Butin d'objets rares (bleus)"
+            "fr": "Butin d'objets rares (bleus)",
+            "de": "Beute: rare Gegenstände (blau)",
+            "es": "Botín: objetos raros (azules)"
           },
           "target": {
             "file": "worldserver.conf",
@@ -331,7 +375,9 @@
           "type": "number",
           "label": {
             "en": "Epic item drops (purple)",
-            "fr": "Butin d'objets épiques (violets)"
+            "fr": "Butin d'objets épiques (violets)",
+            "de": "Beute: epische Gegenstände (lila)",
+            "es": "Botín: objetos épicos (morados)"
           },
           "target": {
             "file": "worldserver.conf",
@@ -346,7 +392,9 @@
           "type": "integer",
           "label": {
             "en": "Crafting skill gains",
-            "fr": "Progression des métiers d'artisanat"
+            "fr": "Progression des métiers d'artisanat",
+            "de": "Fortschritt der Herstellungsberufe",
+            "es": "Progreso de las profesiones de fabricación"
           },
           "target": {
             "file": "worldserver.conf",
@@ -357,7 +405,9 @@
           "max": 10,
           "help": {
             "en": "Skill points per gain: 2 = twice as fast.",
-            "fr": "Points gagnés à chaque progression : 2 = deux fois plus vite."
+            "fr": "Points gagnés à chaque progression : 2 = deux fois plus vite.",
+            "de": "Fertigkeitspunkte pro Steigerung: 2 = doppelt so schnell.",
+            "es": "Puntos ganados en cada subida: 2 = el doble de rápido."
           }
         },
         {
@@ -365,7 +415,9 @@
           "type": "integer",
           "label": {
             "en": "Gathering and fishing skill gains",
-            "fr": "Progression de la cueillette, du minage, du dépeçage et de la pêche"
+            "fr": "Progression de la cueillette, du minage, du dépeçage et de la pêche",
+            "de": "Fortschritt von Kräuterkunde, Bergbau, Kürschnerei und Angeln",
+            "es": "Progreso de herboristería, minería, desuello y pesca"
           },
           "target": {
             "file": "worldserver.conf",
@@ -376,7 +428,9 @@
           "max": 10,
           "help": {
             "en": "Skill points per gain: 2 = twice as fast.",
-            "fr": "Points gagnés à chaque progression : 2 = deux fois plus vite."
+            "fr": "Points gagnés à chaque progression : 2 = deux fois plus vite.",
+            "de": "Fertigkeitspunkte pro Steigerung: 2 = doppelt so schnell.",
+            "es": "Puntos ganados en cada subida: 2 = el doble de rápido."
           }
         },
         {
@@ -384,7 +438,9 @@
           "type": "number",
           "label": {
             "en": "Arena points",
-            "fr": "Points d'arène"
+            "fr": "Points d'arène",
+            "de": "Arenapunkte",
+            "es": "Puntos de arena"
           },
           "target": {
             "file": "worldserver.conf",
@@ -400,7 +456,9 @@
       "id": "realm",
       "label": {
         "en": "Realm",
-        "fr": "Royaume"
+        "fr": "Royaume",
+        "de": "Realm",
+        "es": "Reino"
       },
       "options": [
         {
@@ -408,7 +466,9 @@
           "type": "choice",
           "label": {
             "en": "Realm type",
-            "fr": "Type de royaume"
+            "fr": "Type de royaume",
+            "de": "Realmtyp",
+            "es": "Tipo de reino"
           },
           "default": "normal",
           "choices": [
@@ -416,7 +476,9 @@
               "id": "normal",
               "label": {
                 "en": "Normal (PvE)",
-                "fr": "Normal (JcE)"
+                "fr": "Normal (JcE)",
+                "de": "Normal (PvE)",
+                "es": "Normal (JcE)"
               },
               "config": {
                 "worldserver.conf": {
@@ -428,7 +490,9 @@
               "id": "pvp",
               "label": {
                 "en": "PvP",
-                "fr": "JcJ"
+                "fr": "JcJ",
+                "de": "PvP",
+                "es": "JcJ"
               },
               "config": {
                 "worldserver.conf": {
@@ -440,7 +504,9 @@
               "id": "rp",
               "label": {
                 "en": "Role-play",
-                "fr": "Jeu de rôle"
+                "fr": "Jeu de rôle",
+                "de": "Rollenspiel",
+                "es": "Rol"
               },
               "config": {
                 "worldserver.conf": {
@@ -452,7 +518,9 @@
               "id": "rp-pvp",
               "label": {
                 "en": "Role-play PvP",
-                "fr": "Jeu de rôle JcJ"
+                "fr": "Jeu de rôle JcJ",
+                "de": "Rollenspiel-PvP",
+                "es": "Rol JcJ"
               },
               "config": {
                 "worldserver.conf": {
@@ -464,7 +532,9 @@
               "id": "ffa-pvp",
               "label": {
                 "en": "Free-for-all PvP",
-                "fr": "JcJ sauvage (tous contre tous)"
+                "fr": "JcJ sauvage (tous contre tous)",
+                "de": "Freies PvP (jeder gegen jeden)",
+                "es": "JcJ libre (todos contra todos)"
               },
               "config": {
                 "worldserver.conf": {
@@ -475,7 +545,9 @@
           ],
           "help": {
             "en": "PvP realms flag players for combat in contested zones. Also shown in the game's realm list.",
-            "fr": "Sur un royaume JcJ, les joueurs sont attaquables dans les zones contestées. Affiché aussi dans la liste des royaumes du jeu."
+            "fr": "Sur un royaume JcJ, les joueurs sont attaquables dans les zones contestées. Affiché aussi dans la liste des royaumes du jeu.",
+            "de": "Auf PvP-Realms sind Spieler in umkämpften Gebieten angreifbar. Wird auch in der Realmliste des Spiels angezeigt.",
+            "es": "En los reinos JcJ, los jugadores pueden ser atacados en las zonas en disputa. También se muestra en la lista de reinos del juego."
           }
         },
         {
@@ -483,7 +555,9 @@
           "type": "boolean",
           "label": {
             "en": "Groups between factions",
-            "fr": "Groupes entre factions"
+            "fr": "Groupes entre factions",
+            "de": "Gruppen über Fraktionen hinweg",
+            "es": "Grupos entre facciones"
           },
           "target": {
             "file": "worldserver.conf",
@@ -496,7 +570,9 @@
           "type": "boolean",
           "label": {
             "en": "Guilds between factions",
-            "fr": "Guildes entre factions"
+            "fr": "Guildes entre factions",
+            "de": "Gilden über Fraktionen hinweg",
+            "es": "Hermandades entre facciones"
           },
           "target": {
             "file": "worldserver.conf",
@@ -509,7 +585,9 @@
           "type": "boolean",
           "label": {
             "en": "Chat between factions",
-            "fr": "Discussion entre factions"
+            "fr": "Discussion entre factions",
+            "de": "Chat über Fraktionen hinweg",
+            "es": "Chat entre facciones"
           },
           "target": {
             "file": "worldserver.conf",
@@ -522,7 +600,9 @@
           "type": "boolean",
           "label": {
             "en": "Shared auction houses",
-            "fr": "Hôtels des ventes communs aux factions"
+            "fr": "Hôtels des ventes communs aux factions",
+            "de": "Gemeinsame Auktionshäuser",
+            "es": "Casas de subastas comunes a las facciones"
           },
           "target": {
             "file": "worldserver.conf",
@@ -535,7 +615,9 @@
           "type": "boolean",
           "label": {
             "en": "Enter dungeons at any level",
-            "fr": "Entrer dans les donjons à tout niveau"
+            "fr": "Entrer dans les donjons à tout niveau",
+            "de": "Dungeons auf jeder Stufe betreten",
+            "es": "Entrar en mazmorras a cualquier nivel"
           },
           "target": {
             "file": "worldserver.conf",
@@ -548,7 +630,9 @@
           "type": "boolean",
           "label": {
             "en": "Enter raids without a raid group",
-            "fr": "Entrer en raid sans groupe de raid"
+            "fr": "Entrer en raid sans groupe de raid",
+            "de": "Schlachtzüge ohne Schlachtzugsgruppe betreten",
+            "es": "Entrar en bandas sin grupo de banda"
           },
           "target": {
             "file": "worldserver.conf",
@@ -561,7 +645,9 @@
           "type": "choice",
           "label": {
             "en": "Raid lockout reset",
-            "fr": "Réinitialisation des raids"
+            "fr": "Réinitialisation des raids",
+            "de": "Zurücksetzen der Schlachtzüge",
+            "es": "Reinicio de las bandas"
           },
           "default": "weekly",
           "choices": [
@@ -569,7 +655,9 @@
               "id": "weekly",
               "label": {
                 "en": "Weekly (normal)",
-                "fr": "Chaque semaine (normal)"
+                "fr": "Chaque semaine (normal)",
+                "de": "Jede Woche (normal)",
+                "es": "Cada semana (normal)"
               },
               "config": {
                 "worldserver.conf": {
@@ -581,7 +669,9 @@
               "id": "three-days",
               "label": {
                 "en": "Every 3 days",
-                "fr": "Tous les 3 jours"
+                "fr": "Tous les 3 jours",
+                "de": "Alle 3 Tage",
+                "es": "Cada 3 días"
               },
               "config": {
                 "worldserver.conf": {
@@ -593,7 +683,9 @@
               "id": "daily",
               "label": {
                 "en": "Every day",
-                "fr": "Chaque jour"
+                "fr": "Chaque jour",
+                "de": "Jeden Tag",
+                "es": "Cada día"
               },
               "config": {
                 "worldserver.conf": {
@@ -604,7 +696,9 @@
           ],
           "help": {
             "en": "Heroic dungeons already reset every day. A change takes effect after the reset already planned.",
-            "fr": "Les donjons héroïques se réinitialisent déjà chaque jour. Un changement prend effet après la réinitialisation déjà prévue."
+            "fr": "Les donjons héroïques se réinitialisent déjà chaque jour. Un changement prend effet après la réinitialisation déjà prévue.",
+            "de": "Heroische Dungeons werden bereits täglich zurückgesetzt. Eine Änderung wirkt nach dem bereits geplanten Zurücksetzen.",
+            "es": "Las mazmorras heroicas ya se reinician cada día. Un cambio surte efecto tras el reinicio ya previsto."
           }
         }
       ]
@@ -613,7 +707,9 @@
       "id": "characters",
       "label": {
         "en": "Characters",
-        "fr": "Personnages"
+        "fr": "Personnages",
+        "de": "Charaktere",
+        "es": "Personajes"
       },
       "options": [
         {
@@ -621,7 +717,9 @@
           "type": "integer",
           "label": {
             "en": "Maximum level",
-            "fr": "Niveau maximum"
+            "fr": "Niveau maximum",
+            "de": "Höchststufe",
+            "es": "Nivel máximo"
           },
           "target": {
             "file": "worldserver.conf",
@@ -636,7 +734,9 @@
           "type": "integer",
           "label": {
             "en": "Starting level",
-            "fr": "Niveau de départ"
+            "fr": "Niveau de départ",
+            "de": "Startstufe",
+            "es": "Nivel inicial"
           },
           "target": {
             "file": "worldserver.conf",
@@ -651,7 +751,9 @@
           "type": "integer",
           "label": {
             "en": "Death Knight starting level",
-            "fr": "Niveau de départ des chevaliers de la mort"
+            "fr": "Niveau de départ des chevaliers de la mort",
+            "de": "Startstufe der Todesritter",
+            "es": "Nivel inicial de los caballeros de la Muerte"
           },
           "target": {
             "file": "worldserver.conf",
@@ -666,7 +768,9 @@
           "type": "integer",
           "label": {
             "en": "Starting money (copper)",
-            "fr": "Argent de départ (cuivre)"
+            "fr": "Argent de départ (cuivre)",
+            "de": "Startgeld (Kupfer)",
+            "es": "Dinero inicial (cobre)"
           },
           "target": {
             "file": "worldserver.conf",
@@ -677,7 +781,9 @@
           "max": 2000000000,
           "help": {
             "en": "In copper coins: 100 = 1 silver, 10000 = 1 gold.",
-            "fr": "En pièces de cuivre : 100 = 1 argent, 10000 = 1 or."
+            "fr": "En pièces de cuivre : 100 = 1 argent, 10000 = 1 or.",
+            "de": "In Kupfermünzen: 100 = 1 Silber, 10000 = 1 Gold.",
+            "es": "En monedas de cobre: 100 = 1 de plata, 10000 = 1 de oro."
           }
         },
         {
@@ -685,7 +791,9 @@
           "type": "boolean",
           "label": {
             "en": "Know every flight path",
-            "fr": "Connaître tous les trajets aériens"
+            "fr": "Connaître tous les trajets aériens",
+            "de": "Alle Flugrouten kennen",
+            "es": "Conocer todas las rutas de vuelo"
           },
           "target": {
             "file": "worldserver.conf",
@@ -698,7 +806,9 @@
           "type": "boolean",
           "label": {
             "en": "Weapon and defense skills always maxed",
-            "fr": "Compétences d'armes et de défense toujours au maximum"
+            "fr": "Compétences d'armes et de défense toujours au maximum",
+            "de": "Waffen- und Verteidigungsfertigkeiten immer auf Maximum",
+            "es": "Habilidades de armas y defensa siempre al máximo"
           },
           "target": {
             "file": "worldserver.conf",
@@ -711,7 +821,9 @@
           "type": "choice",
           "label": {
             "en": "Intro cinematic",
-            "fr": "Cinématique d'introduction"
+            "fr": "Cinématique d'introduction",
+            "de": "Einleitungsfilm",
+            "es": "Cinemática de introducción"
           },
           "default": "always",
           "choices": [
@@ -719,7 +831,9 @@
               "id": "always",
               "label": {
                 "en": "For every new character",
-                "fr": "Pour chaque nouveau personnage"
+                "fr": "Pour chaque nouveau personnage",
+                "de": "Für jeden neuen Charakter",
+                "es": "Para cada personaje nuevo"
               },
               "config": {
                 "worldserver.conf": {
@@ -731,7 +845,9 @@
               "id": "first",
               "label": {
                 "en": "Once per race",
-                "fr": "Une fois par race"
+                "fr": "Une fois par race",
+                "de": "Einmal pro Volk",
+                "es": "Una vez por raza"
               },
               "config": {
                 "worldserver.conf": {
@@ -743,7 +859,9 @@
               "id": "never",
               "label": {
                 "en": "Never",
-                "fr": "Jamais"
+                "fr": "Jamais",
+                "de": "Nie",
+                "es": "Nunca"
               },
               "config": {
                 "worldserver.conf": {
@@ -761,11 +879,15 @@
       "id": "announce",
       "label": {
         "en": "Announce",
-        "fr": "Annonce"
+        "fr": "Annonce",
+        "de": "Ankündigen",
+        "es": "Anunciar"
       },
       "description": {
         "en": "Shows a message to every player.",
-        "fr": "Affiche un message à tous les joueurs."
+        "fr": "Affiche un message à tous les joueurs.",
+        "de": "Zeigt allen Spielern eine Nachricht.",
+        "es": "Muestra un mensaje a todos los jugadores."
       },
       "command": "announce {message}",
       "params": [
@@ -773,7 +895,9 @@
           "id": "message",
           "label": {
             "en": "Message",
-            "fr": "Message"
+            "fr": "Message",
+            "de": "Nachricht",
+            "es": "Mensaje"
           },
           "type": "text",
           "maxLength": 200
@@ -784,7 +908,9 @@
       "id": "teleport",
       "label": {
         "en": "Teleport",
-        "fr": "Téléporter"
+        "fr": "Téléporter",
+        "de": "Teleportieren",
+        "es": "Teletransportar"
       },
       "command": "teleport name {character} {location}",
       "params": [
@@ -792,7 +918,9 @@
           "id": "character",
           "label": {
             "en": "Character",
-            "fr": "Personnage"
+            "fr": "Personnage",
+            "de": "Charakter",
+            "es": "Personaje"
           },
           "type": "character"
         },
@@ -800,7 +928,9 @@
           "id": "location",
           "label": {
             "en": "Place",
-            "fr": "Lieu"
+            "fr": "Lieu",
+            "de": "Ort",
+            "es": "Lugar"
           },
           "type": "location"
         }
@@ -810,7 +940,9 @@
       "id": "level",
       "label": {
         "en": "Set the level",
-        "fr": "Changer le niveau"
+        "fr": "Changer le niveau",
+        "de": "Stufe festlegen",
+        "es": "Fijar el nivel"
       },
       "command": "character level {character} {level}",
       "params": [
@@ -818,7 +950,9 @@
           "id": "character",
           "label": {
             "en": "Character",
-            "fr": "Personnage"
+            "fr": "Personnage",
+            "de": "Charakter",
+            "es": "Personaje"
           },
           "type": "character"
         },
@@ -826,7 +960,9 @@
           "id": "level",
           "label": {
             "en": "Level",
-            "fr": "Niveau"
+            "fr": "Niveau",
+            "de": "Stufe",
+            "es": "Nivel"
           },
           "type": "number",
           "min": 1,
@@ -839,7 +975,9 @@
       "id": "revive",
       "label": {
         "en": "Revive",
-        "fr": "Ressusciter"
+        "fr": "Ressusciter",
+        "de": "Wiederbeleben",
+        "es": "Resucitar"
       },
       "command": "revive {character}",
       "params": [
@@ -847,7 +985,9 @@
           "id": "character",
           "label": {
             "en": "Character",
-            "fr": "Personnage"
+            "fr": "Personnage",
+            "de": "Charakter",
+            "es": "Personaje"
           },
           "type": "character"
         }
@@ -857,7 +997,9 @@
       "id": "unstuck",
       "label": {
         "en": "Unstuck",
-        "fr": "Débloquer"
+        "fr": "Débloquer",
+        "de": "Befreien (feststeckend)",
+        "es": "Desatascar"
       },
       "command": "unstuck {character} {where}",
       "params": [
@@ -865,7 +1007,9 @@
           "id": "character",
           "label": {
             "en": "Character",
-            "fr": "Personnage"
+            "fr": "Personnage",
+            "de": "Charakter",
+            "es": "Personaje"
           },
           "type": "character"
         },
@@ -873,7 +1017,9 @@
           "id": "where",
           "label": {
             "en": "Send to",
-            "fr": "Envoyer à"
+            "fr": "Envoyer à",
+            "de": "Senden zu",
+            "es": "Enviar a"
           },
           "type": "choice",
           "choices": [
@@ -881,14 +1027,18 @@
               "value": "inn",
               "label": {
                 "en": "Hearthstone inn",
-                "fr": "Auberge de la pierre de foyer"
+                "fr": "Auberge de la pierre de foyer",
+                "de": "Gasthaus des Ruhesteins",
+                "es": "Posada de la piedra de hogar"
               }
             },
             {
               "value": "graveyard",
               "label": {
                 "en": "Nearest graveyard",
-                "fr": "Cimetière le plus proche"
+                "fr": "Cimetière le plus proche",
+                "de": "Nächster Friedhof",
+                "es": "Cementerio más cercano"
               }
             }
           ]
@@ -899,11 +1049,15 @@
       "id": "send-item",
       "label": {
         "en": "Send an item",
-        "fr": "Envoyer un objet"
+        "fr": "Envoyer un objet",
+        "de": "Gegenstand senden",
+        "es": "Enviar un objeto"
       },
       "description": {
         "en": "Sent by mail: the item id is on wowhead-style sites (e.g. 6948 = Hearthstone).",
-        "fr": "Envoyé par courrier : l'identifiant d'un objet se trouve sur les sites de base de données (ex. 6948 = Pierre de foyer)."
+        "fr": "Envoyé par courrier : l'identifiant d'un objet se trouve sur les sites de base de données (ex. 6948 = Pierre de foyer).",
+        "de": "Per Post gesendet: Die Gegenstands-ID steht auf Seiten im Stil von Wowhead (z. B. 6948 = Ruhestein).",
+        "es": "Enviado por correo: el id del objeto está en webs de estilo wowhead (p. ej. 6948 = Piedra de hogar)."
       },
       "command": "send items {character} \"{subject}\" \"{subject}\" {item}:{count}",
       "params": [
@@ -911,7 +1065,9 @@
           "id": "character",
           "label": {
             "en": "Character",
-            "fr": "Personnage"
+            "fr": "Personnage",
+            "de": "Charakter",
+            "es": "Personaje"
           },
           "type": "character"
         },
@@ -919,7 +1075,9 @@
           "id": "item",
           "label": {
             "en": "Item id",
-            "fr": "Identifiant de l'objet"
+            "fr": "Identifiant de l'objet",
+            "de": "Gegenstands-ID",
+            "es": "Id del objeto"
           },
           "type": "number",
           "min": 1,
@@ -929,7 +1087,9 @@
           "id": "count",
           "label": {
             "en": "Count",
-            "fr": "Quantité"
+            "fr": "Quantité",
+            "de": "Anzahl",
+            "es": "Cantidad"
           },
           "type": "number",
           "min": 1,
@@ -940,7 +1100,9 @@
           "id": "subject",
           "label": {
             "en": "Mail subject",
-            "fr": "Objet du courrier"
+            "fr": "Objet du courrier",
+            "de": "Betreff der Post",
+            "es": "Asunto del correo"
           },
           "type": "text",
           "maxLength": 60
@@ -951,11 +1113,15 @@
       "id": "send-gold",
       "label": {
         "en": "Send gold",
-        "fr": "Envoyer de l'or"
+        "fr": "Envoyer de l'or",
+        "de": "Gold senden",
+        "es": "Enviar oro"
       },
       "description": {
         "en": "Sent by mail.",
-        "fr": "Envoyé par courrier."
+        "fr": "Envoyé par courrier.",
+        "de": "Per Post gesendet.",
+        "es": "Enviado por correo."
       },
       "command": "send money {character} \"{subject}\" \"{subject}\" {gold}g",
       "params": [
@@ -963,7 +1129,9 @@
           "id": "character",
           "label": {
             "en": "Character",
-            "fr": "Personnage"
+            "fr": "Personnage",
+            "de": "Charakter",
+            "es": "Personaje"
           },
           "type": "character"
         },
@@ -971,7 +1139,9 @@
           "id": "gold",
           "label": {
             "en": "Gold",
-            "fr": "Or"
+            "fr": "Or",
+            "de": "Gold",
+            "es": "Oro"
           },
           "type": "number",
           "min": 1,
@@ -982,7 +1152,9 @@
           "id": "subject",
           "label": {
             "en": "Mail subject",
-            "fr": "Objet du courrier"
+            "fr": "Objet du courrier",
+            "de": "Betreff der Post",
+            "es": "Asunto del correo"
           },
           "type": "text",
           "maxLength": 60
@@ -993,11 +1165,15 @@
       "id": "save",
       "label": {
         "en": "Save everything",
-        "fr": "Tout sauvegarder"
+        "fr": "Tout sauvegarder",
+        "de": "Alles speichern",
+        "es": "Guardarlo todo"
       },
       "description": {
         "en": "Saves every character now.",
-        "fr": "Sauvegarde tous les personnages maintenant."
+        "fr": "Sauvegarde tous les personnages maintenant.",
+        "de": "Speichert jetzt alle Charaktere.",
+        "es": "Guarda ahora todos los personajes."
       },
       "command": "saveall",
       "params": []

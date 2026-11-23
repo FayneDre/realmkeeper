@@ -49,6 +49,8 @@ fn step(id: &str, executable: &str, script: &str, create: &[&str]) -> Extraction
         label: LocalizedText {
             en: id.into(),
             fr: None,
+            de: None,
+            es: None,
         },
     }
 }

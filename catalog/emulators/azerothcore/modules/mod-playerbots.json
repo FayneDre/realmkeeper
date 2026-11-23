@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Playerbots",
-    "fr": "Playerbots"
+    "fr": "Playerbots",
+    "de": "Playerbots",
+    "es": "Playerbots"
   },
   "description": {
     "en": "AI-controlled player characters that quest, group, run dungeons and populate the world.",
-    "fr": "Personnages joueurs contrôlés par l'IA qui font des quêtes, se groupent, font des donjons et peuplent le monde."
+    "fr": "Personnages joueurs contrôlés par l'IA qui font des quêtes, se groupent, font des donjons et peuplent le monde.",
+    "de": "KI-gesteuerte Spielercharaktere, die Quests erledigen, Gruppen bilden, Dungeons laufen und die Welt bevölkern.",
+    "es": "Personajes jugadores controlados por IA que hacen misiones, se agrupan, hacen mazmorras y pueblan el mundo."
   },
   "category": "bots",
   "homepage": "https://github.com/mod-playerbots/mod-playerbots",
@@ -63,11 +67,15 @@
       "type": "boolean",
       "label": {
         "en": "Random bots in the world",
-        "fr": "Bots aléatoires dans le monde"
+        "fr": "Bots aléatoires dans le monde",
+        "de": "Zufallsbots in der Welt",
+        "es": "Bots aleatorios en el mundo"
       },
       "help": {
         "en": "Bots that live their own lives: questing, grouping, trading.",
-        "fr": "Des bots qui vivent leur vie : quêtes, groupes, échanges."
+        "fr": "Des bots qui vivent leur vie : quêtes, groupes, échanges.",
+        "de": "Bots, die ihr eigenes Leben führen: Quests, Gruppen, Handel.",
+        "es": "Bots que viven su propia vida: misiones, grupos, comercio."
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -80,11 +88,15 @@
       "type": "integer",
       "label": {
         "en": "Minimum random bots",
-        "fr": "Nombre minimum de bots aléatoires"
+        "fr": "Nombre minimum de bots aléatoires",
+        "de": "Mindestzahl an Zufallsbots",
+        "es": "Mínimo de bots aleatorios"
       },
       "help": {
         "en": "At each server start, the number of bots online is drawn at random between the minimum and the maximum. Set both to the same value for a fixed number.",
-        "fr": "À chaque démarrage du serveur, le nombre de bots en ligne est tiré au hasard entre le minimum et le maximum. Mets la même valeur aux deux pour un nombre fixe."
+        "fr": "À chaque démarrage du serveur, le nombre de bots en ligne est tiré au hasard entre le minimum et le maximum. Mets la même valeur aux deux pour un nombre fixe.",
+        "de": "Bei jedem Serverstart wird die Zahl der Bots online zufällig zwischen Minimum und Maximum gewählt. Setze beide auf denselben Wert für eine feste Zahl.",
+        "es": "En cada inicio del servidor, el número de bots en línea se sortea entre el mínimo y el máximo. Pon ambos al mismo valor para un número fijo."
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -99,11 +111,15 @@
       "type": "integer",
       "label": {
         "en": "Maximum random bots",
-        "fr": "Nombre maximum de bots aléatoires"
+        "fr": "Nombre maximum de bots aléatoires",
+        "de": "Höchstzahl an Zufallsbots",
+        "es": "Máximo de bots aleatorios"
       },
       "help": {
         "en": "At each server start, the number of bots online is drawn at random between the minimum and the maximum. Set both to the same value for a fixed number.",
-        "fr": "À chaque démarrage du serveur, le nombre de bots en ligne est tiré au hasard entre le minimum et le maximum. Mets la même valeur aux deux pour un nombre fixe."
+        "fr": "À chaque démarrage du serveur, le nombre de bots en ligne est tiré au hasard entre le minimum et le maximum. Mets la même valeur aux deux pour un nombre fixe.",
+        "de": "Bei jedem Serverstart wird die Zahl der Bots online zufällig zwischen Minimum und Maximum gewählt. Setze beide auf denselben Wert für eine feste Zahl.",
+        "es": "En cada inicio del servidor, el número de bots en línea se sortea entre el mínimo y el máximo. Pon ambos al mismo valor para un número fijo."
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -118,7 +134,9 @@
       "type": "integer",
       "label": {
         "en": "Lowest random bot level",
-        "fr": "Niveau minimum des bots aléatoires"
+        "fr": "Niveau minimum des bots aléatoires",
+        "de": "Niedrigste Stufe der Zufallsbots",
+        "es": "Nivel más bajo de los bots aleatorios"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -133,7 +151,9 @@
       "type": "integer",
       "label": {
         "en": "Highest random bot level",
-        "fr": "Niveau maximum des bots aléatoires"
+        "fr": "Niveau maximum des bots aléatoires",
+        "de": "Höchste Stufe der Zufallsbots",
+        "es": "Nivel más alto de los bots aleatorios"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -148,11 +168,15 @@
       "type": "boolean",
       "label": {
         "en": "Random bots follow the players' level",
-        "fr": "Les bots aléatoires suivent le niveau des joueurs"
+        "fr": "Les bots aléatoires suivent le niveau des joueurs",
+        "de": "Zufallsbots folgen der Stufe der Spieler",
+        "es": "Los bots aleatorios siguen el nivel de los jugadores"
       },
       "help": {
         "en": "Caps the random bot level at the highest level of the players online.",
-        "fr": "Limite le niveau des bots aléatoires au plus haut niveau des joueurs connectés."
+        "fr": "Limite le niveau des bots aléatoires au plus haut niveau des joueurs connectés.",
+        "de": "Begrenzt die Stufe der Zufallsbots auf die höchste Stufe der Spieler online.",
+        "es": "Limita el nivel de los bots aleatorios al nivel más alto de los jugadores en línea."
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -165,11 +189,15 @@
       "type": "integer",
       "label": {
         "en": "Bots a player can control",
-        "fr": "Bots qu'un joueur peut contrôler"
+        "fr": "Bots qu'un joueur peut contrôler",
+        "de": "Bots, die ein Spieler steuern kann",
+        "es": "Bots que puede controlar un jugador"
       },
       "help": {
         "en": "How many bots one player can add to their group or command at once.",
-        "fr": "Combien de bots un joueur peut ajouter à son groupe ou commander à la fois."
+        "fr": "Combien de bots un joueur peut ajouter à son groupe ou commander à la fois.",
+        "de": "Wie viele Bots ein Spieler gleichzeitig zu seiner Gruppe hinzufügen oder befehligen kann.",
+        "es": "Cuántos bots puede añadir un jugador a su grupo o dirigir a la vez."
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -184,7 +212,9 @@
       "type": "boolean",
       "label": {
         "en": "Random bots use the dungeon finder",
-        "fr": "Les bots aléatoires utilisent la recherche de donjon"
+        "fr": "Les bots aléatoires utilisent la recherche de donjon",
+        "de": "Zufallsbots nutzen den Dungeonbrowser",
+        "es": "Los bots aleatorios usan el buscador de mazmorras"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -197,7 +227,9 @@
       "type": "boolean",
       "label": {
         "en": "Random bots join battlegrounds and arenas",
-        "fr": "Les bots aléatoires rejoignent champs de bataille et arènes"
+        "fr": "Les bots aléatoires rejoignent champs de bataille et arènes",
+        "de": "Zufallsbots treten Schlachtfeldern und Arenen bei",
+        "es": "Los bots aleatorios se unen a campos de batalla y arenas"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -210,7 +242,9 @@
       "type": "boolean",
       "label": {
         "en": "Random bots start battlegrounds on their own",
-        "fr": "Les bots aléatoires lancent des champs de bataille d'eux-mêmes"
+        "fr": "Les bots aléatoires lancent des champs de bataille d'eux-mêmes",
+        "de": "Zufallsbots starten Schlachtfelder selbst",
+        "es": "Los bots aleatorios inician campos de batalla por su cuenta"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -223,7 +257,9 @@
       "type": "integer",
       "label": {
         "en": "Guilds of random bots",
-        "fr": "Guildes de bots aléatoires"
+        "fr": "Guildes de bots aléatoires",
+        "de": "Gilden von Zufallsbots",
+        "es": "Hermandades de bots aleatorios"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -238,7 +274,9 @@
       "type": "boolean",
       "label": {
         "en": "Random bots talk in chat",
-        "fr": "Les bots aléatoires parlent dans le chat"
+        "fr": "Les bots aléatoires parlent dans le chat",
+        "de": "Zufallsbots schreiben im Chat",
+        "es": "Los bots aleatorios hablan en el chat"
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -251,11 +289,15 @@
       "type": "boolean",
       "label": {
         "en": "Random bots announce their deeds",
-        "fr": "Les bots aléatoires annoncent leurs exploits"
+        "fr": "Les bots aléatoires annoncent leurs exploits",
+        "de": "Zufallsbots verkünden ihre Taten",
+        "es": "Los bots aleatorios anuncian sus hazañas"
       },
       "help": {
         "en": "Loot, quest and level-up messages in the general and guild channels.",
-        "fr": "Messages de butin, de quêtes et de niveaux dans les canaux général et de guilde."
+        "fr": "Messages de butin, de quêtes et de niveaux dans les canaux général et de guilde.",
+        "de": "Beute-, Quest- und Stufenaufstiegsnachrichten im allgemeinen und im Gildenkanal.",
+        "es": "Mensajes de botín, misiones y subidas de nivel en los canales general y de hermandad."
       },
       "target": {
         "file": "modules/playerbots.conf",
@@ -268,11 +310,15 @@
       "type": "choice",
       "label": {
         "en": "MultiBot add-on in the game",
-        "fr": "Add-on MultiBot dans le jeu"
+        "fr": "Add-on MultiBot dans le jeu",
+        "de": "Add-on MultiBot im Spiel",
+        "es": "Accesorio MultiBot en el juego"
       },
       "help": {
         "en": "Buttons to command your bots in the game instead of typing chat commands (MultiBot by Macx-Lio, GPL-3.0). Installed in Interface/AddOns, removed when turned off.",
-        "fr": "Des boutons pour commander tes bots dans le jeu au lieu de taper des commandes dans le chat (MultiBot de Macx-Lio, GPL-3.0). Installé dans Interface/AddOns, retiré une fois désactivé."
+        "fr": "Des boutons pour commander tes bots dans le jeu au lieu de taper des commandes dans le chat (MultiBot de Macx-Lio, GPL-3.0). Installé dans Interface/AddOns, retiré une fois désactivé.",
+        "de": "Schaltflächen, um deine Bots im Spiel zu befehligen, statt Chatbefehle zu tippen (MultiBot von Macx-Lio, GPL-3.0). Wird in Interface/AddOns installiert und beim Ausschalten entfernt.",
+        "es": "Botones para dirigir a tus bots en el juego en vez de escribir comandos en el chat (MultiBot de Macx-Lio, GPL-3.0). Se instala en Interface/AddOns y se quita al desactivarlo."
       },
       "default": "off",
       "choices": [
@@ -280,14 +326,18 @@
           "id": "off",
           "label": {
             "en": "Off",
-            "fr": "Désactivé"
+            "fr": "Désactivé",
+            "de": "Aus",
+            "es": "Desactivado"
           }
         },
         {
           "id": "on",
           "label": {
             "en": "On",
-            "fr": "Activé"
+            "fr": "Activé",
+            "de": "An",
+            "es": "Activado"
           },
           "assets": [
             "multibot"
@@ -300,7 +350,9 @@
       "type": "boolean",
       "label": {
         "en": "Random bots never level up",
-        "fr": "Les bots aléatoires ne montent jamais de niveau"
+        "fr": "Les bots aléatoires ne montent jamais de niveau",
+        "de": "Zufallsbots steigen nie auf",
+        "es": "Los bots aleatorios nunca suben de nivel"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.RandomBotFixedLevel" },
       "default": false
@@ -310,7 +362,9 @@
       "type": "boolean",
       "label": {
         "en": "No Death Knight random bots",
-        "fr": "Pas de bots aléatoires chevaliers de la mort"
+        "fr": "Pas de bots aléatoires chevaliers de la mort",
+        "de": "Keine Todesritter unter den Zufallsbots",
+        "es": "Ningún caballero de la Muerte entre los bots aleatorios"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.DisableDeathKnightLogin" },
       "default": false
@@ -320,33 +374,35 @@
       "type": "choice",
       "label": {
         "en": "Best gear of random bots",
-        "fr": "Meilleur équipement des bots aléatoires"
+        "fr": "Meilleur équipement des bots aléatoires",
+        "de": "Beste Ausrüstung der Zufallsbots",
+        "es": "Mejor equipo de los bots aleatorios"
       },
       "default": "rare",
       "choices": [
         {
           "id": "common",
-          "label": { "en": "Common (white)", "fr": "Commun (blanc)" },
+          "label": { "en": "Common (white)", "fr": "Commun (blanc)", "de": "Gewöhnlich (weiß)", "es": "Común (blanco)" },
           "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 1 } }
         },
         {
           "id": "uncommon",
-          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)", "de": "Selten (grün)", "es": "Poco común (verde)" },
           "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 2 } }
         },
         {
           "id": "rare",
-          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)", "de": "Rar (blau)", "es": "Raro (azul)" },
           "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 3 } }
         },
         {
           "id": "epic",
-          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)", "de": "Episch (lila)", "es": "Épico (morado)" },
           "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 4 } }
         },
         {
           "id": "legendary",
-          "label": { "en": "Legendary (orange)", "fr": "Légendaire (orange)" },
+          "label": { "en": "Legendary (orange)", "fr": "Légendaire (orange)", "de": "Legendär (orange)", "es": "Legendario (naranja)" },
           "config": { "modules/playerbots.conf": { "Playerbots.RandomGearQualityLimit": 5 } }
         }
       ]
@@ -356,7 +412,9 @@
       "type": "boolean",
       "label": {
         "en": "Your other characters can be your bots",
-        "fr": "Vos autres personnages peuvent être vos bots"
+        "fr": "Vos autres personnages peuvent être vos bots",
+        "de": "Deine anderen Charaktere können deine Bots sein",
+        "es": "Tus otros personajes pueden ser tus bots"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AllowAccountBots" },
       "default": true
@@ -366,7 +424,9 @@
       "type": "boolean",
       "label": {
         "en": "Guild members' characters can be your bots",
-        "fr": "Les personnages de la guilde peuvent être vos bots"
+        "fr": "Les personnages de la guilde peuvent être vos bots",
+        "de": "Charaktere von Gildenmitgliedern können deine Bots sein",
+        "es": "Los personajes de miembros de la hermandad pueden ser tus bots"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AllowGuildBots" },
       "default": true
@@ -376,7 +436,9 @@
       "type": "boolean",
       "label": {
         "en": "Your bots equip the upgrades they loot",
-        "fr": "Vos bots s'équipent des améliorations qu'ils ramassent"
+        "fr": "Vos bots s'équipent des améliorations qu'ils ramassent",
+        "de": "Deine Bots legen erbeutete Verbesserungen an",
+        "es": "Tus bots se equipan las mejoras que despojan"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AutoEquipUpgradeLoot" },
       "default": true
@@ -386,33 +448,35 @@
       "type": "choice",
       "label": {
         "en": "Best gear of the \"autogear\" command",
-        "fr": "Meilleur équipement de la commande « autogear »"
+        "fr": "Meilleur équipement de la commande « autogear »",
+        "de": "Beste Ausrüstung des Befehls „autogear“",
+        "es": "Mejor equipo del comando «autogear»"
       },
       "default": "rare",
       "choices": [
         {
           "id": "common",
-          "label": { "en": "Common (white)", "fr": "Commun (blanc)" },
+          "label": { "en": "Common (white)", "fr": "Commun (blanc)", "de": "Gewöhnlich (weiß)", "es": "Común (blanco)" },
           "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 1 } }
         },
         {
           "id": "uncommon",
-          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)" },
+          "label": { "en": "Uncommon (green)", "fr": "Peu commun (vert)", "de": "Selten (grün)", "es": "Poco común (verde)" },
           "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 2 } }
         },
         {
           "id": "rare",
-          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)" },
+          "label": { "en": "Rare (blue)", "fr": "Rare (bleu)", "de": "Rar (blau)", "es": "Raro (azul)" },
           "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 3 } }
         },
         {
           "id": "epic",
-          "label": { "en": "Epic (purple)", "fr": "Épique (violet)" },
+          "label": { "en": "Epic (purple)", "fr": "Épique (violet)", "de": "Episch (lila)", "es": "Épico (morado)" },
           "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 4 } }
         },
         {
           "id": "legendary",
-          "label": { "en": "Legendary (orange)", "fr": "Légendaire (orange)" },
+          "label": { "en": "Legendary (orange)", "fr": "Légendaire (orange)", "de": "Legendär (orange)", "es": "Legendario (naranja)" },
           "config": { "modules/playerbots.conf": { "Playerbots.AutoGearQualityLimit": 5 } }
         }
       ]
@@ -422,7 +486,9 @@
       "type": "boolean",
       "label": {
         "en": "Your bots complete quests with you",
-        "fr": "Vos bots terminent les quêtes avec vous"
+        "fr": "Vos bots terminent les quêtes avec vous",
+        "de": "Deine Bots schließen Quests mit dir ab",
+        "es": "Tus bots completan misiones contigo"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.SyncQuestWithPlayer" },
       "default": true
@@ -432,7 +498,9 @@
       "type": "boolean",
       "label": {
         "en": "Summon your bots during a fight",
-        "fr": "Invoquer vos bots pendant un combat"
+        "fr": "Invoquer vos bots pendant un combat",
+        "de": "Deine Bots im Kampf herbeirufen",
+        "es": "Invocar a tus bots durante un combate"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.AllowSummonInCombat" },
       "default": true
@@ -442,23 +510,25 @@
       "type": "choice",
       "label": {
         "en": "Revive bots when summoning them",
-        "fr": "Ressusciter les bots en les invoquant"
+        "fr": "Ressusciter les bots en les invoquant",
+        "de": "Bots beim Herbeirufen wiederbeleben",
+        "es": "Resucitar a los bots al invocarlos"
       },
       "default": "out-of-combat",
       "choices": [
         {
           "id": "never",
-          "label": { "en": "Never", "fr": "Jamais" },
+          "label": { "en": "Never", "fr": "Jamais", "de": "Nie", "es": "Nunca" },
           "config": { "modules/playerbots.conf": { "Playerbots.ReviveBotWhenSummoned": 0 } }
         },
         {
           "id": "out-of-combat",
-          "label": { "en": "Out of combat", "fr": "Hors combat" },
+          "label": { "en": "Out of combat", "fr": "Hors combat", "de": "Außerhalb des Kampfes", "es": "Fuera de combate" },
           "config": { "modules/playerbots.conf": { "Playerbots.ReviveBotWhenSummoned": 1 } }
         },
         {
           "id": "always",
-          "label": { "en": "Always", "fr": "Toujours" },
+          "label": { "en": "Always", "fr": "Toujours", "de": "Immer", "es": "Siempre" },
           "config": { "modules/playerbots.conf": { "Playerbots.ReviveBotWhenSummoned": 2 } }
         }
       ]
@@ -468,23 +538,25 @@
       "type": "choice",
       "label": {
         "en": "Bots roll on items they need",
-        "fr": "Les bots lancent les dés sur les objets utiles"
+        "fr": "Les bots lancent les dés sur les objets utiles",
+        "de": "Bots würfeln um Gegenstände, die sie brauchen",
+        "es": "Los bots tiran por los objetos que necesitan"
       },
       "default": "greed",
       "choices": [
         {
           "id": "pass",
-          "label": { "en": "Pass", "fr": "Passer" },
+          "label": { "en": "Pass", "fr": "Passer", "de": "Passen", "es": "Pasar" },
           "config": { "modules/playerbots.conf": { "Playerbots.LootNeedRollLevel": 0 } }
         },
         {
           "id": "greed",
-          "label": { "en": "Greed", "fr": "Cupidité" },
+          "label": { "en": "Greed", "fr": "Cupidité", "de": "Gier", "es": "Codicia" },
           "config": { "modules/playerbots.conf": { "Playerbots.LootNeedRollLevel": 1 } }
         },
         {
           "id": "need",
-          "label": { "en": "Need", "fr": "Besoin" },
+          "label": { "en": "Need", "fr": "Besoin", "de": "Bedarf", "es": "Necesidad" },
           "config": { "modules/playerbots.conf": { "Playerbots.LootNeedRollLevel": 2 } }
         }
       ]
@@ -494,7 +566,9 @@
       "type": "boolean",
       "label": {
         "en": "Bots roll Greed on other items",
-        "fr": "Les bots lancent Cupidité sur les autres objets"
+        "fr": "Les bots lancent Cupidité sur les autres objets",
+        "de": "Bots würfeln „Gier“ auf andere Gegenstände",
+        "es": "Los bots tiran Codicia por los demás objetos"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.LootGreedRollLevel" },
       "default": false
@@ -504,7 +578,9 @@
       "type": "boolean",
       "label": {
         "en": "Bots roll on recipes they can learn",
-        "fr": "Les bots lancent les dés sur les recettes qu'ils peuvent apprendre"
+        "fr": "Les bots lancent les dés sur les recettes qu'ils peuvent apprendre",
+        "de": "Bots würfeln um Rezepte, die sie lernen können",
+        "es": "Los bots tiran por las recetas que pueden aprender"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.LootRollRecipe" },
       "default": false
@@ -514,7 +590,9 @@
       "type": "boolean",
       "label": {
         "en": "Enchanter bots roll Disenchant",
-        "fr": "Les bots enchanteurs lancent Désenchanter"
+        "fr": "Les bots enchanteurs lancent Désenchanter",
+        "de": "Verzauberer-Bots würfeln „Entzaubern“",
+        "es": "Los bots encantadores tiran Desencantar"
       },
       "target": { "file": "modules/playerbots.conf", "key": "Playerbots.LootRollDisenchant" },
       "default": false
@@ -523,7 +601,7 @@
   "optionGroups": [
     {
       "id": "world",
-      "label": { "en": "Random bots in the world", "fr": "Bots aléatoires dans le monde" },
+      "label": { "en": "Random bots in the world", "fr": "Bots aléatoires dans le monde", "de": "Zufallsbots in der Welt", "es": "Bots aleatorios en el mundo" },
       "options": [
         "random-bot-autologin",
         "min-random-bots",
@@ -539,7 +617,7 @@
     },
     {
       "id": "activities",
-      "label": { "en": "What random bots do", "fr": "Ce que font les bots aléatoires" },
+      "label": { "en": "What random bots do", "fr": "Ce que font les bots aléatoires", "de": "Was Zufallsbots tun", "es": "Qué hacen los bots aleatorios" },
       "options": [
         "random-bot-join-lfg",
         "random-bot-join-bg",
@@ -550,7 +628,7 @@
     },
     {
       "id": "yours",
-      "label": { "en": "Your bots", "fr": "Vos bots" },
+      "label": { "en": "Your bots", "fr": "Vos bots", "de": "Deine Bots", "es": "Tus bots" },
       "options": [
         "max-added-bots",
         "allow-account-bots",
@@ -564,7 +642,7 @@
     },
     {
       "id": "loot",
-      "label": { "en": "Loot rolls", "fr": "Jets de butin" },
+      "label": { "en": "Loot rolls", "fr": "Jets de butin", "de": "Würfeln um Beute", "es": "Tiradas de botín" },
       "options": ["loot-need", "loot-greed", "loot-recipes", "loot-disenchant"]
     }
   ],

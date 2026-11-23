@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Reagent Bank",
-    "fr": "Banque de composants"
+    "fr": "Banque de composants",
+    "de": "Reagenzienbank",
+    "es": "Banco de componentes"
   },
   "description": {
     "en": "An NPC that stores your crafting reagents without using bag or bank space. A GM places it with .npc add 290011.",
-    "fr": "Un PNJ qui garde tes composants d'artisanat sans prendre de place dans tes sacs ni ta banque. Un MJ le place avec .npc add 290011."
+    "fr": "Un PNJ qui garde tes composants d'artisanat sans prendre de place dans tes sacs ni ta banque. Un MJ le place avec .npc add 290011.",
+    "de": "Ein NSC, der deine Herstellungsreagenzien lagert, ohne Platz in Taschen oder Bank zu belegen. Ein Spielleiter platziert ihn mit .npc add 290011.",
+    "es": "Un PNJ que guarda tus componentes de fabricación sin ocupar espacio en las bolsas ni en el banco. Un maestro de juego lo coloca con .npc add 290011."
   },
   "category": "quality-of-life",
   "homepage": "https://github.com/ZhengPeiRu21/mod-reagent-bank",

@@ -30,6 +30,16 @@ describe("i18n", () => {
     i18n.locale = "fr";
     expect(localized({ en: "Bots", fr: "Robots" })).toBe("Robots");
     expect(localized({ en: "Bots" })).toBe("Bots");
+    i18n.locale = "de";
+    expect(localized({ en: "Rates", fr: "Taux", de: "Raten" })).toBe("Raten");
+    expect(localized({ en: "Rates", fr: "Taux" })).toBe("Rates");
+  });
+
+  it("speaks German and Spanish", () => {
+    i18n.locale = "de";
+    expect(t("nav.home")).toBe("Startseite");
+    i18n.locale = "es";
+    expect(t("nav.home")).toBe("Inicio");
   });
 
   it("knows backend error codes only when translated", () => {

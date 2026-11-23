@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "Transmogrification",
-    "fr": "Transmogrification"
+    "fr": "Transmogrification",
+    "de": "Transmogrifikation",
+    "es": "Transfiguración"
   },
   "description": {
     "en": "Change the look of your gear with the appearance of other items you collected. A GM places the transmogrifier with .npc add 190010; a portable one comes with the module.",
-    "fr": "Change l'apparence de ton équipement avec celle d'objets que tu as collectés. Un MJ place le transmogrifieur avec .npc add 190010 ; une version portable est fournie avec le module."
+    "fr": "Change l'apparence de ton équipement avec celle d'objets que tu as collectés. Un MJ place le transmogrifieur avec .npc add 190010 ; une version portable est fournie avec le module.",
+    "de": "Ändere das Aussehen deiner Ausrüstung mit dem anderer gesammelter Gegenstände. Ein Spielleiter platziert den Transmogrifizierer mit .npc add 190010; ein tragbarer liegt dem Modul bei.",
+    "es": "Cambia el aspecto de tu equipo con la apariencia de otros objetos que hayas reunido. Un maestro de juego coloca al transfigurador con .npc add 190010; el módulo incluye uno portátil."
   },
   "category": "cosmetic",
   "homepage": "https://github.com/azerothcore/mod-transmog",
@@ -61,7 +65,9 @@
       "type": "boolean",
       "label": {
         "en": "Unlock appearances by collecting items",
-        "fr": "Débloquer les apparences en collectant les objets"
+        "fr": "Débloquer les apparences en collectant les objets",
+        "de": "Aussehen durch Sammeln von Gegenständen freischalten",
+        "es": "Desbloquear apariencias reuniendo objetos"
       },
       "target": {
         "file": "modules/transmog.conf",
@@ -74,7 +80,9 @@
       "type": "boolean",
       "label": {
         "en": "Portable transmogrifier",
-        "fr": "Transmogrifieur portable"
+        "fr": "Transmogrifieur portable",
+        "de": "Tragbarer Transmogrifizierer",
+        "es": "Transfigurador portátil"
       },
       "target": {
         "file": "modules/transmog.conf",
@@ -87,7 +95,9 @@
       "type": "number",
       "label": {
         "en": "Cost multiplier",
-        "fr": "Multiplicateur de coût"
+        "fr": "Multiplicateur de coût",
+        "de": "Kostenfaktor",
+        "es": "Multiplicador de coste"
       },
       "target": {
         "file": "modules/transmog.conf",
@@ -102,7 +112,9 @@
       "type": "boolean",
       "label": {
         "en": "Allow hiding a piece of gear",
-        "fr": "Permettre de masquer une pièce d'équipement"
+        "fr": "Permettre de masquer une pièce d'équipement",
+        "de": "Ausrüstungsteile verbergen erlauben",
+        "es": "Permitir ocultar una pieza de equipo"
       },
       "target": {
         "file": "modules/transmog.conf",
@@ -113,28 +125,28 @@
     {
       "id": "sets",
       "type": "boolean",
-      "label": { "en": "Saved outfits", "fr": "Tenues enregistrées" },
+      "label": { "en": "Saved outfits", "fr": "Tenues enregistrées", "de": "Gespeicherte Outfits", "es": "Conjuntos guardados" },
       "target": { "file": "modules/transmog.conf", "key": "Transmogrification.EnableSets" },
       "default": true
     },
     {
       "id": "allow-poor",
       "type": "boolean",
-      "label": { "en": "Poor (grey) items", "fr": "Objets médiocres (gris)" },
+      "label": { "en": "Poor (grey) items", "fr": "Objets médiocres (gris)", "de": "Schlechte (graue) Gegenstände", "es": "Objetos pobres (grises)" },
       "target": { "file": "modules/transmog.conf", "key": "Transmogrification.AllowPoor" },
       "default": false
     },
     {
       "id": "allow-common",
       "type": "boolean",
-      "label": { "en": "Common (white) items", "fr": "Objets communs (blancs)" },
+      "label": { "en": "Common (white) items", "fr": "Objets communs (blancs)", "de": "Gewöhnliche (weiße) Gegenstände", "es": "Objetos comunes (blancos)" },
       "target": { "file": "modules/transmog.conf", "key": "Transmogrification.AllowCommon" },
       "default": false
     },
     {
       "id": "allow-legendary",
       "type": "boolean",
-      "label": { "en": "Legendary items", "fr": "Objets légendaires" },
+      "label": { "en": "Legendary items", "fr": "Objets légendaires", "de": "Legendäre Gegenstände", "es": "Objetos legendarios" },
       "target": { "file": "modules/transmog.conf", "key": "Transmogrification.AllowLegendary" },
       "default": false
     },
@@ -143,7 +155,9 @@
       "type": "boolean",
       "label": {
         "en": "Mix armor types (cloth look on plate...)",
-        "fr": "Mélanger les types d'armure (tissu sur plaques...)"
+        "fr": "Mélanger les types d'armure (tissu sur plaques...)",
+        "de": "Rüstungstypen mischen (Stoffoptik auf Platte...)",
+        "es": "Mezclar tipos de armadura (aspecto de tela sobre placas...)"
       },
       "target": {
         "file": "modules/transmog.conf",
@@ -154,7 +168,7 @@
     {
       "id": "mixed-weapons",
       "type": "boolean",
-      "label": { "en": "Mix weapon types", "fr": "Mélanger les types d'armes" },
+      "label": { "en": "Mix weapon types", "fr": "Mélanger les types d'armes", "de": "Waffentypen mischen", "es": "Mezclar tipos de armas" },
       "target": {
         "file": "modules/transmog.conf",
         "key": "Transmogrification.AllowMixedWeaponTypes"
@@ -166,7 +180,9 @@
       "type": "boolean",
       "label": {
         "en": "Ignore the item's required level",
-        "fr": "Ignorer le niveau requis de l'objet"
+        "fr": "Ignorer le niveau requis de l'objet",
+        "de": "Erforderliche Stufe des Gegenstands ignorieren",
+        "es": "Ignorar el nivel requerido del objeto"
       },
       "target": { "file": "modules/transmog.conf", "key": "Transmogrification.IgnoreReqLevel" },
       "default": false
@@ -175,7 +191,7 @@
   "optionGroups": [
     {
       "id": "rules",
-      "label": { "en": "What can be used as a look", "fr": "Ce qui peut servir d'apparence" },
+      "label": { "en": "What can be used as a look", "fr": "Ce qui peut servir d'apparence", "de": "Was als Aussehen dienen kann", "es": "Qué se puede usar como apariencia" },
       "options": [
         "allow-poor",
         "allow-common",

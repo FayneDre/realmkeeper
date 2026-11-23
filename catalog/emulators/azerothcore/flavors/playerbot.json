@@ -5,11 +5,15 @@
   "emulator": "azerothcore",
   "name": {
     "en": "AzerothCore (Playerbot)",
-    "fr": "AzerothCore (Playerbot)"
+    "fr": "AzerothCore (Playerbot)",
+    "de": "AzerothCore (Playerbot)",
+    "es": "AzerothCore (Playerbot)"
   },
   "description": {
     "en": "AzerothCore fork maintained by the mod-playerbots project. Required by mod-playerbots; the official repository does not work with it.",
-    "fr": "Fork d'AzerothCore maintenu par le projet mod-playerbots. Requis par mod-playerbots ; le dépôt officiel n'est pas compatible."
+    "fr": "Fork d'AzerothCore maintenu par le projet mod-playerbots. Requis par mod-playerbots ; le dépôt officiel n'est pas compatible.",
+    "de": "Vom Projekt mod-playerbots gepflegter AzerothCore-Fork. Wird von mod-playerbots benötigt; das offizielle Repository funktioniert damit nicht.",
+    "es": "Fork de AzerothCore mantenido por el proyecto mod-playerbots. Lo necesita mod-playerbots; el repositorio oficial no funciona con él."
   },
   "source": {
     "repo": "https://github.com/mod-playerbots/azerothcore-wotlk",

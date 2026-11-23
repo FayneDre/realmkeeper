@@ -3,27 +3,38 @@
 
 import en from "./locales/en.json";
 import fr from "./locales/fr.json";
+import de from "./locales/de.json";
+import es from "./locales/es.json";
 
-export type Locale = "en" | "fr";
+export type Locale = "en" | "fr" | "de" | "es";
 export type MessageKey = keyof typeof en;
-export type LocalizedText = { en: string; fr?: string };
+/** Catalog text: English is mandatory and the fallback of every locale. */
+export type LocalizedText = { en: string } & Partial<Record<Exclude<Locale, "en">, string>>;
 
+/** Each language under its own name, in its own language. */
 export const LOCALES: { id: Locale; label: string }[] = [
-  { id: "fr", label: "Français" },
   { id: "en", label: "English" },
+  { id: "fr", label: "Français" },
+  { id: "de", label: "Deutsch" },
+  { id: "es", label: "Español" },
 ];
 
-const dictionaries: Record<Locale, Partial<Record<MessageKey, string>>> = { en, fr };
+const dictionaries: Record<Locale, Partial<Record<MessageKey, string>>> = { en, fr, de, es };
+
+function isLocale(value: string | null): value is Locale {
+  return LOCALES.some((l) => l.id === value);
+}
 const STORAGE_KEY = "rk.locale";
 
 function initialLocale(): Locale {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "en" || saved === "fr") return saved;
+    if (isLocale(saved)) return saved;
   } catch {
     // Storage unavailable: fall through to the system language.
   }
-  return navigator.language.toLowerCase().startsWith("fr") ? "fr" : "en";
+  const system = navigator.language.toLowerCase().split("-")[0] ?? "en";
+  return isLocale(system) ? system : "en";
 }
 
 let current = $state<Locale>(initialLocale());
@@ -53,7 +64,7 @@ export function t(key: MessageKey, params: Record<string, string | number> = {})
 
 /** Picks the current locale from catalog text, falling back to English. */
 export function localized(text: LocalizedText): string {
-  return (current === "fr" ? text.fr : undefined) ?? text.en;
+  return (current === "en" ? undefined : text[current]) ?? text.en;
 }
 
 /** Whether a message exists (error codes come from the backend). */
