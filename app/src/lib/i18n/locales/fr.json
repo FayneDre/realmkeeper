@@ -541,6 +541,7 @@
   "handoff.toTakeBody": "Jouée sur {machine} ({date}) : reprends-la avant de jouer ici.",
   "handoff.arriving": "La partie jouée sur {machine} n'est pas encore arrivée : attends la synchronisation avant de jouer ici.",
   "handoff.otherPlaying": "{machine} joue peut-être encore sur ce royaume.",
+  "handoff.otherUnsent": "{machine} a joué sur ce royaume sans envoyer sa partie : ouvre d'abord RealmKeeper là-bas, il l'envoie.",
   "handoff.conflictBody": "Jouée ici et sur {machine} ({date}) depuis le dernier échange.",
   "handoff.conflictTitle": "Deux parties différentes",
   "handoff.conflictExplain": "Ce royaume a été joué sur ce PC et sur {machine} depuis leur dernier échange. RealmKeeper ne fusionne jamais deux parties : choisis celle à continuer.",

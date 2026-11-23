@@ -163,6 +163,20 @@ impl AppState {
         Ok(None)
     }
 
+    /// Background work (daily backup, handoff send) is still running:
+    /// quitting waits for it instead of cutting an export short.
+    pub fn background_busy(&self) -> bool {
+        let mut background = self.background.lock().unwrap_or_else(|e| e.into_inner());
+        background.retain(|_, handle| !handle.inner().is_finished());
+        !background.is_empty()
+    }
+
+    /// Servers run or background work goes on: quitting goes through
+    /// [`AppState::shutdown`].
+    pub fn has_work(&self) -> bool {
+        !self.running_ids().is_empty() || self.background_busy()
+    }
+
     /// Ids of the instances with a session.
     pub fn running_ids(&self) -> Vec<String> {
         let mut sessions = self.sessions.lock().unwrap_or_else(|e| e.into_inner());
@@ -182,15 +196,17 @@ impl AppState {
         {
             active.cancel.cancel();
         }
-        let sessions: Vec<Session> =
+        let sessions: Vec<(String, Session)> =
             std::mem::take(&mut *self.sessions.lock().unwrap_or_else(|e| e.into_inner()))
-                .into_values()
+                .into_iter()
                 .collect();
-        for session in &sessions {
+        for (_, session) in &sessions {
             session.stop();
         }
-        for session in sessions {
+        let mut stopped = Vec::new();
+        for (id, session) in sessions {
             session.wait().await;
+            stopped.push(id);
         }
         // A backup in progress finishes (its database stops cleanly).
         let background: Vec<_> =
@@ -199,6 +215,14 @@ impl AppState {
                 .collect();
         for handle in background {
             let _ = handle.await;
+        }
+        // Quitting with the servers running is a clean stop too: a shared
+        // realm played here is sent now, or the other computer would take
+        // back an older game (ADR 0028).
+        if let Ok(launcher) = self.launcher() {
+            for id in stopped {
+                send_if_played(&launcher, &id).await;
+            }
         }
     }
 }
@@ -1416,6 +1440,61 @@ fn schedule_after_stop(app: &AppHandle, instance: &str) {
         .lock()
         .unwrap_or_else(|e| e.into_inner())
         .insert(instance.to_owned(), handle);
+}
+
+/// Sends the stopped shared realm `id` when it was played here since its
+/// last handoff (best effort: a failure leaves it "to send" in the UI).
+async fn send_if_played(launcher: &Launcher, id: &str) {
+    if !matches!(launcher.handoff_link(id), Ok(Some(link)) if link.played) {
+        return;
+    }
+    let Some(place) = handoff::place(&rk_launcher::app_dir()).ok().flatten() else {
+        return;
+    };
+    let _turn = launcher.database_turn(id).await;
+    let _ = launcher.handoff_send(id, &place, false).await;
+}
+
+/// At launch: shared realms played here but never sent (the launcher or
+/// the computer stopped before the send finished) are sent now, unless
+/// they already run again.
+pub fn send_unsent_realms(app: &AppHandle) {
+    let state = app.state::<AppState>();
+    let Ok(launcher) = state.launcher() else {
+        return;
+    };
+    let Ok(instances) = launcher.instances() else {
+        return;
+    };
+    for id in instances.into_iter().map(|i| i.record.id) {
+        if !matches!(launcher.handoff_link(&id), Ok(Some(link)) if link.played) {
+            continue;
+        }
+        let (app, launcher) = (app.clone(), launcher.clone());
+        let instance = id.clone();
+        // Registered like the send after a stop: a start waits for it.
+        let handle = tauri::async_runtime::spawn(async move {
+            let emit = |sending: bool| {
+                let _ = app.emit(
+                    "handoff",
+                    HandoffPayload {
+                        instance: instance.clone(),
+                        sending,
+                        sent: None,
+                        error: None,
+                    },
+                );
+            };
+            emit(true);
+            send_if_played(&launcher, &instance).await;
+            emit(false);
+        });
+        state
+            .background
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(id, handle);
+    }
 }
 
 /// Forwards session events in batches until the session ends; reacts to

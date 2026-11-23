@@ -383,6 +383,24 @@ pub fn other_playing(view: &FolderView, machine_id: &str, now: u64) -> Option<Pl
         .cloned()
 }
 
+/// Another computer's older playing mark that its sends never cleared: it
+/// played after its newest state (the launcher or the computer stopped
+/// before the send), so the folder's state misses that game.
+pub fn other_unsent(view: &FolderView, machine_id: &str, now: u64) -> Option<Playing> {
+    view.playing
+        .iter()
+        .filter(|p| {
+            p.machine_id != machine_id
+                && p.secs.saturating_add(PLAYING_FRESH_SECS) <= now
+                && !view
+                    .heads
+                    .iter()
+                    .any(|s| s.head.machine_id == p.machine_id && s.head.secs >= p.secs)
+        })
+        .max_by_key(|p| p.secs)
+        .cloned()
+}
+
 // ------------------------------------------------------------ status
 
 /// A head as the UI shows it.
@@ -435,6 +453,10 @@ pub struct Status {
     /// Another computer's servers seem to run on this realm.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub other_playing: Option<Remote>,
+    /// Another computer played this realm after its newest state and never
+    /// sent that game (its launcher has to send it first).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub other_unsent: Option<Remote>,
     /// Time of the newest state this computer sent, when it is the newest.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sent: Option<u64>,
@@ -445,6 +467,7 @@ impl Status {
         Self {
             state,
             other_playing: None,
+            other_unsent: None,
             sent: None,
         }
     }
@@ -558,9 +581,15 @@ impl Launcher {
                 s.head.machine_id == place.machine_id && s.head.generation == link.generation
             })
             .map(|s| s.head.secs);
+        let now = unix_secs();
         Ok(Status {
             state,
-            other_playing: other_playing(&view, &place.machine_id, unix_secs()).map(|p| Remote {
+            other_playing: other_playing(&view, &place.machine_id, now).map(|p| Remote {
+                machine: p.machine,
+                secs: p.secs,
+                generation: 0,
+            }),
+            other_unsent: other_unsent(&view, &place.machine_id, now).map(|p| Remote {
                 machine: p.machine,
                 secs: p.secs,
                 generation: 0,
@@ -757,6 +786,11 @@ impl Launcher {
             Err(e) => Err(e),
         };
         let _ = std::fs::remove_file(&local);
+        if result.is_ok() {
+            // This computer's game was replaced: its playing mark would tell
+            // the other one it played without sending (`other_unsent`).
+            let _ = std::fs::remove_file(dir.join(format!("playing-{}.json", place.machine_id)));
+        }
         result
     }
 
@@ -1134,6 +1168,24 @@ mod tests {
         assert_eq!(other_playing(&view, ME, 2_000), Some(playing.clone()));
         assert_eq!(other_playing(&view, OTHER, 2_000), None, "not my own mark");
         assert_eq!(other_playing(&view, ME, 1_000 + PLAYING_FRESH_SECS), None);
+        // Played after its newest state (secs 20) and never sent.
+        assert_eq!(other_unsent(&view, ME, 2_000), None, "still fresh");
+        assert_eq!(
+            other_unsent(&view, ME, 1_000 + PLAYING_FRESH_SECS),
+            Some(playing.clone())
+        );
+    }
+
+    #[test]
+    fn a_mark_older_than_its_computers_state_is_not_unsent() {
+        let mut view = FolderView::default();
+        view.heads.push(seen(head(3, OTHER, 5_000), true));
+        view.playing.push(Playing {
+            machine_id: OTHER.into(),
+            machine: "PC-fe".into(),
+            secs: 4_000,
+        });
+        assert_eq!(other_unsent(&view, ME, 4_000 + PLAYING_FRESH_SECS), None);
     }
 
     #[test]

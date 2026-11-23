@@ -261,6 +261,9 @@
           {t("home.unfinished")}
         {:else if status === "moved"}
           {t("home.moved")}
+        {:else if status === "toTake" && handoff?.otherUnsent}
+          <!-- The state on offer misses a newer game of that computer. -->
+          {t("handoff.otherUnsent", { machine: handoff.otherUnsent.machine })}
         {:else if status === "toTake" && handoff?.state === "toTake"}
           {t("handoff.toTakeBody", { machine: handoff.from.machine, date: when(handoff.from.secs) })}
         {:else if status === "conflict" && handoff?.state === "conflict"}
@@ -280,6 +283,8 @@
           {t("handoff.sending")}
         {:else if handoff?.state === "arriving"}
           {t("handoff.arriving", { machine: handoff.from.machine })}
+        {:else if handoff?.otherUnsent}
+          {t("handoff.otherUnsent", { machine: handoff.otherUnsent.machine })}
         {:else if handoff?.otherPlaying}
           {t("handoff.otherPlaying", { machine: handoff.otherPlaying.machine })}
         {:else if !clientReady}

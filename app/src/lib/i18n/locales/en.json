@@ -541,6 +541,7 @@
   "handoff.toTakeBody": "Played on {machine} ({date}): take it back before playing here.",
   "handoff.arriving": "The game played on {machine} has not fully arrived yet: wait for the sync before playing here.",
   "handoff.otherPlaying": "{machine} may still be playing this realm.",
+  "handoff.otherUnsent": "{machine} played this realm without sending its game: open RealmKeeper there first, it sends it.",
   "handoff.conflictBody": "Played here and on {machine} ({date}) since the last handoff.",
   "handoff.conflictTitle": "Two different games",
   "handoff.conflictExplain": "This realm was played on this computer and on {machine} since they last exchanged it. RealmKeeper never merges two games: choose the one to continue.",

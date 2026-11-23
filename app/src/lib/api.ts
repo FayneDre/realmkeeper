@@ -475,6 +475,8 @@ export type HandoffState =
 export type HandoffStatus = HandoffState & {
   /** Another computer's servers seem to run on this realm. */
   otherPlaying?: HandoffRemote;
+  /** Another computer played after its newest state and never sent it. */
+  otherUnsent?: HandoffRemote;
   /** When this computer sent the newest state (unix seconds). */
   sent?: number;
 };

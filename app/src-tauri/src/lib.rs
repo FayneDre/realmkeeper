@@ -37,17 +37,19 @@ pub fn run() {
             let state = commands::AppState::open(app.handle());
             app.manage(state);
             app.manage(tray::create(app.handle())?);
+            commands::send_unsent_realms(app.handle());
             if let Some(window) = app.get_webview_window("main") {
                 let _ = fit_to_screen(&window);
             }
             Ok(())
         })
         .on_window_event(|window, event| {
-            // Closing the window with servers running: stop them cleanly
+            // Closing the window with servers running (or a send or backup
+            // going on after a stop): stop them cleanly
             // first (worldserver saves the world and logs the bots out).
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 let app = window.app_handle();
-                if app.state::<commands::AppState>().running_ids().is_empty() {
+                if !app.state::<commands::AppState>().has_work() {
                     return;
                 }
                 api.prevent_close();
@@ -128,7 +130,7 @@ pub fn run() {
             // servers still running stop cleanly first (ADR 0020).
             if let tauri::RunEvent::Exit = event {
                 let state = app.state::<commands::AppState>();
-                if !state.running_ids().is_empty() {
+                if state.has_work() {
                     tauri::async_runtime::block_on(state.shutdown());
                 }
             }
@@ -138,7 +140,7 @@ pub fn run() {
 /// Quits the launcher; servers still running are stopped cleanly first
 /// (the window shows why it waits).
 pub fn request_exit(app: &AppHandle) {
-    if app.state::<commands::AppState>().running_ids().is_empty() {
+    if !app.state::<commands::AppState>().has_work() {
         app.exit(0);
         return;
     }
