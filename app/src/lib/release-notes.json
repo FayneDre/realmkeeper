@@ -1,4 +1,34 @@
 {
+  "0.3.5": {
+    "en": [
+      "RealmKeeper now speaks German and Spanish: choose the launcher language in Options. The modules and settings are translated too.",
+      "Playing on two computers is safer: quitting the launcher with the servers running now sends your game too, a game left unsent is sent the next time the launcher opens, and the other computer warns you when a newer game was never sent.",
+      "New realm settings in Server: raid lockouts every day or every 3 days, faster crafting and gathering skill gains (fishing included), arena point rate.",
+      "Modules now have their own tab, and \"Server settings\" is simply \"Server\". The title bar was redrawn: the tabs sit in the bar itself, the window buttons fill its height.",
+      "A game client with many languages no longer breaks the layout: the game language is picked from a list."
+    ],
+    "fr": [
+      "RealmKeeper parle maintenant allemand et espagnol : choisissez la langue du launcher dans Options. Les modules et les réglages sont traduits aussi.",
+      "Jouer sur deux ordinateurs est plus sûr : quitter le launcher serveurs lancés envoie aussi votre partie, une partie restée non envoyée part à la prochaine ouverture du launcher, et l'autre ordinateur prévient quand une partie plus récente n'a jamais été envoyée.",
+      "Nouveaux réglages du royaume dans Serveur : réinitialisation des raids chaque jour ou tous les 3 jours, progression plus rapide des métiers d'artisanat et de récolte (pêche comprise), taux de points d'arène.",
+      "Les modules ont maintenant leur propre onglet, et « Réglages du serveur » devient simplement « Serveur ». La barre du haut est redessinée : les onglets font partie de la barre, les boutons de la fenêtre en occupent toute la hauteur.",
+      "Un client du jeu avec beaucoup de langues ne casse plus l'affichage : la langue du jeu se choisit dans une liste."
+    ],
+    "de": [
+      "RealmKeeper spricht jetzt Deutsch und Spanisch: Wähle die Sprache des Launchers in den Optionen. Module und Einstellungen sind ebenfalls übersetzt.",
+      "Spielen auf zwei Computern ist sicherer: Wer den Launcher bei laufenden Servern beendet, sendet sein Spiel jetzt ebenfalls, ein nicht gesendetes Spiel wird beim nächsten Öffnen des Launchers gesendet, und der andere Computer warnt, wenn ein neueres Spiel nie gesendet wurde.",
+      "Neue Realm-Einstellungen unter Server: Schlachtzüge täglich oder alle 3 Tage zurücksetzen, schnellerer Fortschritt bei Herstellungs- und Sammelberufen (Angeln inbegriffen), Rate der Arenapunkte.",
+      "Module haben jetzt einen eigenen Reiter. Die Titelleiste wurde neu gestaltet: Die Reiter sind Teil der Leiste, die Fensterschaltflächen füllen ihre Höhe.",
+      "Ein Spielclient mit vielen Sprachen bringt die Anzeige nicht mehr durcheinander: Die Spielsprache wird aus einer Liste gewählt."
+    ],
+    "es": [
+      "RealmKeeper ya habla alemán y español: elige el idioma del launcher en Opciones. Los módulos y los ajustes también están traducidos.",
+      "Jugar en dos ordenadores es más seguro: salir del launcher con los servidores en marcha ahora también envía tu partida, una partida sin enviar se envía la próxima vez que se abre el launcher, y el otro ordenador avisa cuando una partida más reciente nunca se envió.",
+      "Nuevos ajustes del reino en Servidor: reinicio de las bandas cada día o cada 3 días, progreso más rápido de las profesiones de fabricación y recolección (pesca incluida), tasa de puntos de arena.",
+      "Los módulos tienen ahora su propia pestaña. La barra superior se ha rediseñado: las pestañas forman parte de la barra y los botones de la ventana ocupan toda su altura.",
+      "Un cliente del juego con muchos idiomas ya no rompe la interfaz: el idioma del juego se elige en una lista."
+    ]
+  },
   "0.3.4": {
     "en": [
       "Play the same realm on several computers: choose a folder you already synchronise (Google Drive, OneDrive, Dropbox...) with the Other computer button; your game is sent there at each clean stop, and the other computer offers to take it back. If both computers played, you pick which game to keep: they are never mixed.",

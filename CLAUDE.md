@@ -525,4 +525,7 @@ which now holds the launcher language; server update status).
 2026-11-21: 0.3.4 (handoff between computers, ADR 0028; AHBot settings in
 its table, ADR 0029; optional Individual Progression SQL, ADR 0027; many
 more grouped module options; changes an older server build lacks refused).
+2026-11-23: 0.3.5 (German and Spanish; Server and Modules tabs, new title
+bar; raid reset, profession and arena point settings; handoff sent when the
+launcher quits; game language list, issue #6).
 Remaining before a wide release: SignPath (maintainer).

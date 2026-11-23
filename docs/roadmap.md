@@ -136,6 +136,9 @@ Durations assume one full-time developer and are rough.
   module settings kept in tables with AHBot quantities, quality mix and prices (ADR 0029),
   optional module SQL (ADR 0027), many more grouped module options, game cache cleared on
   content changes (2026-11-21)
+- [x] RealmKeeper 0.3.5: German and Spanish, Server and Modules tabs with a new title bar,
+  raid reset / profession / arena point settings, handoff sent when the launcher quits
+  (2026-11-23)
 
 ## Phase 7: second emulator prototype (started 2026-11-19, ADR 0024)
 
