@@ -17,7 +17,7 @@
   },
   "category": "progression",
   "homepage": "https://github.com/ZhengPeiRu21/mod-individual-progression",
-  "license": "NOASSERTION",
+  "license": "MIT",
   "source": {
     "repo": "https://github.com/ZhengPeiRu21/mod-individual-progression",
     "ref": "master",
