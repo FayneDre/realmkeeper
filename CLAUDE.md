@@ -530,4 +530,7 @@ more grouped module options; changes an older server build lacks refused).
 2026-11-23: 0.3.5 (German and Spanish; Server and Modules tabs, new title
 bar; raid reset, profession and arena point settings; handoff sent when the
 launcher quits; game language list, issue #6).
+2026-11-24: 0.3.6 (flight path speed, instant flights and primary profession
+settings; No Hearthstone cooldown module; stale Playerbots account types of
+player accounts removed before each start).
 Remaining before a wide release: SignPath (maintainer).

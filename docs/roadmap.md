@@ -140,9 +140,10 @@ Phase 6 goes on release by release, phase 7 proves a second emulator.
 - [x] RealmKeeper 0.3.5: German and Spanish, Server and Modules tabs with a new title bar,
   raid reset / profession / arena point settings, handoff sent when the launcher quits
   (2026-11-23)
-- [ ] Next (0.3.6): flight path speed, instant flights and primary profession settings,
+- [x] RealmKeeper 0.3.6: flight path speed, instant flights and primary profession settings,
   No Hearthstone cooldown module, Playerbots account types of restored player accounts
   cleaned before each start (alts summoned with `.playerbots bot add` were re-levelled)
+  (2026-11-24)
 
 ## Phase 7: second emulator prototype (started 2026-11-19, ADR 0024)
 
