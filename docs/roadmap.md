@@ -1,6 +1,7 @@
 # Roadmap
 
-Durations assume one full-time developer and are rough.
+Phases 0 to 5 are done; the launcher is public since 0.3.0 (2026-11-18).
+Phase 6 goes on release by release, phase 7 proves a second emulator.
 
 ## Phase 0: foundations ✅
 
@@ -13,7 +14,7 @@ Durations assume one full-time developer and are rough.
 - [x] Git repository + public GitHub remote
 - [x] CI: `cargo fmt/clippy/test`, `npm run check`, catalog validation (Windows) + portable crates (Linux)
 
-## Phase 1: CI build chain (~2 weeks, highest risk first) — exit reached
+## Phase 1: CI build chain ✅
 
 - [x] Windows build of the Playerbot fork with all catalog modules (`build-server.yml`)
 - [x] Verify `Updates.AllowedModules` naming (module directory name)
@@ -29,7 +30,7 @@ Durations assume one full-time developer and are rough.
 - [x] AHBot account/character creation without a client (phase 3 post-install steps)
 - **Exit:** a downloadable artifact that works when installed by hand ✅ (2026-11-14)
 
-## Phase 2: install engine (~2–3 weeks) — started
+## Phase 2: install engine ✅
 
 - [x] `rk-store`: parallel resumable downloads, mirrors, sha256 verification,
       per-blob lock, fail-fast on permanent errors
@@ -49,7 +50,7 @@ Durations assume one full-time developer and are rough.
       `rk install --index` (verified locally end to end, 28 s)
 - **Exit:** `rk install` creates a working instance from scratch
 
-## Phase 3: runtime + AzerothCore driver (~2 weeks)
+## Phase 3: runtime + AzerothCore driver ✅
 
 - [x] Supervisor, readiness, graceful stop, logs (`rk-runtime`, ADR 0011; `rk start`,
   verified 2026-11-15: world ready in 21-92 s, clean stop, launcher kill -> world saves,
@@ -66,7 +67,7 @@ Durations assume one full-time developer and are rough.
 - [x] Log in and play with the maintainer's 3.3.5a client (2026-11-15: character created, in game, bots present)
 - **Exit:** start, log in and play through the CLI
 
-## Phase 4: client (~1 week)
+## Phase 4: client ✅
 
 - [x] Detection: version resource of the executable (build 12340), locale folders (`rk client set`)
 - [x] Realmlist (`realmlist.wtf` + the address saved in `Config.wtf`), cache cleared on server change
@@ -76,7 +77,7 @@ Durations assume one full-time developer and are rough.
 - [x] Synchronised launch: `rk play` (servers stop when the game is closed)
 - **Exit:** one command from a stopped instance to the login screen
 
-## Phase 5: public app (~3 weeks)
+## Phase 5: public app ✅ (except signing)
 
 - [x] Shared services for the app and the CLI: `rk-launcher` (ADR 0014)
 - [x] UI: install wizard (client folder, modules, solo/LAN), Play / start / stop with real
@@ -92,7 +93,7 @@ Durations assume one full-time developer and are rough.
 - [ ] Maintainer: SignPath Foundation project
 - No beta phase: releases go public directly (decided 2026-11-18)
 
-## Phase 6: player tools (started 2026-11-15)
+## Phase 6: player tools (ongoing since 2026-11-15)
 
 - [x] Bots tab: Playerbots options (counts, levels, LFG/BG, guilds, chat), keys verified at
   the pinned commit
@@ -139,6 +140,9 @@ Durations assume one full-time developer and are rough.
 - [x] RealmKeeper 0.3.5: German and Spanish, Server and Modules tabs with a new title bar,
   raid reset / profession / arena point settings, handoff sent when the launcher quits
   (2026-11-23)
+- [ ] Next (0.3.6): flight path speed, instant flights and primary profession settings,
+  No Hearthstone cooldown module, Playerbots account types of restored player accounts
+  cleaned before each start (alts summoned with `.playerbots bot add` were re-levelled)
 
 ## Phase 7: second emulator prototype (started 2026-11-19, ADR 0024)
 
@@ -146,15 +150,20 @@ Mists of Pandaria 5.4.8 with Playerbots (LoA-Pandaria-Playerbots), to prove
 that an emulator is data + a driver.
 
 - [x] Upstream facts verified; `v1.1.1` dumps import into MySQL 8.4.13 (94 s)
-- [ ] CI build of the pinned commit (servers + extractors): `build-server-pandaria.yml`, core pinned to release v1.1.1 (`2f9aebde`); then published in the index
-- [ ] Catalog: client `wow-5-4-8`, emulator `pandaria`, flavor `playerbot`
-- [ ] Resumable game data extraction step from the player's client (mmaps: hours)
-- [ ] `drivers/pandaria`: accounts, realm list, start on MySQL 8.4
-- [ ] Login with a 5.4.8 client, bots online
+- [x] CI build of the pinned commit (servers + extractors): `build-server-pandaria.yml`,
+  core pinned to release v1.1.1 (`2f9aebde`), green since 2026-11-19
+- [ ] Publication of that build in the signed index
+- [x] Catalog: client `wow-5-4-8`, emulator `pandaria` (marked `experimental`: listed only
+  with `RK_EXPERIMENTAL=1`), flavor `playerbot`
+- [x] Resumable game data extraction step from the player's client (`ExtractData`,
+  `serverdata-<client>-<version>`)
+- [x] `drivers/pandaria`: accounts, realm list, GM levels, population
+- [ ] End-to-end install with a 5.4.8 client: extraction (mmaps: hours), login, bots online
 
 ## Later
 
-- v1.x: simplified module settings, server/module updates, Internet play
-- v2: catalog growth, multi-instance polish, addons management, import/export
-- Second emulator to validate the abstraction: see phase 7
-- Linux / macOS
+- Authenticode signing of the installer (SignPath Foundation project, maintainer)
+- Internet play (port forwarding help, account hardening)
+- More modules and game versions in the catalog
+- Optional "external database" mode, server auto-restart after a crash
+- Linux / macOS (the core crates are kept portable and tested on Linux)

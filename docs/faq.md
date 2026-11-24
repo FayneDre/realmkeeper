@@ -20,6 +20,7 @@ report. Your personal folders are hidden in it.
 - [Playing on another computer](#handoff)
 - [Playing on a local network](#lan)
 - [GM panel and accounts](#gm)
+- [Advanced: the realm's database](#database)
 - [Something else](#other)
 
 <a id="start"></a>
@@ -230,6 +231,20 @@ step. Each step is recorded, so nothing is lost when one stops.
 - The **Account** tab, **Game master** part, sends ready-made commands (teleport, level,
   revive, send an item or gold, announce) while the servers run. The values
   are checked first.
+
+<a id="database"></a>
+## Advanced: the realm's database
+
+- Each realm has its own MySQL server. It runs only while the realm's
+  servers are started: start them before you connect.
+- To open it with a tool such as HeidiSQL or MySQL Workbench, look in the
+  realm's folder, `<data root>\instances\<realm>\` (the data root is
+  `%LOCALAPPDATA%\RealmKeeperData` unless you picked another folder):
+  - host `127.0.0.1`, port = `dbPort` in `instance.json`;
+  - user and password = `dbUser` and `dbPassword` in `secrets.json`.
+- Click **Back up now** first and change only what you understand. Before
+  each start the launcher rewrites a few things itself: the realm list,
+  the NPCs of the modules and the module settings kept in tables.
 
 <a id="other"></a>
 ## Something else

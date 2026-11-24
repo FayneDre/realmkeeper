@@ -9,7 +9,7 @@ contribution must follow. Architecture lives in [`docs/architecture.md`](docs/ar
 |---|---|---|
 | Rust | stable (pinned by `rust-toolchain.toml`) | `winget install Rustlang.Rustup` |
 | Visual Studio Build Tools | 2022, workload "Desktop development with C++" | `winget install Microsoft.VisualStudio.2022.BuildTools` |
-| Node.js | 24 | `winget install OpenJS.NodeJS` |
+| Node.js | 24 (as in CI) | `winget install OpenJS.NodeJS` |
 | WebView2 | any | preinstalled on Windows 11 |
 
 ```sh
@@ -24,12 +24,22 @@ npm run dev            # launcher in development mode
 Run before every push (CI runs the same):
 
 ```sh
-npm run check                                        # svelte-check + catalog schema + i18n parity
+npm run check                                        # svelte-check + unit tests + catalog schema + i18n parity
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 cargo run -p rk-cli -- catalog validate             # cross-manifest references
+cargo deny check advisories licenses sources bans   # dependencies (cargo install cargo-deny --locked)
 ```
+
+CI also runs `npm audit` and a UI smoke test (`npm run test:ui`, the debug app
+driven over the DevTools protocol). `rk-db` integration tests need a real
+MySQL 8.4: set `RK_MYSQL_BASEDIR` to an unpacked ZIP
+(`tools/ci/fetch-mysql.ps1` downloads a verified one); without it they are
+skipped.
+
+Run cargo from PowerShell or `cmd`: in Git Bash, `/usr/bin/link` shadows the
+MSVC linker.
 
 ## 3. Git hooks
 
@@ -67,8 +77,18 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`
 
 - **Catalog**: follow [`catalog/README.md`](catalog/README.md). Pin full commits,
   verify facts upstream, change the JSON Schema and `crates/rk-core/src/manifest.rs` together.
-- **UI text**: every string goes through `t()` and exists in both
-  `app/src/lib/i18n/locales/en.json` and `fr.json`.
+- **UI text**: every string goes through `t()` and exists in every locale of
+  `app/src/lib/i18n/locales/` (`en`, `fr`, `de`, `es`; English is the
+  fallback). German and Spanish use the informal du / tú and the official
+  terms of those game clients. Catalog text carries the same four languages.
+  `npm run check:i18n` checks key and placeholder parity.
+- **Errors are for players**: every failure becomes a translated message with
+  an action (`UiError` codes, `error.<code>` in the locales), linked to the
+  [FAQ](docs/faq.md); never a raw stack trace.
+- **Player data is sacred**: databases marked `playerData` are never dropped or
+  regenerated, only migrated, and always backed up first.
+- **Emulator-specific behaviour** goes in a manifest or a driver
+  (`drivers/`), never in the engine crates.
 - **Architecture changes** need an ADR in [`docs/decisions/`](docs/decisions/).
 - **Never** commit game client files, Blizzard assets, built servers or secrets.
 - **Never** reduce in-game server settings to save resources: we optimise the

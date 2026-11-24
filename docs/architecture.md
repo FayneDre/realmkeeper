@@ -111,11 +111,12 @@ Implemented in `.github/workflows/build-server.yml` (scripts in `tools/ci/`):
 ```
 catalog release ─► GitHub Actions (Windows runner)
                     ├─ checkout flavor@commit + all modules@commit
-                    ├─ MSVC Release build (vcpkg + sccache caches)
+                    ├─ MSVC Release build (Boost and MySQL client libs cached)
                     ├─ dbimport on MySQL 8.4 → database snapshot
-                    ├─ smoke tests: start, login, bots spawn, AH posts, module toggles inert
-                    ├─ zstd packaging + per-file hash manifest
-                    └─ sign (ed25519) + publish + update the catalog index
+                    ├─ smoke tests: modules off/on, SRP6 logon + realm list,
+                    │  bots online, AHBot auctions, optional SQL applied
+                    ├─ zstd packaging (ZIP with zstd entries)
+                    └─ sign (ed25519) + publish + update the signed index
 ```
 
 **Avoiding rebuilds.** Compiling takes about an hour, so the workflow compiles
@@ -162,14 +163,15 @@ of Tauri, reusable by the `rk` CLI (CI, support, power users) and testable.
 | `rk-core` | ✅ | Manifest types, `Catalog`, module resolver. Pure, no I/O. |
 | `rk-catalog` | ✅ | Load catalog from disk, cross-manifest validation, signed artifact index (`index`: Ed25519 envelope, trusted keys, anti-rollback, selection by catalog pins, ADR 0010). |
 | `rk-launcher` | ✅ | Player actions shared by the app and the CLI (ADR 0014): install, update, repair, resume (`pending.json`), modules, options, client preparation, accounts; `UiError` codes; serializable progress (`progress`) and background sessions with console (`session`); opt-in crash reports (`crash`, ADR 0015). |
-| `rk-cli` | ✅ | `rk` over `rk-launcher`: catalog, store, install, start, play, update, repair, resume, module, option, client, account, index. |
+| `rk-cli` | ✅ | `rk` over `rk-launcher`: catalog, store, index, component, install, start, play, account, update, repair, resume, uninstall, module, option, client, backup, realm, handoff, join, diagnostic, firewall. |
 | `rk-store` | ✅ | Content-addressed store: parallel ranged downloads (8 × 16 MiB segments by default), resume from persisted segment state (also across mirrors), mirror fallback (also when a mirror serves corrupted bytes), size + sha256 verification before a blob becomes visible, OS file lock per blob (concurrent fetches download once), fail-fast on permanent HTTP errors. |
 | `rk-conf` | ✅ | Lossless `.conf` parser and layered renderer (§9). Pure, no I/O. |
-| `rk-engine` | ✅ (executor) | Transactional step executor (§5.1): durable journal, OS lock per operation, resume after crash or cancel, plan fingerprint, reverse-order rollback (itself resumable), repair state, finalize, `DirSwap` atomic directory replacement. Concrete steps come with their phase. |
-| `rk-db` | ✅ (first slice) | Portable MySQL instance: `my.ini`, secure init, start/readiness, clean stop, databases + service accounts, backup/restore, adoption of a restored snapshot (§8). Later: Job Object. |
-| `rk-runtime` | ✅ (first slice) | Supervisor (§10, ADR 0011): MySQL then the manifest processes in order, each gated by readiness; console (stdin of the `close-stdin` process), output to `logs/<process>.console.log` + broadcast, crash detection, clean stop in reverse order; kill-on-close Job Object for `terminate` processes. `EmulatorDriver` trait. |
+| `rk-engine` | ✅ | Transactional step executor (§5.1): durable journal, OS lock per operation, resume after crash or cancel, plan fingerprint, reverse-order rollback (itself resumable), repair state, finalize, `DirSwap` atomic directory replacement; install, update, restore and data-extraction steps (§5.2-5.4). |
+| `rk-db` | ✅ | Portable MySQL instance: `my.ini`, secure init, start/readiness, clean stop, databases + service accounts, backup/restore (`--one-database` replay), adoption of a restored snapshot (§8). |
+| `rk-runtime` | ✅ | Supervisor (§10, ADR 0011): MySQL then the manifest processes in order, each gated by readiness; console (stdin of the `close-stdin` process), output to `logs/<process>.console.log` + broadcast, crash detection, clean stop in reverse order; kill-on-close Job Object for `terminate` processes; module operations (`modules-<id>`, post-install, world rebuild, optional SQL); module settings written to tables before each start (ADR 0029). `EmulatorDriver` trait. |
 | `rk-client` | ✅ | Client detection (build from the version resource, locales), realmlist + saved setting, cache clearing, managed patch files tracked by sha256, client lock, launch (ADR 0013). |
-| `drivers/azerothcore` | ✅ (first slice) | Game accounts written to the auth database like `AccountMgr::CreateAccount` (SRP6), realm 1 address/port before each start. Later: AHBot account + character, module post-install steps. |
+| `drivers/azerothcore` | ✅ | Game accounts written to the auth database like `AccountMgr::CreateAccount` (SRP6), GM levels, characters without a client (AHBot seller); before each start: realm 1 address/port/type, module NPC spawns (ADR 0023), stale Playerbots account types removed; population and online characters for the UI. |
+| `drivers/pandaria` | prototype | LoA Pandaria (ADR 0024): accounts (`sha_pass_hash`), GM levels, realm list, population, online characters, teleport places. |
 | `app/src-tauri` | ✅ | Thin adapter over `rk-launcher`: commands, `operation` / `session` events (sessions batched every 100 ms), one change at a time, clean stop of the servers on window close, updater plugin when the build has a feed (ADR 0015). |
 
 ### 5.1 Install engine (`rk-engine`)
@@ -345,12 +347,17 @@ trait EmulatorDriver: Send + Sync {
     fn create_character(&self, cx: &DriverContext, c: &NewCharacter) -> DriverFuture<u32>; // servers stopped
     fn find_character(&self, cx: &DriverContext, name: &str) -> DriverFuture<Option<(u32, u32)>>;
     fn population(&self, cx: &DriverContext) -> DriverFuture<Option<Population>>; // default: unknown (ADR 0018)
+    fn accounts(&self, cx: &DriverContext) -> DriverFuture<Option<Vec<AccountInfo>>>;  // Account tab
+    fn set_gm_level(&self, cx: &DriverContext, username: &str, gm_level: u8) -> DriverFuture<()>;
+    fn online_characters(&self, cx: &DriverContext, limit: u32) -> DriverFuture<Option<Vec<OnlineCharacter>>>;
+    fn teleport_locations(&self, cx: &DriverContext) -> DriverFuture<Vec<String>>;    // GM panel
 }
 ```
 
 `DriverContext` gives the running database, the emulator manifest, the
-instance record and the realm address (`127.0.0.1` solo, LAN address in LAN
-mode). Console commands, readiness and stop are declared in the manifest,
+instance record, the realm address (`127.0.0.1` solo, LAN address in LAN
+mode), the rendered configs and, during a start, the NPC spawns and the
+databases of the enabled modules (e.g. Playerbots). Console commands, readiness and stop are declared in the manifest,
 not in the driver. The AzerothCore driver writes characters as one
 `characters` row with the next guid (mod-ah-bot never loads its character:
 it builds an in-memory `Player` from the guid).
@@ -362,18 +369,22 @@ runtime, UI and updates are reused unchanged.
 
 ```
 %LOCALAPPDATA%\RealmKeeperData\   launcher folder: crash-reports\, location.json (ADR 0017)
-<data root>\               = the launcher folder, or the picked folder (ADR 0019; marker .realmkeeper)\n├─ store\                 blobs by hash (shared cache)
+<data root>\               = the launcher folder, or the picked folder (ADR 0019; marker .realmkeeper)
+├─ store\                 blobs by hash (shared cache)
 ├─ components\mysql-8-4\
 ├─ serverdata\<client>-<version>\   shared server data (ADR 0006)
 ├─ instances\<id>\        bin\ sql\ configs\ db\ logs\ instance.json secrets.json  (cwd of the servers)
 ├─ assets\<sha256>\       module assets, unpacked once per archive (ADR 0013)
 ├─ clients\<client>.json  registered client + files the launcher put in it (.lock while used)
-├─ backups\<id>\          manual-<secs>.sql, import-<secs>.sql (player data, kept), before-<label>-<secs>.sql (newest 5)
+├─ backups\<id>\          manual-<secs>.sql, import-<secs>.sql (player data, kept), daily-<secs>.sql (newest 7),
+│                         before-<label>-<secs>.sql (every database, newest 5)
 └─ state\                 operation journals, locks
 ```
 
-Instances also hold `bindings.json`, `instance.lock` and, while a module
-asset overrides a server file, `data\`. Server data is extracted once per
+Instances also hold `bindings.json`, `instance.lock`, `pending.json` (an
+interrupted change), `import.json` (an unfinished import), `handoff.json` (a
+realm shared between computers) and, while a module asset overrides a server
+file, `data\`. Server data is extracted once per
 client version into `serverdata\` and shared through an absolute `DataDir`
 (ADR 0007). While an override exists (e.g. `dbc/Spell.dbc`), `DataDir`
 points to the instance overlay `instances\<id>\data\`: junctions to the
@@ -407,24 +418,26 @@ build made them, and dbimport migrates the restored ones.
   checks and applies the chosen modules' SQL (~10 s instead of 6-14 min).
 - **Credentials:** root gets a random 32-character password during bootstrap
   (`--initialize-insecure` + `--init-file`, so the server never listens without
-  one); service accounts (`acore`) get their own random passwords. They live in
-  files under the user's profile (`client.cnf` for the MySQL tools, never on a
-  command line). DPAPI would add nothing: upstream servers read their DB
+  one); the service account (`rk`) gets its own random password. They live in
+  files of the data root (`client.cnf` for the MySQL tools, `secrets.json`,
+  the servers' `.conf` files), never on a command line. DPAPI would add nothing: upstream servers read their DB
   password in clear text from their `.conf` files. Protection = `127.0.0.1`
-  bind + per-user profile ACL.
+  bind + the folder permissions of the user.
 - `my.ini` (rendered by `rk-db`): `mysqlx=OFF` (no port 33060 shared between
   realms), `disable-log-bin` (no replication: binary logs only cost disk and
   import speed), utf8mb4, durable `innodb_flush_log_at_trx_commit=1`, buffer
   pool 1 GiB and redo log 512 MiB by default (performance, not minimised).
 - "Running" means an **authenticated** query succeeds, so another MySQL on the
   same port is never mistaken for the instance; a busy port is reported as such.
-- Clean shutdown only (`mysqladmin shutdown`, wait until the port is free).
-  Planned: Job Object (orphans), refuse datadirs inside cloud-synced folders.
+- Clean shutdown only (`mysqladmin shutdown`, wait until the port is free);
+  never killed, adopted at the next start when the launcher died. Data roots
+  in synchronised or non-NTFS folders are refused (ADR 0020).
 - Backups: `mysqldump --single-transaction` (routines, triggers, events), written
   atomically; restore replays them. Covered by a real-MySQL lifecycle test
   (`RK_MYSQL_BASEDIR`, run in Windows CI).
-- Automatic backups before every migration and on a schedule.
-- Optional "external database" mode for advanced users (MySQL 8.4 required).
+- Automatic backups before every migration, daily backups after a clean stop,
+  and backups while the servers run (players saved first, ADR 0022).
+- Later: an optional "external database" mode for advanced users (MySQL 8.4).
 
 ### Uninstall (ADR 0017)
 
@@ -575,5 +588,11 @@ hardening) is v1.x.
 ## 14. Open questions (tracked)
 
 - ~~Exact `Updates.AllowedModules` naming~~ — resolved: module directory name (see §3).
-- Creating the AHBot character without a client (driver command vs SQL template) — prototype in phase 1.
-- Whether each catalog module is truly inert when compiled in and disabled — CI test.
+- ~~Creating the AHBot character without a client~~ — resolved: one `characters`
+  row written by the driver while worldserver is stopped (§6).
+- ~~Whether each catalog module is inert when compiled in and disabled~~ —
+  checked by the smoke test (round A); modules that read their tables while
+  disabled use `applyWhenDisabled` (ADR 0008).
+- Licences of the full build: some modules are AGPL-3.0 or declare no licence
+  (`NOASSERTION` in the catalog) while the core is GPL-2.0; to clarify with
+  their authors before a wide release.

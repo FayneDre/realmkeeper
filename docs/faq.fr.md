@@ -20,6 +20,7 @@ et colle-le dans le signalement : tes dossiers personnels y sont masqués.
 - [Jouer sur un autre PC](#handoff)
 - [Jouer en réseau local](#lan)
 - [Panneau MJ et comptes](#gm)
+- [Avancé : la base de données du royaume](#database)
 - [Autre chose](#other)
 
 <a id="start"></a>
@@ -254,6 +255,23 @@ n'est perdu quand l'une s'arrête.
 - L'onglet **Compte**, partie **Maître du jeu**, envoie des commandes toutes prêtes
   (téléporter, niveau, ressusciter, envoyer un objet ou de l'or, annonce)
   pendant que les serveurs tournent. Les valeurs sont vérifiées d'abord.
+
+<a id="database"></a>
+## Avancé : la base de données du royaume
+
+- Chaque royaume a son propre serveur MySQL. Il ne tourne que lorsque les
+  serveurs du royaume sont démarrés : démarre-les avant de te connecter.
+- Pour l'ouvrir avec un outil comme HeidiSQL ou MySQL Workbench, regarde
+  dans le dossier du royaume, `<dossier de données>\instances\<royaume>\`
+  (le dossier de données est `%LOCALAPPDATA%\RealmKeeperData`, sauf si tu
+  en as choisi un autre) :
+  - hôte `127.0.0.1`, port = `dbPort` dans `instance.json` ;
+  - utilisateur et mot de passe = `dbUser` et `dbPassword` dans
+    `secrets.json`.
+- Clique d'abord sur **Sauvegarder maintenant** et ne change que ce que tu
+  comprends. Avant chaque démarrage, le launcher réécrit lui-même quelques
+  éléments : la liste des royaumes, les PNJ des modules et les réglages de
+  modules gardés dans des tables.
 
 <a id="other"></a>
 ## Autre chose
