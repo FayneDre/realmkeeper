@@ -1,0 +1,80 @@
+{
+  "$schema": "../../../schema/module.schema.json",
+  "schemaVersion": 1,
+  "id": "mod-no-hearthstone-cooldown",
+  "emulator": "azerothcore",
+  "name": {
+    "en": "No Hearthstone cooldown",
+    "fr": "Pierre de foyer sans temps de recharge",
+    "de": "Ruhestein ohne Abklingzeit",
+    "es": "Piedra de hogar sin tiempo de reutilización"
+  },
+  "description": {
+    "en": "Your Hearthstone is ready again as soon as it has taken you home.",
+    "fr": "Ta pierre de foyer est de nouveau prête dès qu'elle t'a ramené chez toi.",
+    "de": "Dein Ruhestein ist wieder bereit, sobald er dich nach Hause gebracht hat.",
+    "es": "Tu piedra de hogar vuelve a estar lista en cuanto te ha llevado a casa."
+  },
+  "category": "quality-of-life",
+  "homepage": "https://github.com/BytesGalore/mod-no-hearthstone-cooldown",
+  "license": "AGPL-3.0",
+  "source": {
+    "repo": "https://github.com/BytesGalore/mod-no-hearthstone-cooldown",
+    "ref": "main",
+    "commit": "832ef5e6d7268876112be65202ee8e60d287a936"
+  },
+  "compatibleFlavors": [
+    "playerbot"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "removable": true,
+  "activation": {
+    "mode": "config",
+    "enable": {
+      "modules/mod_no_hearthstone_cooldown.conf": {
+        "NoHearthstoneCooldown.Enable": 1
+      }
+    },
+    "disable": {
+      "modules/mod_no_hearthstone_cooldown.conf": {
+        "NoHearthstoneCooldown.Enable": 0
+      }
+    }
+  },
+  "database": {
+    "dbimportId": "mod-no-hearthstone-cooldown",
+    "touches": []
+  },
+  "config": {
+    "files": [
+      {
+        "file": "modules/mod_no_hearthstone_cooldown.conf",
+        "dist": "modules/mod_no_hearthstone_cooldown.conf.dist"
+      }
+    ]
+  },
+  "options": [
+    {
+      "id": "announce",
+      "type": "boolean",
+      "label": {
+        "en": "Announce the module at login",
+        "fr": "Annoncer le module à la connexion",
+        "de": "Das Modul beim Einloggen ankündigen",
+        "es": "Anunciar el módulo al conectarse"
+      },
+      "target": {
+        "file": "modules/mod_no_hearthstone_cooldown.conf",
+        "key": "NoHearthstoneCooldown.Announce"
+      },
+      "default": true,
+      "help": {
+        "en": "An English chat line at each login.",
+        "fr": "Une ligne en anglais dans la discussion à chaque connexion.",
+        "de": "Eine englische Chatzeile bei jedem Einloggen.",
+        "es": "Una línea en inglés en el chat en cada conexión."
+      }
+    }
+  ]
+}

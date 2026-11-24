@@ -1,4 +1,26 @@
 {
+  "0.3.6": {
+    "en": [
+      "New realm settings in Server: flight path speed (up to 50, 32 is normal), instant flight paths (always, or the player's choice at each flight master) and the number of primary professions per character (up to 11).",
+      "New module No Hearthstone cooldown: your Hearthstone is ready again as soon as it has taken you home. It comes with the next server update of your realm.",
+      "Summoning one of your own characters with .playerbots bot add no longer turns it into a bot of your level with bot gear on a realm restored from another server: the launcher repairs the realm at its next start."
+    ],
+    "fr": [
+      "Nouveaux réglages du royaume dans Serveur : vitesse des trajets aériens (jusqu'à 50, 32 est la vitesse normale), trajets aériens instantanés (toujours, ou au choix du joueur chez chaque maître de vol) et nombre de métiers principaux par personnage (jusqu'à 11).",
+      "Nouveau module Pierre de foyer sans temps de recharge : votre pierre de foyer est de nouveau prête dès qu'elle vous a ramené chez vous. Il arrive avec la prochaine mise à jour du serveur de votre royaume.",
+      "Invoquer un de vos propres personnages avec .playerbots bot add ne le transforme plus en bot de votre niveau avec un équipement de bot sur un royaume restauré depuis un autre serveur : le launcher répare le royaume à son prochain démarrage."
+    ],
+    "de": [
+      "Neue Realm-Einstellungen unter Server: Fluggeschwindigkeit der Flugrouten (bis 50, 32 ist normal), sofortige Flugrouten (immer oder nach Wahl des Spielers bei jedem Flugmeister) und Anzahl der Hauptberufe pro Charakter (bis 11).",
+      "Neues Modul Ruhestein ohne Abklingzeit: Dein Ruhestein ist wieder bereit, sobald er dich nach Hause gebracht hat. Es kommt mit dem nächsten Server-Update deines Realms.",
+      "Einen deiner eigenen Charaktere mit .playerbots bot add zu rufen, macht ihn auf einem von einem anderen Server wiederhergestellten Realm nicht mehr zu einem Bot deiner Stufe mit Bot-Ausrüstung: Der Launcher repariert den Realm beim nächsten Start."
+    ],
+    "es": [
+      "Nuevos ajustes del reino en Servidor: velocidad de las rutas de vuelo (hasta 50, 32 es la normal), rutas de vuelo instantáneas (siempre, o a elección del jugador en cada maestro de vuelo) y número de profesiones principales por personaje (hasta 11).",
+      "Nuevo módulo Piedra de hogar sin tiempo de reutilización: tu piedra de hogar vuelve a estar lista en cuanto te ha llevado a casa. Llega con la próxima actualización del servidor de tu reino.",
+      "Invocar a uno de tus propios personajes con .playerbots bot add ya no lo convierte en un bot de tu nivel con equipo de bot en un reino restaurado desde otro servidor: el launcher repara el reino en su próximo arranque."
+    ]
+  },
   "0.3.5": {
     "en": [
       "RealmKeeper now speaks German and Spanish: choose the launcher language in Options. The modules and settings are translated too.",
