@@ -802,6 +802,84 @@
           "default": false
         },
         {
+          "id": "flight-speed",
+          "type": "number",
+          "label": {
+            "en": "Flight path speed",
+            "fr": "Vitesse des trajets aériens",
+            "de": "Fluggeschwindigkeit der Flugrouten",
+            "es": "Velocidad de las rutas de vuelo"
+          },
+          "target": {
+            "file": "worldserver.conf",
+            "key": "TaxiFlightSpeed"
+          },
+          "default": 32,
+          "min": 1,
+          "max": 50,
+          "help": {
+            "en": "32 = normal speed, 50 at most.",
+            "fr": "32 = vitesse normale, 50 au maximum.",
+            "de": "32 = normale Geschwindigkeit, höchstens 50.",
+            "es": "32 = velocidad normal, 50 como máximo."
+          }
+        },
+        {
+          "id": "instant-flights",
+          "type": "choice",
+          "label": {
+            "en": "Instant flight paths",
+            "fr": "Trajets aériens instantanés",
+            "de": "Sofortige Flugrouten",
+            "es": "Rutas de vuelo instantáneas"
+          },
+          "default": "off",
+          "choices": [
+            {
+              "id": "off",
+              "label": {
+                "en": "Off",
+                "fr": "Non",
+                "de": "Aus",
+                "es": "No"
+              },
+              "config": {
+                "worldserver.conf": {
+                  "InstantFlightPaths": 0
+                }
+              }
+            },
+            {
+              "id": "on",
+              "label": {
+                "en": "Always",
+                "fr": "Toujours",
+                "de": "Immer",
+                "es": "Siempre"
+              },
+              "config": {
+                "worldserver.conf": {
+                  "InstantFlightPaths": 1
+                }
+              }
+            },
+            {
+              "id": "choice",
+              "label": {
+                "en": "Player's choice at each flight master",
+                "fr": "Au choix du joueur chez chaque maître de vol",
+                "de": "Nach Wahl des Spielers bei jedem Flugmeister",
+                "es": "A elección del jugador en cada maestro de vuelo"
+              },
+              "config": {
+                "worldserver.conf": {
+                  "InstantFlightPaths": 2
+                }
+              }
+            }
+          ]
+        },
+        {
           "id": "max-skills",
           "type": "boolean",
           "label": {
@@ -815,6 +893,23 @@
             "key": "AlwaysMaxSkillForLevel"
           },
           "default": false
+        },
+        {
+          "id": "max-professions",
+          "type": "integer",
+          "label": {
+            "en": "Primary professions per character",
+            "fr": "Métiers principaux par personnage",
+            "de": "Hauptberufe pro Charakter",
+            "es": "Profesiones principales por personaje"
+          },
+          "target": {
+            "file": "worldserver.conf",
+            "key": "MaxPrimaryTradeSkill"
+          },
+          "default": 2,
+          "min": 0,
+          "max": 11
         },
         {
           "id": "cinematics",
