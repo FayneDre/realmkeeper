@@ -736,6 +736,7 @@ impl PostInstall {
             realm_address: std::net::Ipv4Addr::LOCALHOST,
             configs: &self.configs,
             spawns: &[],
+            module_databases: &[],
         };
         let mut bindings = Bindings::load(&self.bindings)?;
         for (module, steps) in &self.modules {

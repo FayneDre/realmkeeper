@@ -15,6 +15,13 @@
 //! - **Population:** characters flagged `online` in the characters
 //!   database; those of `RNDBOT` accounts (Playerbots'
 //!   `RandomBotAccountPrefix`, upper-cased like every account name) are bots.
+//! - **Playerbots account types:** before each start, rows of
+//!   `playerbots_account_type` whose account is not (or no longer) an
+//!   `RNDBOT` account are deleted. Playerbots never removes them, and a
+//!   restore from another server gives their ids to player accounts: an
+//!   account left as type 2 (AddClass) has its characters re-levelled and
+//!   re-geared when summoned with `.playerbots bot add` by a character more
+//!   than 3 levels apart (`PlayerbotHolder::OnBotLogin` @ 405f811).
 
 #![forbid(unsafe_code)]
 
@@ -90,6 +97,15 @@ impl EmulatorDriver for AzerothCore {
                 .database("world")
                 .ok_or(AccountError::MissingDatabase("world"))?;
             cx.db.execute(&spawns_sql(world, cx.spawns)?).await?;
+            if let Some(playerbots) = cx.database("playerbots") {
+                // Absent until worldserver has created the Playerbots tables.
+                let exists = cx.db.execute(&account_type_exists_sql(playerbots)).await?;
+                if exists.trim() != "0" {
+                    cx.db
+                        .execute(&account_type_cleanup_sql(auth, playerbots))
+                        .await?;
+                }
+            }
             Ok(())
         })
     }
@@ -608,6 +624,24 @@ fn spawns_sql(world: &str, spawns: &[rk_core::manifest::Spawn]) -> Result<String
     Ok(sql)
 }
 
+fn account_type_exists_sql(playerbots: &str) -> String {
+    format!(
+        "SELECT COUNT(*) FROM information_schema.tables \
+         WHERE table_schema = '{playerbots}' AND table_name = 'playerbots_account_type';"
+    )
+}
+
+/// Forgets the Playerbots account types of accounts that are not random bot
+/// accounts (player accounts, or accounts that no longer exist). Playerbots
+/// assigns types to `RNDBOT` accounts only, at startup.
+fn account_type_cleanup_sql(auth: &str, playerbots: &str) -> String {
+    format!(
+        "DELETE t FROM `{playerbots}`.playerbots_account_type t \
+         LEFT JOIN `{auth}`.account a ON a.id = t.account_id \
+         WHERE a.id IS NULL OR a.username NOT LIKE '{BOT_ACCOUNT_PREFIX}%';\n"
+    )
+}
+
 /// Points realm 1 at the address players connect to, with its type.
 fn realm_sql(auth: &str, address: std::net::Ipv4Addr, port: u16, icon: u8) -> String {
     format!(
@@ -643,6 +677,17 @@ mod tests {
             }
         );
         assert!(parse_population("NULL\tNULL").is_err());
+    }
+
+    #[test]
+    fn account_types_of_player_accounts_are_forgotten() {
+        let sql = account_type_cleanup_sql("acore_auth", "acore_playerbots");
+        assert!(sql.starts_with("DELETE t FROM `acore_playerbots`.playerbots_account_type t"));
+        assert!(sql.contains("LEFT JOIN `acore_auth`.account a ON a.id = t.account_id"));
+        assert!(sql.contains("a.id IS NULL OR a.username NOT LIKE 'RNDBOT%'"));
+        assert!(account_type_exists_sql("acore_playerbots").contains(
+            "table_schema = 'acore_playerbots' AND table_name = 'playerbots_account_type'"
+        ));
     }
 
     #[test]

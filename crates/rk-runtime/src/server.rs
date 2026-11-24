@@ -57,6 +57,8 @@ pub struct Server {
     paths_configs: std::path::PathBuf,
     /// NPCs of the enabled modules (ADR 0023).
     spawns: Vec<rk_core::manifest::Spawn>,
+    /// Databases of the enabled modules, for the driver.
+    module_databases: Vec<rk_core::manifest::Database>,
     /// Module settings kept in tables, written before each start (ADR 0029).
     table_sql: String,
 }
@@ -110,6 +112,11 @@ impl Server {
             .filter_map(|m| catalog.module(&record.emulator, m))
             .flat_map(|m| m.spawns.iter().cloned())
             .collect();
+        let module_databases = enabled
+            .iter()
+            .filter_map(|m| catalog.module(&record.emulator, m))
+            .flat_map(|m| m.database.extra_databases.iter().cloned())
+            .collect();
         let mut writes = Vec::new();
         for module in &enabled {
             if let Some(manifest) = catalog.module(&record.emulator, module) {
@@ -122,6 +129,7 @@ impl Server {
             layout: layout.clone(),
             db,
             spawns,
+            module_databases,
             table_sql,
             emulator,
             paths_configs: layout.instance(&record.id).configs,
@@ -177,6 +185,7 @@ impl Server {
             realm_address,
             configs: &self.paths_configs,
             spawns: &self.spawns,
+            module_databases: &self.module_databases,
         }
     }
 

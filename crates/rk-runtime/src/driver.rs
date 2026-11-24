@@ -5,7 +5,7 @@ use std::future::Future;
 use std::net::Ipv4Addr;
 use std::pin::Pin;
 
-use rk_core::manifest::{EmulatorManifest, Spawn};
+use rk_core::manifest::{Database, EmulatorManifest, Spawn};
 use rk_engine::install::InstanceRecord;
 
 /// Errors stay typed so the UI can translate them (principle 8).
@@ -25,14 +25,19 @@ pub struct DriverContext<'a> {
     /// NPCs of the enabled modules to place (ADR 0023), in resolution
     /// order; empty outside a start.
     pub spawns: &'a [Spawn],
+    /// Databases of the enabled modules (`extraDatabases`, e.g. Playerbots),
+    /// in resolution order; empty outside a start.
+    pub module_databases: &'a [Database],
 }
 
 impl DriverContext<'_> {
-    /// Name of a database declared in the emulator manifest.
+    /// Name of a database declared in the emulator manifest or, during a
+    /// start, by an enabled module.
     pub fn database(&self, id: &str) -> Option<&str> {
         self.emulator
             .databases
             .iter()
+            .chain(self.module_databases)
             .find(|d| d.id == id)
             .map(|d| d.name.as_str())
     }
