@@ -634,11 +634,16 @@ fn account_type_exists_sql(playerbots: &str) -> String {
 /// Forgets the Playerbots account types of accounts that are not random bot
 /// accounts (player accounts, or accounts that no longer exist). Playerbots
 /// assigns types to `RNDBOT` accounts only, at startup.
+///
+/// Single-table form on purpose: MySQL 8.4 rejects a multi-table
+/// `DELETE alias FROM db.table alias JOIN ...` with ERROR 1046 "No database
+/// selected" when the connection has no default database, even though every
+/// table is qualified (0.3.6 could not start any realm because of it).
 fn account_type_cleanup_sql(auth: &str, playerbots: &str) -> String {
     format!(
-        "DELETE t FROM `{playerbots}`.playerbots_account_type t \
-         LEFT JOIN `{auth}`.account a ON a.id = t.account_id \
-         WHERE a.id IS NULL OR a.username NOT LIKE '{BOT_ACCOUNT_PREFIX}%';\n"
+        "DELETE FROM `{playerbots}`.playerbots_account_type \
+         WHERE account_id NOT IN (SELECT id FROM `{auth}`.account \
+         WHERE username LIKE '{BOT_ACCOUNT_PREFIX}%');\n"
     )
 }
 
@@ -682,9 +687,10 @@ mod tests {
     #[test]
     fn account_types_of_player_accounts_are_forgotten() {
         let sql = account_type_cleanup_sql("acore_auth", "acore_playerbots");
-        assert!(sql.starts_with("DELETE t FROM `acore_playerbots`.playerbots_account_type t"));
-        assert!(sql.contains("LEFT JOIN `acore_auth`.account a ON a.id = t.account_id"));
-        assert!(sql.contains("a.id IS NULL OR a.username NOT LIKE 'RNDBOT%'"));
+        assert!(sql.starts_with("DELETE FROM `acore_playerbots`.playerbots_account_type WHERE"));
+        assert!(sql.contains(
+            "account_id NOT IN (SELECT id FROM `acore_auth`.account WHERE username LIKE 'RNDBOT%')"
+        ));
         assert!(account_type_exists_sql("acore_playerbots").contains(
             "table_schema = 'acore_playerbots' AND table_name = 'playerbots_account_type'"
         ));
