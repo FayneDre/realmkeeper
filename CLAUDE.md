@@ -533,4 +533,6 @@ launcher quits; game language list, issue #6).
 2026-11-24: 0.3.6 (flight path speed, instant flights and primary profession
 settings; No Hearthstone cooldown module; stale Playerbots account types of
 player accounts removed before each start).
+2026-11-25: 0.3.7 (realms start again: the 0.3.6 cleanup used a multi-table
+`DELETE` that MySQL 8.4 rejects without a default database, ERROR 1046).
 Remaining before a wide release: SignPath (maintainer).

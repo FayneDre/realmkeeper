@@ -1,4 +1,18 @@
 {
+  "0.3.7": {
+    "en": [
+      "Realms start again: since 0.3.6, starting the servers stopped at once with the error \"No database selected\". Nothing was lost, your characters and accounts are intact."
+    ],
+    "fr": [
+      "Les royaumes démarrent de nouveau : depuis la 0.3.6, le démarrage des serveurs s'arrêtait aussitôt avec l'erreur « No database selected ». Rien n'a été perdu, tes personnages et tes comptes sont intacts."
+    ],
+    "de": [
+      "Realms starten wieder: Seit 0.3.6 brach der Start der Server sofort mit dem Fehler „No database selected“ ab. Nichts ist verloren gegangen, deine Charaktere und Accounts sind unversehrt."
+    ],
+    "es": [
+      "Los reinos vuelven a arrancar: desde la 0.3.6, el inicio de los servidores se detenía al instante con el error «No database selected». No se ha perdido nada, tus personajes y cuentas están intactos."
+    ]
+  },
   "0.3.6": {
     "en": [
       "New realm settings in Server: flight path speed (up to 50, 32 is normal), instant flight paths (always, or the player's choice at each flight master) and the number of primary professions per character (up to 11).",
