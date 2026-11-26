@@ -337,7 +337,8 @@ When a hook blocks you, fix the cause; never work around it.
 | `new-adr` | record an architecture decision |
 
 
-`rk-db` integration tests need a real MySQL: set `RK_MYSQL_BASEDIR` to an
+`rk-db` and driver (`drivers/azerothcore/tests/mysql.rs`: every driver
+statement on the real tables) integration tests need a real MySQL: set `RK_MYSQL_BASEDIR` to an
 unpacked MySQL 8.4 ZIP (`tools/ci/fetch-mysql.ps1` downloads a verified one).
 
 ## 7. Commands

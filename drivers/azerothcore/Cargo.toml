@@ -21,4 +21,7 @@ sha1.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+rk-catalog.workspace = true
+rk-engine.workspace = true
 tempfile.workspace = true
+tokio.workspace = true

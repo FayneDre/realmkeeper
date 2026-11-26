@@ -3641,13 +3641,16 @@ dependencies = [
  "getrandom 0.4.3",
  "hex",
  "num-bigint",
+ "rk-catalog",
  "rk-conf",
  "rk-core",
  "rk-db",
+ "rk-engine",
  "rk-runtime",
  "sha1",
  "tempfile",
  "thiserror 2.0.21",
+ "tokio",
 ]
 
 [[package]]

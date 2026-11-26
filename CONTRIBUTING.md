@@ -33,7 +33,8 @@ cargo deny check advisories licenses sources bans   # dependencies (cargo instal
 ```
 
 CI also runs `npm audit` and a UI smoke test (`npm run test:ui`, the debug app
-driven over the DevTools protocol). `rk-db` integration tests need a real
+driven over the DevTools protocol). `rk-db` and AzerothCore driver
+integration tests need a real
 MySQL 8.4: set `RK_MYSQL_BASEDIR` to an unpacked ZIP
 (`tools/ci/fetch-mysql.ps1` downloads a verified one); without it they are
 skipped.
