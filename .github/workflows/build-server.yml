@@ -522,6 +522,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_INSTALL_PREFIX="$AC_SRC/env/install"
           -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-include utility"
           -DAPPS_BUILD=all -DTOOLS_BUILD=db-only
           -DSCRIPTS=static -DMODULES=static
           -DBUILD_TESTING=OFF -DWITH_WARNINGS=OFF
