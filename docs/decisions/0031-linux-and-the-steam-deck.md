@@ -83,12 +83,22 @@ Upstream facts (2026-11-27):
    same source key: handoff, exports, restores and the "an older build lacks
    this" checks compare source keys, never build keys across platforms. A
    realm taken back from the PC on the Deck needs the Linux build of the same
-   catalog release, which the same CI run published.
+   catalog release, which the same CI run published. The installed realm
+   keeps its build's source key (`instance.json` `source`), exports and
+   handoff heads carry it (`source`, ignored by older launchers), and a take
+   back asks for the server update first when the offered build has the
+   other computer's source key. Without a source key on one side the build
+   keys are compared, as before.
 4. **Database.** The `mysql-8-4` component gets a `linux-x86_64` entry: the
-   minimal tarball above. `rk-store` / `rk-engine` unpack `.tar.xz`. The
-   database snapshot is made per platform by that platform's smoke test and
-   carries the platform in `snapshot.json`; a snapshot of another platform is
-   never restored. The Linux smoke test also restores a player-data dump made
+   minimal tarball above. `rk-engine` unpacks `.tar.xz` (pure Rust, one
+   stream; its symbolic links become hard links to files of the same
+   archive, so nothing unpacked points outside the component), then copies
+   the declared `extras` out of their Debian packages (`package-files` step,
+   inside the component operation: a failure rolls the whole component
+   back). The database snapshot is made per platform by that platform's
+   smoke test and carries the platform in `snapshot.json`; a snapshot or a
+   server build of another platform is refused (`build-info.json` and
+   `snapshot.json` without one are Windows ones). The Linux smoke test also restores a player-data dump made
    by the Windows smoke test (cross-platform check of point 3).
 5. **Executables.** The emulator manifest names programs without extension
    (`bin/worldserver`); the engine adds the platform's executable suffix

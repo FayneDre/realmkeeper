@@ -319,6 +319,9 @@ pub enum ServerUpdate {
     Available {
         current: Option<String>,
         build: String,
+        /// Source key of that build (ADR 0031), when it has one.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        source: Option<String>,
         download: u64,
     },
     /// Nothing published yet for this launcher's catalog pins.
@@ -594,6 +597,7 @@ impl Launcher {
                 ServerUpdate::Available {
                     current: record.build,
                     build: build.build_key,
+                    source: build.source_key,
                     download: build.server.size,
                 }
             },

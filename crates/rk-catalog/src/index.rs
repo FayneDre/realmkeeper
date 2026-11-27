@@ -128,6 +128,10 @@ pub struct Build {
     pub flavor: String,
     pub platform: String,
     pub build_key: String,
+    /// Same core and module sources on every platform (ADR 0031); absent
+    /// from builds published before it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_key: Option<String>,
     pub core: Pin,
     /// Every module compiled in: id -> commit.
     pub modules: BTreeMap<String, String>,

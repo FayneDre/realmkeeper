@@ -237,6 +237,20 @@ pub struct OptionalSqlSpec {
     pub target: String,
 }
 
+impl ProcessSpec {
+    /// The executable on this platform.
+    pub fn program(&self) -> String {
+        program_path(&self.executable)
+    }
+}
+
+impl ExtractionStep {
+    /// The executable on this platform.
+    pub fn program(&self) -> String {
+        program_path(&self.executable)
+    }
+}
+
 impl OptionalSqlSpec {
     pub fn source_path(&self, module: &str, file: &str) -> String {
         self.source
@@ -250,13 +264,27 @@ impl OptionalSqlSpec {
     }
 }
 
+/// Path of a program of the server build on this platform: manifests name
+/// programs without extension (`bin/worldserver`) and the platform's
+/// executable suffix is added (`.exe` on Windows, nothing on Linux; ADR 0031).
+pub fn program_path(executable: &str) -> String {
+    format!("{executable}{}", std::env::consts::EXE_SUFFIX)
+}
+
 /// A command-line tool shipped with the server build.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ToolSpec {
-    /// Relative to the instance root.
+    /// Relative to the instance root, without extension ([`program_path`]).
     pub executable: String,
     pub config_file: String,
+}
+
+impl ToolSpec {
+    /// The executable on this platform.
+    pub fn program(&self) -> String {
+        program_path(&self.executable)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -269,6 +297,7 @@ pub struct ComponentRef {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ProcessSpec {
     pub id: String,
+    /// Relative to the instance root, without extension ([`program_path`]).
     pub executable: String,
     pub config_file: String,
     pub readiness: Readiness,
@@ -1272,7 +1301,8 @@ pub struct DataExtraction {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ExtractionStep {
     pub id: String,
-    /// Relative to the instance root (a tool of the server build).
+    /// Relative to the instance root (a tool of the server build), without
+    /// extension ([`program_path`]).
     pub executable: String,
     /// `${client.root}`, `${client.data}` (its `Data` folder) and
     /// `${cpu.count}` are replaced; paths are relative to the output.

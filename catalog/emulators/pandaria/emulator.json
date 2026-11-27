@@ -108,7 +108,7 @@
   "processes": [
     {
       "id": "authserver",
-      "executable": "bin/authserver.exe",
+      "executable": "bin/authserver",
       "configFile": "authserver.conf",
       "args": [
         "-c",
@@ -124,7 +124,7 @@
     },
     {
       "id": "worldserver",
-      "executable": "bin/worldserver.exe",
+      "executable": "bin/worldserver",
       "configFile": "worldserver.conf",
       "args": [
         "-c",
@@ -146,7 +146,7 @@
     "steps": [
       {
         "id": "maps",
-        "executable": "bin/mapextractor.exe",
+        "executable": "bin/mapextractor",
         "args": ["-i", "${client.root}", "-o", "."],
         "weight": 0.05,
         "label": {
@@ -158,7 +158,7 @@
       },
       {
         "id": "vmaps-extract",
-        "executable": "bin/vmap4extractor.exe",
+        "executable": "bin/vmap4extractor",
         "args": ["-d", "${client.data}"],
         "weight": 0.05,
         "label": {
@@ -170,7 +170,7 @@
       },
       {
         "id": "vmaps-assemble",
-        "executable": "bin/vmap4assembler.exe",
+        "executable": "bin/vmap4assembler",
         "args": ["Buildings", "vmaps"],
         "create": ["vmaps"],
         "weight": 0.05,
@@ -183,7 +183,7 @@
       },
       {
         "id": "mmaps",
-        "executable": "bin/mmaps_generator.exe",
+        "executable": "bin/mmaps_generator",
         "args": ["--threads", "${cpu.count}"],
         "create": ["mmaps"],
         "weight": 0.85,

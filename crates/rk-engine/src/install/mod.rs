@@ -30,7 +30,7 @@ pub use steps::{
     RenderConfigs, RunTool, ToolFailed,
 };
 
-use crate::steps::{read_entry, Extract, ExtractData, Fetch, Strip};
+use crate::steps::{read_entry, Extract, ExtractData, Fetch, PackageFiles, Strip};
 use crate::{fsutil, Operation};
 
 #[derive(Debug, Error)]
@@ -55,6 +55,13 @@ pub enum PlanError {
     Index(#[from] rk_catalog::index::IndexError),
     #[error("database snapshot {path} does not fit this instance: {reason}")]
     SnapshotMismatch { path: PathBuf, reason: String },
+    /// A server build or snapshot made for another platform (ADR 0031).
+    #[error("{path} is made for {platform}, this computer is {expected}")]
+    OtherPlatform {
+        path: PathBuf,
+        platform: String,
+        expected: String,
+    },
     #[error(
         "instance '{0}' is in use by another command \
          (its server is running, or it is being changed)"
@@ -189,6 +196,11 @@ pub struct InstanceRecord {
     /// `None` for instances made before it was recorded.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub build: Option<String>,
+    /// Source key of that build: the same core and module sources on every
+    /// platform (ADR 0031), so player data moves between a Windows and a
+    /// Linux realm with the same one. `None` for builds made before it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
     /// Module option values chosen by the player (module -> option -> value);
     /// absent options use the manifest default.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -291,6 +303,7 @@ pub fn open_or_create(
         created: crate::journal::now(),
         regenerate: Vec::new(),
         build: None,
+        source: None,
         options: BTreeMap::new(),
         name: None,
     };
@@ -408,9 +421,33 @@ pub fn component_operation(
         size: build.size,
         sha256: build.sha256.clone(),
     };
-    Ok(Operation::new(format!("component-{id}"))
-        .step(Fetch::new("download", store, request))
-        .step(Extract::new("extract", blob, layout.component(id)).strip(Strip::SingleRootDir)))
+    let target = layout.component(id);
+    let mut op = Operation::new(format!("component-{id}"))
+        .step(Fetch::new("download", store.clone(), request))
+        .step(Extract::new("extract", blob, &target).strip(Strip::SingleRootDir));
+    // Libraries the download expects from the system (ADR 0031), into the
+    // directory the `extract` just put in place.
+    for (n, extra) in build.extras.iter().enumerate() {
+        let request = FetchRequest {
+            urls: vec![extra.upstream.clone()],
+            size: extra.size,
+            sha256: extra.sha256.clone(),
+        };
+        let package = store.blob_path(&extra.sha256);
+        op = op
+            .step(Fetch::new(
+                format!("download-extra-{n}"),
+                store.clone(),
+                request,
+            ))
+            .step(PackageFiles::new(
+                format!("extra-{n}"),
+                package,
+                &target,
+                extra.files.clone(),
+            ));
+    }
+    Ok(op)
 }
 
 /// `serverdata-<client>-<version>`: the emulator's downloaded server data
@@ -501,6 +538,10 @@ pub struct SnapshotManifest {
     pub format: u32,
     /// Build key of the server artifact whose SQL made the snapshot.
     pub build_key: String,
+    /// Platform of the MySQL that made it (ADR 0031); absent before Linux
+    /// builds, when every snapshot was a Windows one.
+    #[serde(default)]
+    pub platform: Option<String>,
     pub mysql: SnapshotMysql,
     pub databases: Vec<String>,
     /// Modules whose SQL is in the snapshot (dbimport names).
@@ -529,12 +570,51 @@ fn read_manifest<T: for<'de> Deserialize<'de>>(archive: &Path, name: &str) -> Re
 #[serde(rename_all = "camelCase")]
 struct BuildInfo {
     build_key: String,
+    #[serde(default)]
+    source_key: Option<String>,
+    /// Absent before Linux builds (ADR 0031): Windows.
+    #[serde(default)]
+    platform: Option<String>,
 }
 
-/// Build key of a server artifact (its `build-info.json`).
-pub fn artifact_build_key(server_artifact: &Path) -> Result<String, PlanError> {
+/// Platform of builds and snapshots made before ADR 0031.
+const LEGACY_PLATFORM: &str = "windows-x86_64";
+
+/// Refuses an archive made for another platform than this computer's.
+fn check_platform(path: &Path, platform: Option<&str>) -> Result<(), PlanError> {
+    let (platform, expected) = (platform.unwrap_or(LEGACY_PLATFORM), self::platform());
+    if platform == expected {
+        Ok(())
+    } else {
+        Err(PlanError::OtherPlatform {
+            path: path.to_owned(),
+            platform: platform.to_owned(),
+            expected,
+        })
+    }
+}
+
+/// Keys of a server artifact (its `build-info.json`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArtifactBuild {
+    pub build_key: String,
+    /// Platform-independent (ADR 0031); `None` for builds made before it.
+    pub source_key: Option<String>,
+}
+
+/// Keys of a server artifact, which must be made for this platform.
+pub fn artifact_build(server_artifact: &Path) -> Result<ArtifactBuild, PlanError> {
     let build: BuildInfo = read_manifest(server_artifact, "build-info.json")?;
-    Ok(build.build_key)
+    check_platform(server_artifact, build.platform.as_deref())?;
+    Ok(ArtifactBuild {
+        build_key: build.build_key,
+        source_key: build.source_key,
+    })
+}
+
+/// Build key of a server artifact, which must be made for this platform.
+pub fn artifact_build_key(server_artifact: &Path) -> Result<String, PlanError> {
+    Ok(artifact_build(server_artifact)?.build_key)
 }
 
 /// A snapshot fits when it was made from the same server build and MySQL
@@ -546,9 +626,8 @@ fn check_snapshot(
     allowed: &[String],
 ) -> Result<(), PlanError> {
     let manifest: SnapshotManifest = read_manifest(snapshot, "snapshot.json")?;
-    let build = BuildInfo {
-        build_key: artifact_build_key(server_artifact)?,
-    };
+    check_platform(snapshot, manifest.platform.as_deref())?;
+    let build_key = artifact_build_key(server_artifact)?;
     let mismatch = |reason: String| PlanError::SnapshotMismatch {
         path: snapshot.to_owned(),
         reason,
@@ -556,10 +635,10 @@ fn check_snapshot(
     if manifest.format != 1 {
         return Err(mismatch(format!("unknown format {}", manifest.format)));
     }
-    if manifest.build_key != build.build_key {
+    if manifest.build_key != build_key {
         return Err(mismatch(format!(
-            "made for server build {}, not {}",
-            manifest.build_key, build.build_key
+            "made for server build {}, not {build_key}",
+            manifest.build_key
         )));
     }
     let (mysql_id, mysql_version) = mysql;
@@ -677,7 +756,7 @@ pub fn instance_plan(
         },
         import: emu.instance.db_import.as_ref().map(|tool| RunTool {
             id: "db-import".into(),
-            executable: paths.root.join(&tool.executable),
+            executable: paths.root.join(tool.program()),
             args: vec!["-c".into(), format!("configs/{}", tool.config_file)],
             cwd: paths.root.clone(),
             log: paths.logs.join("dbimport.log"),
@@ -872,21 +951,50 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let (snapshot, server) = (dir.path().join("db.zip"), dir.path().join("server.zip"));
         archive(&snapshot, "snapshot.json", snapshot_json);
-        archive(
-            &server,
-            "build-info.json",
-            r#"{"buildKey": "k1", "other": 1}"#,
+        let info = format!(
+            r#"{{"buildKey": "k1", "platform": "{}", "other": 1}}"#,
+            platform()
         );
+        archive(&server, "build-info.json", &info);
         let allowed: Vec<String> = allowed.iter().map(|s| s.to_string()).collect();
         check_snapshot(&snapshot, &server, ("mysql-8-4", "8.4.13"), &allowed)
     }
 
     fn manifest(build_key: &str, version: &str, modules: &str) -> String {
         format!(
-            r#"{{"format": 1, "buildKey": "{build_key}",
+            r#"{{"format": 1, "buildKey": "{build_key}", "platform": "{}",
                 "mysql": {{"id": "mysql-8-4", "version": "{version}", "sha256": "ab"}},
-                "databases": ["acore_world"], "modules": [{modules}]}}"#
+                "databases": ["acore_world"], "modules": [{modules}]}}"#,
+            platform()
         )
+    }
+
+    #[test]
+    fn archives_of_another_platform_are_refused() {
+        let other = if platform() == "linux-x86_64" {
+            "windows-x86_64"
+        } else {
+            "linux-x86_64"
+        };
+        let json = manifest("k1", "8.4.13", "").replace(&platform(), other);
+        let error = check(&json, &[]).unwrap_err();
+        assert!(matches!(error, PlanError::OtherPlatform { .. }), "{error}");
+
+        let dir = tempfile::tempdir().unwrap();
+        let server = dir.path().join("server.zip");
+        archive(
+            &server,
+            "build-info.json",
+            &format!(r#"{{"buildKey": "k1", "platform": "{other}"}}"#),
+        );
+        let error = artifact_build_key(&server).unwrap_err();
+        assert!(error.to_string().contains(other), "{error}");
+        // Builds made before ADR 0031 carry no platform: they are Windows ones.
+        archive(&server, "build-info.json", r#"{"buildKey": "k1"}"#);
+        assert_eq!(
+            artifact_build_key(&server).is_ok(),
+            platform() == "windows-x86_64"
+        );
     }
 
     #[test]

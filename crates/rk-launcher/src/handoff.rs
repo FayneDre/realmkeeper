@@ -228,6 +228,9 @@ pub struct Head {
     pub sha256: String,
     #[serde(default)]
     pub build: Option<String>,
+    /// Source key of that build (ADR 0031).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
     pub launcher: String,
     #[serde(default)]
     pub name: Option<String>,
@@ -240,6 +243,18 @@ pub struct Playing {
     pub machine_id: String,
     pub machine: String,
     pub secs: u64,
+}
+
+/// Whether the player data of `realm` was made by the sources of the build
+/// of `record` (same database schema); `None` when it cannot be told.
+fn same_sources(realm: &realms::ExportedRealm, record: &InstanceRecord) -> Option<bool> {
+    match (&realm.source, &record.source) {
+        (Some(theirs), Some(ours)) => Some(theirs == ours),
+        _ => realm
+            .build
+            .as_ref()
+            .map(|theirs| record.build.as_ref() == Some(theirs)),
+    }
 }
 
 fn valid_uid(uid: &str) -> bool {
@@ -716,6 +731,7 @@ impl Launcher {
             size,
             sha256,
             build: record.build.clone(),
+            source: record.source.clone(),
             launcher: env!("CARGO_PKG_VERSION").to_owned(),
             name: record.name.clone(),
         };
@@ -819,10 +835,16 @@ impl Launcher {
         // the game was made on the build this realm is offered as an update
         // (the other computer updated first). A newer launcher there was
         // refused above; an older build there is upgraded by the restore's
-        // database update.
-        if realm.build.is_some() && realm.build != record.build {
-            if let ServerUpdate::Available { build, .. } = self.server_update(id).await? {
-                if realm.build.as_deref() == Some(build.as_str()) {
+        // database update. Source keys compare builds of different platforms
+        // (a Windows PC and a Steam Deck, ADR 0031); build keys only those of
+        // one platform, for builds made before source keys.
+        if same_sources(&realm, &record) == Some(false) {
+            if let ServerUpdate::Available { build, source, .. } = self.server_update(id).await? {
+                let offered = match &realm.source {
+                    Some(wanted) => source.as_ref() == Some(wanted),
+                    None => realm.build.as_deref() == Some(build.as_str()),
+                };
+                if offered {
                     return Err(LauncherError::HandoffUpdateFirst);
                 }
             }
@@ -1087,9 +1109,57 @@ mod tests {
             size: 3,
             sha256: String::new(),
             build: None,
+            source: None,
             launcher: "0.3.4".into(),
             name: Some("Garona".into()),
         }
+    }
+
+    #[test]
+    fn sources_compare_builds_of_other_platforms() {
+        let realm = |build: Option<&str>, source: Option<&str>| realms::ExportedRealm {
+            format: 1,
+            emulator: "azerothcore".into(),
+            flavor: "playerbot".into(),
+            modules: Vec::new(),
+            options: Default::default(),
+            name: None,
+            network: rk_engine::install::Network::Solo,
+            build: build.map(Into::into),
+            source: source.map(Into::into),
+            exported: 0,
+            launcher: "0.3.9".into(),
+        };
+        let mut record: InstanceRecord = serde_json::from_value(serde_json::json!({
+            "format": 1, "id": "deck", "emulator": "azerothcore", "flavor": "playerbot",
+            "modules": [], "network": "solo", "ports": {}, "dbPort": 3306, "created": 0,
+            "build": "linuxkey", "source": "src1"
+        }))
+        .unwrap();
+        // A Windows export on the same sources as this Linux realm.
+        assert_eq!(
+            same_sources(&realm(Some("winkey"), Some("src1")), &record),
+            Some(true)
+        );
+        assert_eq!(
+            same_sources(&realm(Some("winkey"), Some("src2")), &record),
+            Some(false)
+        );
+        // Without source keys on one side: build keys, as before ADR 0031.
+        assert_eq!(
+            same_sources(&realm(Some("linuxkey"), None), &record),
+            Some(true)
+        );
+        assert_eq!(
+            same_sources(&realm(Some("winkey"), None), &record),
+            Some(false)
+        );
+        record.source = None;
+        assert_eq!(
+            same_sources(&realm(Some("linuxkey"), Some("src1")), &record),
+            Some(true)
+        );
+        assert_eq!(same_sources(&realm(None, None), &record), None);
     }
 
     fn seen(head: Head, arrived: bool) -> SeenHead {

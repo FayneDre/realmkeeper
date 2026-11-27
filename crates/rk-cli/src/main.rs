@@ -1387,6 +1387,7 @@ fn main() -> Result<ExitCode> {
                     current,
                     build,
                     download,
+                    ..
                 } => println!(
                     "update available: build {} -> {build} ({download} bytes to download)",
                     current.as_deref().unwrap_or("(unknown)")

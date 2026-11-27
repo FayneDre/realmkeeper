@@ -26,7 +26,8 @@ fn sleep_script() -> &'static str {
     "sleep 60"
 }
 
-/// Copies the system shell to `<tools>/bin/<name>` (a tool of the "server build").
+/// Copies the system shell to `<tools>/bin/<name>` (a tool of the "server
+/// build") and returns its manifest name (without extension, ADR 0031).
 fn install_shell(tools: &Path, name: &str) -> String {
     #[cfg(windows)]
     let source = PathBuf::from(std::env::var("SystemRoot").unwrap()).join("System32/cmd.exe");
@@ -36,7 +37,7 @@ fn install_shell(tools: &Path, name: &str) -> String {
     fs::create_dir_all(&bin).unwrap();
     let file = format!("{name}{}", std::env::consts::EXE_SUFFIX);
     fs::copy(source, bin.join(&file)).unwrap();
-    format!("bin/{file}")
+    format!("bin/{name}")
 }
 
 fn step(id: &str, executable: &str, script: &str, create: &[&str]) -> ExtractionStep {
@@ -260,12 +261,12 @@ async fn the_client_is_checked_before_any_tool_runs() {
 #[tokio::test]
 async fn a_missing_tool_is_named() {
     let s = setup();
-    let ex = extraction(vec![step("maps", "bin/mapextractor.exe", "", &[])]);
+    let ex = extraction(vec![step("maps", "bin/mapextractor", "", &[])]);
     let err = run(&s, data_step(&s, ex), &CancelToken::new())
         .await
         .unwrap_err();
     assert!(matches!(
         step_error(&err),
-        ExtractDataError::MissingTool { tool } if tool.ends_with("bin/mapextractor.exe")
+        ExtractDataError::MissingTool { tool } if tool.ends_with(format!("bin/mapextractor{}", std::env::consts::EXE_SUFFIX))
     ));
 }

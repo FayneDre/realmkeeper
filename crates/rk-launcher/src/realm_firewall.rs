@@ -16,8 +16,8 @@ impl Launcher {
             .iter()
             .map(|spec| firewall::Program {
                 process: spec.id.clone(),
-                path: std::path::absolute(root.join(&spec.executable))
-                    .unwrap_or_else(|_| root.join(&spec.executable)),
+                path: std::path::absolute(root.join(spec.program()))
+                    .unwrap_or_else(|_| root.join(spec.program())),
                 port: match &spec.readiness {
                     rk_core::manifest::Readiness::Tcp { port } => record.ports.get(port).copied(),
                     rk_core::manifest::Readiness::LogLine { .. } => None,

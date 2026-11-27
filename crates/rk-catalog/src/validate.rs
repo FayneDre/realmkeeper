@@ -207,6 +207,31 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                 }
             }
         }
+        // Programs are named without extension; the platform adds its own
+        // (ADR 0031).
+        let programs = emu
+            .processes
+            .iter()
+            .map(|p| (format!("process '{}'", p.id), &p.executable))
+            .chain(
+                emu.instance
+                    .db_import
+                    .iter()
+                    .map(|t| ("instance.dbImport".to_owned(), &t.executable)),
+            )
+            .chain(emu.data_extraction.iter().flat_map(|e| {
+                e.steps
+                    .iter()
+                    .map(|s| (format!("extraction step '{}'", s.id), &s.executable))
+            }));
+        for (what, executable) in programs {
+            if executable.to_ascii_lowercase().ends_with(".exe") {
+                push(
+                    here.clone(),
+                    format!("{what}: '{executable}' names a program without '.exe' (the platform adds it)"),
+                );
+            }
+        }
         for process in &emu.processes {
             if process
                 .startup

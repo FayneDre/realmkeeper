@@ -129,7 +129,7 @@ impl ExtractData {
         vars: &Variables,
     ) -> Result<(), crate::StepError> {
         let step = &self.extraction.steps[index];
-        let executable = self.tools_root.join(&step.executable);
+        let executable = self.tools_root.join(step.program());
         if !executable.is_file() {
             return Err(Box::new(ExtractDataError::MissingTool { tool: executable }));
         }

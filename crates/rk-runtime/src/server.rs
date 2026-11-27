@@ -115,7 +115,7 @@ impl Server {
                 };
                 Ok(ProcessConfig {
                     id: spec.id.clone(),
-                    program: paths.root.join(&spec.executable),
+                    program: paths.root.join(spec.program()),
                     args: spec.args.clone(),
                     cwd: paths.root.clone(),
                     log_file: paths.logs.join(format!("{}.console.log", spec.id)),

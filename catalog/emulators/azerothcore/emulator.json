@@ -77,7 +77,7 @@
         "Updates.EnableDatabases": 0
       }
     },
-    "dbImport": { "executable": "bin/dbimport.exe", "configFile": "dbimport.conf" },
+    "dbImport": { "executable": "bin/dbimport", "configFile": "dbimport.conf" },
     "optionalSql": {
       "source": "modules/{module}/{file}",
       "target": "modules/{module}/data/sql/db-{database}/rk-optional"
@@ -91,7 +91,7 @@
   "processes": [
     {
       "id": "authserver",
-      "executable": "bin/authserver.exe",
+      "executable": "bin/authserver",
       "configFile": "authserver.conf",
       "args": ["-c", "configs/authserver.conf"],
       "readiness": { "type": "tcp", "port": "auth" },
@@ -99,7 +99,7 @@
     },
     {
       "id": "worldserver",
-      "executable": "bin/worldserver.exe",
+      "executable": "bin/worldserver",
       "configFile": "worldserver.conf",
       "args": ["-c", "configs/worldserver.conf"],
       "readiness": { "type": "tcp", "port": "world" },

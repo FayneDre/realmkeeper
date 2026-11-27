@@ -178,7 +178,7 @@ that an emulator is data + a driver.
 - [x] ADR 0031 (proposed): platform `linux-x86_64`, source key, Proton client
 - [x] Deck checks: system libraries, MySQL minimal tarball, file systems, Proton (SteamOS 3.9.5)
 - [ ] CI: Linux server build + Arch container smoke test, `sourceKey`, index entries (written, first run pending)
-- [ ] Engine: `.tar.xz`, executable suffix rule, Linux snapshot
+- [x] Engine: `.tar.xz` (links as hard links, Unix modes, also from release ZIPs), MySQL `extras` from Debian packages, executable suffix rule, other-platform builds and snapshots refused, source key in records, exports and handoff
 - [ ] Runtime and launcher: process groups, `/proc` ports, logind inhibitor, data root
 - [ ] Client through Proton (Steam shortcut, `proton run`, `wine`)
 - [ ] AppImage + updater in `release-app.yml`

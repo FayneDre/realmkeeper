@@ -39,21 +39,41 @@ pub enum ExtractError {
     Duplicate(String),
     #[error("archive has no single root directory to strip")]
     NoSingleRoot,
+    #[error("package {path}: {message}")]
+    Package { path: PathBuf, message: String },
     #[error("{0}")]
     NoSpace(#[from] rk_store::NoSpace),
 }
 
-fn io(path: &Path) -> impl FnOnce(std::io::Error) -> ExtractError + '_ {
+pub(crate) fn io(path: &Path) -> impl FnOnce(std::io::Error) -> ExtractError + '_ {
     move |source| ExtractError::Io {
         path: path.to_path_buf(),
         source,
     }
 }
 
-/// `extract`: unpacks a ZIP archive into a directory, atomically.
+/// Unix permissions of an unpacked file: executable for everyone when the
+/// archive marks it executable for anyone, else read-write for the owner and
+/// readable for everyone (ADR 0031). Nothing to do on Windows.
+#[cfg(unix)]
+pub(crate) fn set_mode(path: &Path, mode: u32) -> std::io::Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    let mode = if mode & 0o111 != 0 { 0o755 } else { 0o644 };
+    std::fs::set_permissions(path, std::fs::Permissions::from_mode(mode))
+}
+
+#[cfg(not(unix))]
+pub(crate) fn set_mode(_path: &Path, _mode: u32) -> std::io::Result<()> {
+    Ok(())
+}
+
+/// `extract`: unpacks a ZIP or `.tar.xz` archive into a directory, atomically.
 ///
-/// The archive is extracted into a staging directory by several threads
-/// (largest files first), every entry's CRC-32 is checked while reading, then
+/// A ZIP archive is extracted into a staging directory by several threads
+/// (largest files first), every entry's CRC-32 is checked while reading; a
+/// `.tar.xz` one (Linux downloads, ADR 0031) in one stream, its links as
+/// hard links to files of the same archive. Unix permissions recorded by the
+/// archive are applied on Linux. Then
 /// [`DirSwap`] puts it in place. `undo` restores the previous directory;
 /// `finalize` drops it. Entries that would escape the target (absolute paths,
 /// `..`, links) fail the step before anything is written.
@@ -149,7 +169,11 @@ impl<C: Sync> Step<C> for Extract {
                         strip,
                     };
                     let progress = (&*done, &*total);
-                    let finished = unzip(&archive, &staging, select, threads, progress, &cancel)?;
+                    let finished = if super::tarball::is_xz(&archive)? {
+                        super::tarball::untar_xz(&archive, &staging, select, progress, &cancel)?
+                    } else {
+                        unzip(&archive, &staging, select, threads, progress, &cancel)?
+                    };
                     if finished {
                         swap.commit()?;
                     }
@@ -373,7 +397,7 @@ pub(crate) fn unzip(
 
 /// A plain relative name: no root (`/x`, `\x`, `\\server`), no drive (`C:`),
 /// no `..`, whatever the separator.
-fn is_relative_name(name: &str) -> bool {
+pub(crate) fn is_relative_name(name: &str) -> bool {
     !name.starts_with(['/', '\\'])
         && name
             .split(['/', '\\'])
@@ -402,6 +426,11 @@ fn write_entry(
         // A CRC-32 mismatch surfaces here as an InvalidData read error.
         let n = entry.read(buf).map_err(io(&file.out))?;
         if n == 0 {
+            // Recorded by `zip-zstd.mjs --unix-modes` for Linux builds.
+            if let Some(mode) = entry.unix_mode() {
+                drop(out);
+                set_mode(&file.out, mode).map_err(io(&file.out))?;
+            }
             return Ok(());
         }
         out.write_all(&buf[..n]).map_err(io(&file.out))?;

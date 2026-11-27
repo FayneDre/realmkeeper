@@ -33,6 +33,16 @@ impl Launcher {
                     build.unpacked_size,
                     self.layout.component(&component.id),
                 );
+                // Debian packages of missing libraries (ADR 0031): a few
+                // hundred kilobytes, their files copied into the component.
+                for extra in &build.extras {
+                    add(
+                        &extra.sha256,
+                        extra.size,
+                        Some(extra.size),
+                        self.layout.component(&component.id),
+                    );
+                }
             }
         }
         let source = self.catalog.server_data_source(emulator);
@@ -239,7 +249,7 @@ impl Launcher {
                 Some(server)
             }
         };
-        let build = server.map(|s| install::artifact_build_key(s)).transpose()?;
+        let build = server.map(|s| install::artifact_build(s)).transpose()?;
         if matches!(pending, Pending::Install { .. }) {
             // Part of the install: until it completes, the instance is not
             // installed and `resume` runs both operations again (the first
@@ -256,7 +266,8 @@ impl Launcher {
         }
         let mut record = record;
         if let Some(build) = build {
-            record.build = Some(build);
+            record.build = Some(build.build_key);
+            record.source = build.source_key;
             install::save_record(&self.layout, &record)?;
         }
         self.clear_pending(&record.id)?;
@@ -679,7 +690,7 @@ impl Launcher {
         let executables = emu
             .processes
             .iter()
-            .map(|p| paths.root.join(&p.executable))
+            .map(|p| paths.root.join(p.program()))
             .collect();
         check(&paths.bin, executables);
         for component in &emu.components {

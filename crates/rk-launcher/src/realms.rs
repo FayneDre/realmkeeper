@@ -57,6 +57,10 @@ pub struct ExportedRealm {
     /// current one and dbimport migrates the player data to it).
     #[serde(default)]
     pub build: Option<String>,
+    /// Source key of that build (ADR 0031): builds of other platforms with
+    /// the same one hold the same database schema.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
     /// Unix seconds.
     pub exported: u64,
     /// Launcher version that wrote the file.
@@ -283,6 +287,7 @@ impl Launcher {
             name: record.name.clone(),
             network: record.network,
             build: record.build.clone(),
+            source: record.source.clone(),
             exported: unix_secs(),
             launcher: env!("CARGO_PKG_VERSION").to_owned(),
         };
@@ -798,6 +803,7 @@ mod tests {
             name: Some("Test".into()),
             network: Network::Solo,
             build: Some("b".into()),
+            source: Some("s".into()),
             exported: 1,
             launcher: "0".into(),
         };

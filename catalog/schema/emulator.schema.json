@@ -130,9 +130,10 @@
           ],
           "properties": {
             "executable": {
-              "description": "Path relative to the instance root.",
+              "description": "Path relative to the instance root, without extension: the platform adds its own ('.exe' on Windows, ADR 0031).",
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "not": { "type": "string", "pattern": "\\.[Ee][Xx][Ee]$" }
             },
             "configFile": {
               "$ref": "common.schema.json#/$defs/configFilePath"
@@ -294,8 +295,9 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/$defs/id" },
         "executable": {
-          "description": "Relative to the instance root (a tool of the server build).",
-          "$ref": "#/$defs/relativePath"
+          "description": "Relative to the instance root (a tool of the server build), without extension (ADR 0031).",
+          "$ref": "#/$defs/relativePath",
+          "not": { "type": "string", "pattern": "\\.[Ee][Xx][Ee]$" }
         },
         "args": {
           "description": "Arguments; ${client.root}, ${client.data} and ${cpu.count} are replaced. Paths are relative to the output directory.",
@@ -357,8 +359,9 @@
           "$ref": "common.schema.json#/$defs/id"
         },
         "executable": {
-          "description": "Path relative to the instance root.",
-          "type": "string"
+          "description": "Path relative to the instance root, without extension: the platform adds its own ('.exe' on Windows, ADR 0031).",
+          "type": "string",
+          "not": { "type": "string", "pattern": "\\.[Ee][Xx][Ee]$" }
         },
         "configFile": {
           "$ref": "common.schema.json#/$defs/configFilePath"

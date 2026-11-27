@@ -228,6 +228,7 @@ async fn driver_statements_run_on_mysql() {
         created: 0,
         regenerate: Vec::new(),
         build: None,
+        source: None,
         options: BTreeMap::new(),
         name: None,
     };

@@ -56,8 +56,11 @@ tauri-plugin-window-state = "2.5"
 windows-sys = "0.61"
 # Directory links without privileges (server data overlay, ADR 0013).
 junction = "2"
+# .tar.xz downloads and Debian packages on Linux (ADR 0031), pure Rust.
+lzma-rust2 = { version = "0.25", default-features = false, features = ["std", "xz"] }
 # Module assets shipped as .7z archives (pure Rust, decoding only).
 sevenz-rust2 = { version = "0.25", default-features = false }
+tar = { version = "0.4", default-features = false }
 # Job Objects: supervised processes that hold no state die with the launcher.
 win32job = "2"
 # Pure-Rust deflate (zlib-rs): no C toolchain, fast decoding.
