@@ -516,6 +516,10 @@ jobs:
       # into the servers (_CONF_DIR, Config.cpp GetConfigPath on Linux):
       # relative "configs" makes them read configs/ and configs/modules/ in
       # their working directory, the instance root, as on Windows.
+      # `-include utility`: MySQLConnection.cpp @ 32fd347 calls std::exchange
+      # without <utility>, which MSVC pulls in through other headers and
+      # libstdc++ does not (clang: "no member named 'exchange' in namespace
+      # 'std'", 2026-11-27).
       - name: Configure CMake
         run: >
           cmake -S "$AC_SRC" -B "$AC_SRC/var/build"
