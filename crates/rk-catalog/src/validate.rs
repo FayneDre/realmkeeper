@@ -434,6 +434,9 @@ pub fn validate(catalog: &Catalog) -> Vec<Issue> {
                     push(here.clone(), issue);
                 }
             }
+            for issue in maintenance_issues(&entry.manifest, module) {
+                push(here.clone(), issue);
+            }
             for flavor in &module.compatible_flavors {
                 if !entry.flavors.contains_key(flavor) {
                     push(
@@ -812,6 +815,35 @@ fn table_issues(
         for name in std::iter::once(table).chain(row).chain(set) {
             if !is_identifier(name) {
                 issues.push(format!("option '{id}': '{name}' is not a plain SQL name"));
+            }
+        }
+    }
+    issues
+}
+
+/// Problems of the cleanups a module offers (ADR 0030).
+fn maintenance_issues(
+    emu: &rk_core::manifest::EmulatorManifest,
+    module: &rk_core::manifest::ModuleManifest,
+) -> Vec<String> {
+    let mut issues = Vec::new();
+    let mut seen = std::collections::BTreeSet::new();
+    for action in &module.maintenance {
+        let id = &action.id;
+        if !seen.insert(id.as_str()) {
+            issues.push(format!("maintenance '{id}' is declared twice"));
+        }
+        if !emu.databases.iter().any(|d| d.id == action.clear.database) {
+            issues.push(format!(
+                "maintenance '{id}': unknown database '{}'",
+                action.clear.database
+            ));
+        }
+        for name in action.clear.names() {
+            if !is_identifier(name) {
+                issues.push(format!(
+                    "maintenance '{id}': '{name}' is not a plain SQL name"
+                ));
             }
         }
     }

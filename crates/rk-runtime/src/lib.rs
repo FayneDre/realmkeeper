@@ -33,4 +33,4 @@ pub use driver::{
 pub use error::RuntimeError;
 pub use network::{lan_ipv4, port_owner};
 pub use process::{Exit, LogLine, Process, ProcessConfig, Ready, Stopped, Stream};
-pub use server::{Observer, Running, Server, ServerEvent};
+pub use server::{DatabaseHold, Observer, Running, Server, ServerEvent};

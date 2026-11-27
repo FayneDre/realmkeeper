@@ -575,10 +575,11 @@ impl Launcher {
                         option: option.clone(),
                     })
                     .collect();
-                (!options.is_empty()).then(|| ModuleOptions {
+                (!options.is_empty() || !manifest.maintenance.is_empty()).then(|| ModuleOptions {
                     module: module.clone(),
                     options,
                     groups: manifest.option_groups.clone(),
+                    maintenance: manifest.maintenance.clone(),
                 })
             })
             .collect()
@@ -628,6 +629,31 @@ impl Launcher {
             });
         }
         Ok(server)
+    }
+
+    /// An instance for work on its database alone (started alone, stopped,
+    /// pinged): the server programs need not be there.
+    pub fn database_server(&self, id: &str) -> Result<rk_runtime::Server> {
+        Ok(rk_runtime::Server::open(&self.catalog, &self.layout, id)?)
+    }
+
+    /// Whether the instance's database answers (started alone, or left
+    /// running by a launcher that stopped abruptly).
+    pub async fn database_up(&self, id: &str) -> Result<bool> {
+        Ok(self.database_server(id)?.db().ping().await)
+    }
+
+    /// What a SQL tool needs to open the instance's databases: the
+    /// launcher's own account, on this computer only.
+    pub fn database_connection(&self, id: &str) -> Result<crate::DatabaseConnection> {
+        let (record, secrets) = install::open_existing(&self.layout, id)?;
+        let db = install::database(&self.catalog, &self.layout, &record)?;
+        Ok(crate::DatabaseConnection {
+            host: "127.0.0.1".into(),
+            port: db.settings().port,
+            user: secrets.db_user,
+            password: secrets.db_password,
+        })
     }
 
     /// Programs and libraries of an instance (its server files, its

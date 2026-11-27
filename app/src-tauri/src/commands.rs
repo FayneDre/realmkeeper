@@ -26,6 +26,7 @@ use rk_launcher::{
     InstallRequest, InstanceSummary, Launcher, LauncherError, ModuleOptions, ServerUpdate,
     SettingsView, SpaceEstimate, UiError, UninstallReport, UpdateOutcome,
 };
+use rk_runtime::DatabaseHold;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
 
@@ -58,6 +59,9 @@ pub struct AppState {
     catalog: Option<PathBuf>,
     operation: Mutex<Option<ActiveOperation>>,
     sessions: Mutex<BTreeMap<String, Session>>,
+    /// Databases started alone, by instance: the next start of the servers
+    /// takes them over, a change waits for them to be stopped.
+    databases: Mutex<BTreeMap<String, DatabaseHold>>,
     /// Work started after a session ended (the daily backup), by instance:
     /// the next start or change of that instance waits for it.
     background: Mutex<BTreeMap<String, tauri::async_runtime::JoinHandle<()>>>,
@@ -98,6 +102,7 @@ impl AppState {
             catalog,
             operation: Mutex::new(None),
             sessions: Mutex::new(BTreeMap::new()),
+            databases: Mutex::new(BTreeMap::new()),
             background: Mutex::new(BTreeMap::new()),
             closing: AtomicBool::new(false),
             hidden_for_game: AtomicBool::new(false),
@@ -144,6 +149,14 @@ impl AppState {
         sessions.contains_key(id)
     }
 
+    /// Whether the instance's database was started alone here.
+    fn database_held(&self, id: &str) -> bool {
+        self.databases
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .contains_key(id)
+    }
+
     /// Controls of the instance's running session, if any.
     fn session_control(&self, id: &str) -> Option<SessionControl> {
         let mut sessions = self.sessions.lock().unwrap_or_else(|e| e.into_inner());
@@ -174,7 +187,16 @@ impl AppState {
     /// Servers run or background work goes on: quitting goes through
     /// [`AppState::shutdown`].
     pub fn has_work(&self) -> bool {
-        !self.running_ids().is_empty() || self.background_busy()
+        !self.running_ids().is_empty() || self.background_busy() || self.databases_alone()
+    }
+
+    /// Some database was started alone: quitting stops it cleanly first.
+    fn databases_alone(&self) -> bool {
+        !self
+            .databases
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .is_empty()
     }
 
     /// Ids of the instances with a session.
@@ -216,6 +238,18 @@ impl AppState {
         for handle in background {
             let _ = handle.await;
         }
+        // Databases started alone stop cleanly too (never killed).
+        let databases: Vec<(String, DatabaseHold)> =
+            std::mem::take(&mut *self.databases.lock().unwrap_or_else(|e| e.into_inner()))
+                .into_iter()
+                .collect();
+        if let Ok(launcher) = self.launcher() {
+            for (id, hold) in databases {
+                if let Ok(server) = launcher.database_server(&id) {
+                    let _ = server.release_database(hold).await;
+                }
+            }
+        }
         // Quitting with the servers running is a clean stop too: a shared
         // realm played here is sent now, or the other computer would take
         // back an older game (ADR 0028).
@@ -235,6 +269,7 @@ pub fn update_shutdown_block(app: &AppHandle, ending: Option<&str>) {
         .running_ids()
         .iter()
         .any(|id| Some(id.as_str()) != ending)
+        || state.databases_alone()
         || state
             .operation
             .lock()
@@ -452,13 +487,18 @@ where
     Fut: std::future::Future<Output = std::result::Result<T, LauncherError>>,
 {
     let launcher = state.launcher()?;
-    if state.running(instance) {
-        return Err(app_error("server.running", instance));
-    }
+    let refused = |state: &AppState| -> Result<()> {
+        if state.running(instance) {
+            return Err(app_error("server.running", instance));
+        }
+        if state.database_held(instance) {
+            return Err(app_error("database.runningAlone", instance));
+        }
+        Ok(())
+    };
+    refused(state)?;
     let settled = state.settle(&launcher, instance).await;
-    if state.running(instance) {
-        return Err(app_error("server.running", instance));
-    }
+    refused(state)?;
     let cancel = CancelToken::new();
     {
         let mut active = state.operation.lock().unwrap_or_else(|e| e.into_inner());
@@ -981,7 +1021,12 @@ pub async fn backup_now(state: State<'_, AppState>, id: String) -> Result<Backup
     if state.operation.lock().expect("operation lock").is_some() {
         return Err(app_error("operation.busy", &id));
     }
-    let made = launcher.backup_now(&id).await.map_err(ui);
+    // A database started alone holds the lock here: dumped as it runs.
+    let made = if state.database_held(&id) {
+        launcher.backup_live(&id).await.map_err(ui)
+    } else {
+        launcher.backup_now(&id).await.map_err(ui)
+    };
     drop(turn);
     made
 }
@@ -1578,6 +1623,15 @@ pub async fn start_instance(app: AppHandle, state: State<'_, AppState>, id: Stri
         }
     }
     let server = launcher.server(&id).map_err(ui)?;
+    // A database started alone is taken over: the servers start on it.
+    let held = state
+        .databases
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .remove(&id);
+    if let Some(hold) = held {
+        server.take_over(hold).map_err(|e| ui(e.into()))?;
+    }
     // The game is launched once the servers are online (`launch_game`).
     let events = forward_session_events(app.clone(), id.clone());
     let session = Session::start(server, None, events).map_err(ui)?;
@@ -1588,6 +1642,141 @@ pub async fn start_instance(app: AppHandle, state: State<'_, AppState>, id: Stri
         .insert(id, session);
     update_shutdown_block(&app, None);
     Ok(())
+}
+
+/// The database of a realm on its own: up (started here, or left running
+/// by a launcher that stopped abruptly) and whether this launcher holds it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseStatus {
+    up: bool,
+    held: bool,
+}
+
+#[tauri::command]
+pub async fn database_status(state: State<'_, AppState>, id: String) -> Result<DatabaseStatus> {
+    let launcher = state.launcher()?;
+    let held = state.database_held(&id);
+    let up = held || launcher.database_up(&id).await.map_err(ui)?;
+    Ok(DatabaseStatus { up, held })
+}
+
+/// Starts only the realm's database (MySQL), e.g. to open it with a SQL
+/// tool; Start servers and Play then take it over.
+#[tauri::command]
+pub async fn start_database(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<()> {
+    let launcher = state.launcher()?;
+    let refused = |state: &AppState| -> Result<bool> {
+        if state.running(&id) {
+            return Err(app_error("server.running", &id));
+        }
+        if let Some(active) = state
+            .operation
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .as_ref()
+        {
+            if active.instance == id {
+                return Err(app_error("operation.busy", &id));
+            }
+        }
+        Ok(state.database_held(&id))
+    };
+    if refused(&state)? {
+        return Ok(());
+    }
+    let _turn = state.settle(&launcher, &id).await;
+    if refused(&state)? {
+        return Ok(());
+    }
+    let server = launcher.database_server(&id).map_err(ui)?;
+    let hold = server.hold_database().await.map_err(|e| ui(e.into()))?;
+    state
+        .databases
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .insert(id, hold);
+    update_shutdown_block(&app, None);
+    Ok(())
+}
+
+/// Stops a database started alone (or left running), cleanly. Refused
+/// while the realm's servers run: they need it.
+#[tauri::command]
+pub async fn stop_database(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<()> {
+    let launcher = state.launcher()?;
+    if state.running(&id) {
+        return Err(app_error("database.serversRunning", &id));
+    }
+    // Waits for database work in progress (accounts, a backup).
+    let _turn = state.settle(&launcher, &id).await;
+    if state.running(&id) {
+        return Err(app_error("database.serversRunning", &id));
+    }
+    let server = launcher.database_server(&id).map_err(ui)?;
+    let held = state
+        .databases
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .remove(&id);
+    // One left running by an earlier launcher is adopted, then stopped;
+    // one already down is left alone (adopting would start it).
+    let hold = match held {
+        Some(hold) => hold,
+        None if !server.db().ping().await => return Ok(()),
+        None => server.hold_database().await.map_err(|e| ui(e.into()))?,
+    };
+    let stopped = server
+        .release_database(hold)
+        .await
+        .map_err(|e| ui(e.into()));
+    update_shutdown_block(&app, None);
+    stopped
+}
+
+/// Runs a module's cleanup on the stopped realm (ADR 0030), its player
+/// data backed up first. On a database started alone, it runs there.
+#[tauri::command]
+pub async fn run_maintenance(
+    state: State<'_, AppState>,
+    id: String,
+    module: String,
+    action: String,
+) -> Result<rk_launcher::maintenance::MaintenanceOutcome> {
+    let launcher = state.launcher()?;
+    let refused = |state: &AppState| -> Result<()> {
+        if state.running(&id) {
+            return Err(app_error("server.running", &id));
+        }
+        if state
+            .operation
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .is_some()
+        {
+            return Err(app_error("operation.busy", &id));
+        }
+        Ok(())
+    };
+    refused(&state)?;
+    // Database work in progress ends first; nothing starts meanwhile.
+    let _turn = state.settle(&launcher, &id).await;
+    refused(&state)?;
+    let held = state.database_held(&id);
+    launcher
+        .run_maintenance(&id, &module, &action, held)
+        .await
+        .map_err(ui)
+}
+
+/// What a SQL tool needs to open the realm's databases (the launcher's
+/// own MySQL account; MySQL only listens on this computer).
+#[tauri::command]
+pub fn database_connection(
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<rk_launcher::DatabaseConnection> {
+    state.launcher()?.database_connection(&id).map_err(ui)
 }
 
 #[tauri::command]

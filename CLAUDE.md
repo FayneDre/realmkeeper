@@ -71,6 +71,8 @@ emulators, clients and modules later **as data + a small driver**, never as rewr
 | A cleanly stopped MySQL 8.4 data directory copied without `auto.cnf`, `*.pem`, `#innodb_temp/` and spare redo files (`#innodb_redo/*_tmp`) starts in ~2 s (new UUID, keys, spares); `--init-file` sets root before listening. dbimport on up-to-date databases: ~9 s (vs 6-14 min from empty). `updates_include` paths are `$/`-relative (portable). | local test (2026-11-14), ADR 0009 |
 | worldserver with stdin as a **pipe** reads commands with `std::getline` and calls `World::StopNow` at EOF (clean: bots logged out, DB pools closed), also when the launcher is killed. Accounts: SRP6 `v = g^H(s‖H(USER:PASS)) mod N`, SHA-1, g = 7, little-endian; our verifier matches one made by worldserver. | fork `CliRunnable.cpp`, `SRP6.cpp`, `AccountMgr.cpp`; local test (2026-11-15) |
 | mod-ah-bot never loads its character: it builds an in-memory `Player` with `Initialize(AuctionHouseBot.GUID)` and owns auctions by that guid; `Account`/`GUID = 0` → "Account id and player id missing" and no bot. A `characters` row (next guid, worldserver stopped) is enough. | mod-ah-bot `c11d831` `AuctionHouseBot.cpp`, local test (2026-11-15) |
+| MySQL 8.4 refuses a table alias in a multi-table `DELETE` (`DELETE t FROM db.x t JOIN ...`) when no default database is selected: `ERROR 1046 No database selected`. Use `DELETE FROM db.x WHERE col IN (SELECT ...)`. The 0.3.6 Playerbots account type cleanup hit it: every Playerbots realm failed to start. | local test on `pubtest` (2026-11-27) |
+| mod-ah-bot never removes auctions above its target: `Sell` returns at once when the house holds `maxitems` auctions (every owner's unless `ConsiderOnlyBotAuctions`), and it fills qualities in order (grey, white, green, blue, purple), `ItemsPerCycle` per house per minute (`AuctionHouseMgr` update timer). Lowering `maxitems` leaves the surplus until it expires; rare items come last. | mod-ah-bot `c11d831` `AuctionHouseBot.cpp`, fork `AuctionHouseMgr.cpp`; player report (2026-11-27) |
 | mod-ah-bot keeps per-house settings in `acore_world.mod_auctionhousebot` (rows 2/6/7): `maxitems` (SQL default 250; the seller fills up to it, `minitems` only sets a flag), 14 `percent<quality>{tradegoods,items}` that must sum to 100 (else module defaults), `min/maxprice<quality>` (% of vendor price). `.ahbotoptions` is `Console::Yes`. | mod-ah-bot `c11d831` `AuctionHouseBotConfig.cpp`, `AuctionHouseBot.cpp`, `cs_ah_bot.cpp`; Garona DB (2026-11-21) |
 | Client 3.3.5a = build **12340**. Ports: auth 3724, world 8085, SOAP 7878. | AzerothCore defaults |
 | `Wow.exe` 3.3.5a: `VS_FIXEDFILEINFO` file version 3.3.5.12340 (build = low word of the low dword). The client reads `Data/<locale>/realmlist.wtf` and also saves `SET realmList "..."` in `WTF/Config.wtf`. | local client (2026-11-15) |
@@ -259,6 +261,15 @@ Update this table when a fact is (re)verified; date it.
   names, integer values; `rk-runtime` writes them (`UPDATE`) before each
   start, after `prepare_start`, so they survive world rebuilds. AHBot:
   auctions per house, quality mix, prices.
+- **0030** Database started alone: `Server::hold_database` (instance lock
+  held, MySQL started or adopted), `take_over` by the next start (stopping
+  the servers stops it too); app `start_database` / `stop_database`
+  (refused while the servers run: toast) / `database_connection`; changes
+  refused while it runs alone (`database.runningAlone`); `rk db start|stop`.
+  Module `maintenance` actions (`clear: {database, table, with}`, plain
+  names, no free SQL): servers stopped, player data dumped first
+  (`before-maintenance-*`), one transaction; confirmed in a modal; AHBot
+  `clear-auctions` (players' auctions included); `rk maintenance`.
 - Scope v1: solo + LAN; Internet later. Linux/macOS later (keep code portable).
 
 Never re-propose rejected options (MariaDB, Docker/WSL2, per-combination builds,
@@ -377,6 +388,8 @@ cargo run -p rk-cli -- backup list|create <id> | restore|delete <id> <name>   # 
 cargo run -p rk-cli -- join <address>        # point the client at a LAN host and launch the game
 cargo run -p rk-cli -- diagnostic            # support report (redacted), ADR 0018
 cargo run -p rk-cli -- firewall show|allow|remove <id>   # LAN firewall rule (allow/remove ask for elevation), ADR 0022
+cargo run -p rk-cli -- db start|stop <id>    # the realm's MySQL alone (start: foreground, Enter or Ctrl+C stops), ADR 0030
+cargo run -p rk-cli -- maintenance <id> <module> <action> --yes   # module cleanup, e.g. mod-ah-bot clear-auctions (backup first), ADR 0030
 node tools/ci/auth-client.mjs --self-test | --login <user> <password>   # SRP6 logon client of the smoke test
 cargo run -p rk-cli -- realm duplicate <source> <id> [--name <n>] | export <id> <file> | import <file> <id> [--name <n>] | rename <id> [<name>]   # ADR 0020
 cargo run -p rk-cli -- handoff folder [<path>] | status|share|unshare|take <id> | send <id> [--keep-mine] | list | join <uid> <id>   # ADR 0028 (RK_HANDOFF_DIR: a second "computer")
@@ -536,4 +549,6 @@ settings; No Hearthstone cooldown module; stale Playerbots account types of
 player accounts removed before each start).
 2026-11-25: 0.3.7 (realms start again: the 0.3.6 cleanup used a multi-table
 `DELETE` that MySQL 8.4 rejects without a default database, ERROR 1046).
+2026-11-27: 0.3.8 (database started alone with connection details, ADR 0030;
+auction houses emptied from the AHBot options).
 Remaining before a wide release: SignPath (maintainer).

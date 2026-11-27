@@ -2,9 +2,20 @@
   // The options of one enabled module, edited as a draft and applied like a
   // module change (servers stopped). Used by "Server settings" and "Bots".
   import { untrack } from "svelte";
-  import { api, asCommandError, type CommandError, type ModuleOption, type ModuleOptions, type OptionValue } from "../api";
+  import {
+    api,
+    asCommandError,
+    type CommandError,
+    type MaintenanceAction,
+    type MaintenanceOutcome,
+    type ModuleOption,
+    type ModuleOptions,
+    type OptionValue,
+  } from "../api";
   import { localized, t } from "../i18n/i18n.svelte";
   import { runOperation } from "../launcher.svelte";
+  import ErrorBox from "./ErrorBox.svelte";
+  import Modal from "./Modal.svelte";
 
   let {
     instanceId,
@@ -99,6 +110,29 @@
     return option.help ? localized(option.help) : null;
   }
 
+  /** The cleanup the player opened (ADR 0030): confirm, then its result. */
+  let cleanup = $state<MaintenanceAction | null>(null);
+  let cleaning = $state(false);
+  let cleaned = $state<MaintenanceOutcome | null>(null);
+  let cleanupError = $state<CommandError | null>(null);
+  function openCleanup(action: MaintenanceAction) {
+    cleanup = action;
+    cleaned = null;
+    cleanupError = null;
+  }
+  async function runCleanup() {
+    if (!cleanup) return;
+    cleaning = true;
+    cleanupError = null;
+    try {
+      cleaned = await api.runMaintenance(instanceId, module.module, cleanup.id);
+    } catch (raw) {
+      cleanupError = asCommandError(raw);
+    } finally {
+      cleaning = false;
+    }
+  }
+
   async function apply() {
     const values = module.options
       .filter((o) => o.option.id in draft && draft[o.option.id] !== asText(o.value))
@@ -157,6 +191,23 @@
         {/each}
       </ul>
     {/each}
+    {#if module.maintenance?.length}
+      <h4 class="group">{t("maintenance.title")}</h4>
+      <ul class="options">
+        {#each module.maintenance as action (action.id)}
+          <li title={action.help ? localized(action.help) : undefined}>
+            <span class="label">
+              {localized(action.label)}
+              {#if action.help}<span class="help" aria-hidden="true">?</span>{/if}
+              {#if locked}<span class="needs">{t("maintenance.stopFirst")}</span>{/if}
+            </span>
+            <button class="btn small" disabled={locked} onclick={() => openCleanup(action)}>
+              {t("maintenance.run")}
+            </button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
   </div>
   <div class="apply">
     <p class="muted">{t("settings.optionsHint")}</p>
@@ -171,6 +222,29 @@
     <button class="btn btn-play" disabled={!changed || locked} onclick={apply}>{t("common.apply")}</button>
   </div>
 </section>
+
+{#if cleanup}
+  <Modal title={localized(cleanup.label)} onclose={() => !cleaning && (cleanup = null)}>
+    {#if cleaned}
+      <p>{t("maintenance.done", { count: String(cleaned.removed), backup: cleaned.backup })}</p>
+    {:else}
+      {#if cleanup.help}<p class="muted">{localized(cleanup.help)}</p>{/if}
+      <p class="danger-text">{localized(cleanup.warning)}</p>
+      {#if cleaning}<p class="muted" role="status">{t("maintenance.working")}</p>{/if}
+      {#if cleanupError}
+        <ErrorBox error={cleanupError} />
+      {/if}
+    {/if}
+    {#snippet actions()}
+      {#if cleaned}
+        <button class="btn" onclick={() => (cleanup = null)}>{t("common.close")}</button>
+      {:else}
+        <button class="btn" disabled={cleaning} onclick={() => (cleanup = null)}>{t("common.cancel")}</button>
+        <button class="btn danger" disabled={cleaning} onclick={runCleanup}>{t("maintenance.confirm")}</button>
+      {/if}
+    {/snippet}
+  </Modal>
+{/if}
 
 <style>
   /* Fills its column, the buttons at the bottom; never shorter than its
@@ -244,6 +318,20 @@
     display: block;
     font-size: 0.78rem;
     color: var(--text-muted);
+  }
+
+  .btn.small {
+    padding: 2px var(--space-3);
+    font-size: 0.82rem;
+  }
+
+  .btn.danger {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .danger-text {
+    color: var(--danger);
   }
 
   input[type="number"] {

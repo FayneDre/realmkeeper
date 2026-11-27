@@ -289,6 +289,84 @@
         }
       },
       "additionalProperties": false
+    },
+    "maintenance": {
+      "description": "Cleanups the player runs by hand on a stopped realm, after a confirmation and an automatic backup of the player data (ADR 0030). They empty one table and the rows it owns: never free SQL.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "warning",
+          "clear"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "label": {
+            "$ref": "common.schema.json#/$defs/localizedText"
+          },
+          "help": {
+            "$ref": "common.schema.json#/$defs/localizedText"
+          },
+          "warning": {
+            "$ref": "common.schema.json#/$defs/localizedText",
+            "description": "What is lost, shown in the confirmation."
+          },
+          "clear": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "database",
+              "table"
+            ],
+            "properties": {
+              "database": {
+                "description": "Emulator database id (characters, world...).",
+                "type": "string",
+                "pattern": "^[a-z0-9-]{1,64}$"
+              },
+              "table": {
+                "type": "string",
+                "pattern": "^[a-z0-9_]{1,64}$",
+                "description": "Table whose rows are all deleted."
+              },
+              "with": {
+                "description": "Rows of other tables the cleared rows point to, deleted first.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "table",
+                    "column",
+                    "from"
+                  ],
+                  "properties": {
+                    "table": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9_]{1,64}$"
+                    },
+                    "column": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9_]{1,64}$",
+                      "description": "Column of this table..."
+                    },
+                    "from": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9_]{1,64}$",
+                      "description": "...equal to this column of the cleared row."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "additionalProperties": false,

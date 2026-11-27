@@ -21,6 +21,7 @@ mod error;
 pub mod firewall;
 pub mod handoff;
 pub mod location;
+pub mod maintenance;
 mod operations;
 pub mod overview;
 mod party;
@@ -254,6 +255,8 @@ pub struct ModuleOptions {
     pub options: Vec<OptionView>,
     /// Headings over some of the options (manifest `optionGroups`).
     pub groups: Vec<rk_core::manifest::OptionGroup>,
+    /// Cleanups run by hand on the stopped realm (ADR 0030).
+    pub maintenance: Vec<rk_core::manifest::MaintenanceAction>,
 }
 
 /// One section of realm settings with the values in force.
@@ -276,6 +279,17 @@ pub struct UninstallReport {
     pub shared_removed: bool,
     /// Steps that could not be done (the uninstall still completed).
     pub warnings: Vec<String>,
+}
+
+/// How a SQL tool reaches an instance's databases (MySQL listens on this
+/// computer only).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseConnection {
+    pub host: String,
+    pub port: u16,
+    pub user: String,
+    pub password: String,
 }
 
 /// Disk space a first install of an emulator needs (ADR 0018).

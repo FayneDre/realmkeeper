@@ -4,8 +4,11 @@
   import {
     api,
     asCommandError,
+    copyText,
     type ClientView,
     type CommandError,
+    type DatabaseConnection,
+    type DatabaseStatus,
     type EmulatorOverview,
     type FirewallStatus,
     type HandoffStatus,
@@ -21,6 +24,7 @@
   import ErrorBox from "./ErrorBox.svelte";
   import Notify from "./Notify.svelte";
   import JoinLan from "./JoinLan.svelte";
+  import Icon from "./Icon.svelte";
   import Modal from "./Modal.svelte";
 
   let { realm, instance, client }: { realm: EmulatorOverview; instance: InstanceView; client: ClientView | null } =
@@ -78,9 +82,63 @@
     return session.phase;
   });
 
+  /** The database on its own (started alone, or left running): read when
+   * the realm is shown, after each start or stop of it and when a session ends. */
+  let database = $state<DatabaseStatus | null>(null);
+  let databaseBusy = $state<"starting" | "stopping" | null>(null);
+  const sessionLive = $derived(!!session && session.phase !== "ended");
+  $effect(() => {
+    const realm = id;
+    void sessionLive;
+    if (incomplete) return;
+    api
+      .databaseStatus(realm)
+      .then((s) => {
+        if (realm === id) database = s;
+      })
+      .catch(() => {});
+  });
+
   function processState(process: string): ProcessState | "idle" {
     if (status === "online" && !session) return "ready";
+    if (process === "database" && !sessionLive) {
+      if (databaseBusy) return databaseBusy;
+      if (database?.up) return "ready";
+    }
     return session?.processes[process] ?? "idle";
+  }
+
+  /** Up for the servers or on its own: the button stops it (refused with a
+   * toast while the servers run), otherwise starts it alone. */
+  const databaseUp = $derived(sessionLive || running || !!database?.up);
+  function toggleDatabase() {
+    const realm = id;
+    const stopping = databaseUp;
+    databaseBusy = stopping ? "stopping" : "starting";
+    void act(async () => {
+      await (stopping ? api.stopDatabase(realm) : api.startDatabase(realm));
+    }).finally(async () => {
+      databaseBusy = null;
+      database = await api.databaseStatus(realm).catch(() => null);
+    });
+  }
+
+  let connection = $state<DatabaseConnection | null>(null);
+  let showPassword = $state(false);
+  let copied = $state<string | null>(null);
+  function openConnection() {
+    showPassword = false;
+    void act(async () => {
+      connection = await api.databaseConnection(id);
+    });
+  }
+  function copyPassword() {
+    if (!connection) return;
+    copied = null;
+    void act(async () => {
+      await copyText(connection!.password);
+      copied = t("database.copied");
+    });
   }
 
   async function act(run: () => Promise<unknown>) {
@@ -370,6 +428,36 @@
 
 <!-- Action errors and warnings float over the page (toasts). -->
 <Notify {error} />
+<Notify text={copied} />
+
+{#if connection}
+  <Modal title={t("database.connectionTitle")} onclose={() => (connection = null)}>
+    <p class="muted">{t("database.connectionHelp")}</p>
+    <dl class="connection">
+      <dt>{t("database.host")}</dt>
+      <dd><code>{connection.host}</code></dd>
+      <dt>{t("database.port")}</dt>
+      <dd><code>{connection.port}</code></dd>
+      <dt>{t("database.user")}</dt>
+      <dd><code>{connection.user}</code></dd>
+      <dt>{t("database.password")}</dt>
+      <dd>
+        <code class="secret">{showPassword ? connection.password : "••••••••••••"}</code>
+        <button
+          class="btn btn-icon"
+          title={showPassword ? t("database.hide") : t("database.show")}
+          aria-label={showPassword ? t("database.hide") : t("database.show")}
+          onclick={() => (showPassword = !showPassword)}
+        >
+          <Icon name={showPassword ? "eye-off" : "eye"} />
+        </button>
+        <button class="btn btn-icon" title={t("database.copy")} aria-label={t("database.copy")} onclick={copyPassword}>
+          <Icon name="copy" />
+        </button>
+      </dd>
+    </dl>
+  </Modal>
+{/if}
 
 {#if conflictOpen && handoff?.state === "conflict"}
   <Modal title={t("handoff.conflictTitle")} onclose={() => (conflictOpen = false)}>
@@ -399,6 +487,29 @@
             aria-hidden="true"
           ></span>
           <span class="row-name">{processLabel(process)}</span>
+          {#if process === "database" && !incomplete}
+            <!-- Both always there (connection greyed while down): the row never moves. -->
+            <span class="db-actions">
+              <button
+                class="btn btn-icon"
+                title={t("database.connection")}
+                aria-label={t("database.connection")}
+                disabled={state !== "ready"}
+                onclick={openConnection}
+              >
+                <Icon name="plug" />
+              </button>
+              <button
+                class="btn btn-icon"
+                title={databaseUp ? t("database.stop") : t("database.startTitle")}
+                aria-label={databaseUp ? t("database.stop") : t("database.start")}
+                disabled={busy || databaseBusy !== null || state === "starting" || state === "stopping"}
+                onclick={toggleDatabase}
+              >
+                <Icon name={databaseUp ? "stop" : "play"} />
+              </button>
+            </span>
+          {/if}
           <span class="muted">{t(PROCESS_KEYS[state])}</span>
           {#if state === "starting" && session?.startup?.process === process}
             <!-- Right under the server it belongs to. -->
@@ -676,6 +787,40 @@
 
   .row-name {
     flex: 1;
+  }
+
+  .db-actions {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .connection {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    margin: var(--space-4) 0 0;
+  }
+
+  .connection dt {
+    color: var(--text-muted);
+  }
+
+  .connection dd {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    margin: 0;
+  }
+
+  /* The password on one line beside its buttons, cut if too long. */
+  .connection .secret {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .dot {

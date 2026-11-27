@@ -3,7 +3,7 @@
 //! - `manual-<secs>.sql`: made by the player ("Back up now"), kept until
 //!   the player deletes it.
 //! - `before-<label>-<secs>.sql`: made automatically before an update,
-//!   repair or restore (the engine adds the time when the operation
+//!   repair, restore or cleanup (ADR 0030) (the engine adds the time when the operation
 //!   completes). Only the newest [`KEEP_AUTOMATIC`] are kept.
 //! - `import-<secs>.sql`: the player data an imported realm came with
 //!   (ADR 0020), kept until the player deletes it.
@@ -38,6 +38,8 @@ pub enum BackupKind {
     Import,
     /// Player data taken back from another computer (ADR 0028).
     Handoff,
+    /// Before a cleanup run by hand (ADR 0030).
+    Maintenance,
     Other,
 }
 
@@ -169,6 +171,8 @@ fn kind_of(stem: &str) -> BackupKind {
         BackupKind::Import
     } else if stem.starts_with("handoff-") {
         BackupKind::Handoff
+    } else if stem.starts_with("before-maintenance-") {
+        BackupKind::Maintenance
     } else {
         BackupKind::Other
     }

@@ -270,6 +270,22 @@ export interface ModuleOptions {
   options: { option: ModuleOption; value: OptionValue; available: boolean }[];
   /** Headings over some options; options in no group come first. */
   groups?: OptionGroup[];
+  /** Cleanups run by hand on the stopped realm (ADR 0030). */
+  maintenance?: MaintenanceAction[];
+}
+
+/** A module's cleanup: confirmed by the player, player data backed up first. */
+export interface MaintenanceAction {
+  id: string;
+  label: LocalizedText;
+  help?: LocalizedText;
+  /** What is lost, shown in the confirmation. */
+  warning: LocalizedText;
+}
+
+export interface MaintenanceOutcome {
+  removed: number;
+  backup: string;
 }
 
 /** What an uninstall did. */
@@ -293,6 +309,20 @@ export interface SettingsSection {
 
 /** A database backup of an instance (`backups/<id>/<name>`). */
 /** Whether other computers of the network can reach a realm (ADR 0022). */
+/** A realm's database on its own: up (started here or left running) and held by this launcher. */
+export interface DatabaseStatus {
+  up: boolean;
+  held: boolean;
+}
+
+/** What a SQL tool needs to open a realm's databases (this computer only). */
+export interface DatabaseConnection {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+}
+
 export interface FirewallStatus {
   /** Rules can be made on this system (Windows). */
   supported: boolean;
@@ -304,7 +334,7 @@ export interface FirewallStatus {
 
 export interface Backup {
   name: string;
-  kind: "manual" | "daily" | "update" | "repair" | "restore" | "import" | "other";
+  kind: "manual" | "daily" | "update" | "repair" | "restore" | "import" | "handoff" | "maintenance" | "other";
   /** Unix seconds. */
   created: number;
   size: number;
@@ -575,6 +605,15 @@ export const api = {
   /** Starts the servers; the game is launched once they are online (`launchGame`). */
   start: (id: string) => invoke<void>("start_instance", { id }),
   stop: (id: string) => invoke<void>("stop_instance", { id }),
+  databaseStatus: (id: string) => invoke<DatabaseStatus>("database_status", { id }),
+  /** Starts only the database; Start servers and Play take it over. */
+  startDatabase: (id: string) => invoke<void>("start_database", { id }),
+  /** Refused (`database.serversRunning`) while the servers run. */
+  stopDatabase: (id: string) => invoke<void>("stop_database", { id }),
+  databaseConnection: (id: string) => invoke<DatabaseConnection>("database_connection", { id }),
+  /** A module's cleanup on the stopped realm (ADR 0030); its player data is backed up first. */
+  runMaintenance: (id: string, module: string, action: string) =>
+    invoke<MaintenanceOutcome>("run_maintenance", { id, module, action }),
   console: (id: string, line: string) => invoke<void>("console_command", { id, line }),
   /** Launches the game in a running session; the servers stop when it exits unless `keepRunning`. */
   launchGame: (id: string, keepRunning: boolean) => invoke<void>("launch_game", { id, keepRunning }),

@@ -382,6 +382,82 @@ pub struct ModuleManifest {
     /// module's console commands (ADR 0025).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub party: Option<Party>,
+    /// Cleanups the player runs by hand on a stopped realm, after a
+    /// confirmation and an automatic backup (ADR 0030).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub maintenance: Vec<MaintenanceAction>,
+}
+
+/// A cleanup run by hand (ADR 0030): what it empties, never free SQL.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MaintenanceAction {
+    pub id: String,
+    pub label: LocalizedText,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub help: Option<LocalizedText>,
+    /// What is lost, shown in the confirmation.
+    pub warning: LocalizedText,
+    pub clear: ClearTable,
+}
+
+/// Every row of one table, and the rows of other tables they point to.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ClearTable {
+    /// Emulator database id (`characters`).
+    pub database: String,
+    pub table: String,
+    /// Rows the cleared ones own (the items of auctions), deleted first.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub with: Vec<ClearDependent>,
+}
+
+/// Rows of `table` whose `column` equals the cleared row's `from` column.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ClearDependent {
+    pub table: String,
+    pub column: String,
+    pub from: String,
+}
+
+impl ClearTable {
+    /// Every name of the cleanup (tables and columns).
+    pub fn names(&self) -> impl Iterator<Item = &str> {
+        std::iter::once(self.table.as_str()).chain(
+            self.with
+                .iter()
+                .flat_map(|d| [d.table.as_str(), d.column.as_str(), d.from.as_str()]),
+        )
+    }
+
+    /// A plain SQL name: lower-case letters, digits and `_`.
+    pub fn plain_name(name: &str) -> bool {
+        (1..=64).contains(&name.len())
+            && name
+                .bytes()
+                .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_')
+    }
+
+    /// The statements, in one transaction, for the database named
+    /// `database`: the row count first (its output), then the deletes.
+    /// `None` when a name is not plain.
+    pub fn sql(&self, database: &str) -> Option<String> {
+        if !Self::plain_name(database) || !self.names().all(Self::plain_name) {
+            return None;
+        }
+        let main = format!("`{database}`.`{}`", self.table);
+        let mut sql = format!("START TRANSACTION;\nSELECT COUNT(*) FROM {main};\n");
+        for dependent in &self.with {
+            sql.push_str(&format!(
+                "DELETE FROM `{database}`.`{}` WHERE `{}` IN (SELECT `{}` FROM {main});\n",
+                dependent.table, dependent.column, dependent.from
+            ));
+        }
+        sql.push_str(&format!("DELETE FROM {main};\nCOMMIT;\n"));
+        Some(sql)
+    }
 }
 
 /// A party of bots: console commands and the classes they accept.
@@ -1281,4 +1357,42 @@ pub struct PlatformBuild {
     pub unpacked_size: Option<u64>,
     pub sha256: String,
     pub executables: BTreeMap<String, String>,
+}
+
+#[cfg(test)]
+mod maintenance_tests {
+    use super::*;
+
+    fn auctions() -> ClearTable {
+        ClearTable {
+            database: "characters".into(),
+            table: "auctionhouse".into(),
+            with: vec![ClearDependent {
+                table: "item_instance".into(),
+                column: "guid".into(),
+                from: "itemguid".into(),
+            }],
+        }
+    }
+
+    #[test]
+    fn clear_table_counts_then_deletes_dependents_first_in_one_transaction() {
+        let sql = auctions().sql("acore_characters").unwrap();
+        assert_eq!(
+            sql,
+            "START TRANSACTION;\n\
+             SELECT COUNT(*) FROM `acore_characters`.`auctionhouse`;\n\
+             DELETE FROM `acore_characters`.`item_instance` WHERE `guid` IN (SELECT `itemguid` FROM `acore_characters`.`auctionhouse`);\n\
+             DELETE FROM `acore_characters`.`auctionhouse`;\n\
+             COMMIT;\n"
+        );
+    }
+
+    #[test]
+    fn clear_table_refuses_names_that_are_not_plain() {
+        let mut bad = auctions();
+        bad.with[0].column = "guid`; DROP DATABASE x; --".into();
+        assert!(bad.sql("acore_characters").is_none());
+        assert!(auctions().sql("acore characters").is_none());
+    }
 }

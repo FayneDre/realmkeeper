@@ -81,10 +81,10 @@
         "es": "Subastas en la casa de subastas de la Alianza"
       },
       "help": {
-        "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
-        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module).",
-        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250).",
-        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250)."
+        "en": "The bot keeps this many auctions on sale (the module's own default is 250). Lowering it does not remove auctions already on sale: the bot waits for them to expire.",
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module). Baisser ce nombre ne retire pas les enchères déjà en vente : le bot attend qu'elles expirent.",
+        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250). Wenn du die Zahl senkst, bleiben laufende Auktionen bestehen: Der Bot wartet, bis sie ablaufen.",
+        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250). Si bajas este número, las subastas ya publicadas no se retiran: el bot espera a que caduquen."
       },
       "target": {
         "database": "world",
@@ -106,10 +106,10 @@
         "es": "Subastas en la casa de subastas de la Horda"
       },
       "help": {
-        "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
-        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module).",
-        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250).",
-        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250)."
+        "en": "The bot keeps this many auctions on sale (the module's own default is 250). Lowering it does not remove auctions already on sale: the bot waits for them to expire.",
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module). Baisser ce nombre ne retire pas les enchères déjà en vente : le bot attend qu'elles expirent.",
+        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250). Wenn du die Zahl senkst, bleiben laufende Auktionen bestehen: Der Bot wartet, bis sie ablaufen.",
+        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250). Si bajas este número, las subastas ya publicadas no se retiran: el bot espera a que caduquen."
       },
       "target": {
         "database": "world",
@@ -131,10 +131,10 @@
         "es": "Subastas en la casa de subastas neutral (Bahía del Botín, Gadgetzan, Vista Eterna)"
       },
       "help": {
-        "en": "The bot keeps this many auctions on sale (the module's own default is 250).",
-        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module).",
-        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250).",
-        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250)."
+        "en": "The bot keeps this many auctions on sale (the module's own default is 250). Lowering it does not remove auctions already on sale: the bot waits for them to expire.",
+        "fr": "Le bot garde ce nombre d'enchères en vente (250 par défaut dans le module). Baisser ce nombre ne retire pas les enchères déjà en vente : le bot attend qu'elles expirent.",
+        "de": "Der Bot hält so viele Auktionen im Angebot (Standard des Moduls: 250). Wenn du die Zahl senkst, bleiben laufende Auktionen bestehen: Der Bot wartet, bis sie ablaufen.",
+        "es": "El bot mantiene tantas subastas a la venta (el valor por defecto del módulo es 250). Si bajas este número, las subastas ya publicadas no se retiran: el bot espera a que caduquen."
       },
       "target": {
         "database": "world",
@@ -901,6 +901,40 @@
           "AuctionHouseBot.Account": "${ahbot_account.id}",
           "AuctionHouseBot.GUID": "${ahbot_character.guid}"
         }
+      }
+    }
+  ],
+  "maintenance": [
+    {
+      "id": "clear-auctions",
+      "label": {
+        "en": "Empty the auction houses",
+        "fr": "Vider les hôtels des ventes",
+        "de": "Auktionshäuser leeren",
+        "es": "Vaciar las casas de subastas"
+      },
+      "help": {
+        "en": "Removes every auction at once, for example after lowering the number of auctions: the bot fills the houses again at the next start.",
+        "fr": "Supprime toutes les enchères d'un coup, par exemple après avoir baissé le nombre d'enchères : le bot remplit de nouveau les hôtels au prochain démarrage.",
+        "de": "Entfernt alle Auktionen auf einmal, etwa nachdem du die Anzahl der Auktionen gesenkt hast: Der Bot füllt die Häuser beim nächsten Start wieder auf.",
+        "es": "Elimina todas las subastas de una vez, por ejemplo después de bajar el número de subastas: el bot vuelve a llenar las casas en el próximo inicio."
+      },
+      "warning": {
+        "en": "Every auction of every auction house is deleted, players' auctions included: the items they put up for sale and the gold of current bids are lost. Your player data is backed up first.",
+        "fr": "Toutes les enchères de tous les hôtels des ventes sont supprimées, y compris celles des joueurs : les objets mis en vente et l'or des offres en cours sont perdus. Tes données de joueur sont sauvegardées avant.",
+        "de": "Alle Auktionen aller Auktionshäuser werden gelöscht, auch die von Spielern: Die eingestellten Gegenstände und das Gold laufender Gebote gehen verloren. Deine Spielerdaten werden vorher gesichert.",
+        "es": "Se eliminan todas las subastas de todas las casas de subastas, incluidas las de los jugadores: los objetos puestos a la venta y el oro de las pujas en curso se pierden. Antes se hace una copia de seguridad de tus datos de jugador."
+      },
+      "clear": {
+        "database": "characters",
+        "table": "auctionhouse",
+        "with": [
+          {
+            "table": "item_instance",
+            "column": "guid",
+            "from": "itemguid"
+          }
+        ]
       }
     }
   ]

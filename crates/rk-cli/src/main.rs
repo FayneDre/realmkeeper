@@ -190,6 +190,25 @@ enum Command {
         #[arg(long, default_value = ".local/rk")]
         root: PathBuf,
     },
+    /// Run a module's cleanup on a stopped realm (ADR 0030), e.g.
+    /// `mod-ah-bot clear-auctions`. The player data is backed up first.
+    Maintenance {
+        instance: String,
+        module: String,
+        action: String,
+        /// Confirm the deletion (it cannot be undone except by a restore).
+        #[arg(long)]
+        yes: bool,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// A realm's database (MySQL) on its own, e.g. to open it with a SQL tool.
+    Db {
+        #[command(subcommand)]
+        command: DbCommand,
+    },
     /// Windows firewall rules that let the other computers of the network
     /// reach a realm's servers (ADR 0022; allow and remove ask for elevation).
     Firewall {
@@ -202,6 +221,27 @@ enum Command {
         address: String,
         #[arg(long, default_value = "azerothcore")]
         emulator: String,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum DbCommand {
+    /// Start only the database, in the foreground: Ctrl+C or Enter stops it
+    /// cleanly. Prints how a SQL tool connects.
+    Start {
+        instance: String,
+        #[arg(long, default_value = "catalog")]
+        catalog: PathBuf,
+        #[arg(long, default_value = ".local/rk")]
+        root: PathBuf,
+    },
+    /// Stop a database left running (servers stopped), cleanly.
+    Stop {
+        instance: String,
         #[arg(long, default_value = "catalog")]
         catalog: PathBuf,
         #[arg(long, default_value = ".local/rk")]
@@ -1426,6 +1466,78 @@ fn main() -> Result<ExitCode> {
                 rk_launcher::diagnostic::report(&launcher, env!("CARGO_PKG_VERSION"), &[])
             );
             Ok(ExitCode::SUCCESS)
+        }
+        Command::Maintenance {
+            instance,
+            module,
+            action,
+            yes,
+            catalog,
+            root,
+        } => {
+            if !yes {
+                anyhow::bail!("this deletes data for good: run again with --yes to confirm");
+            }
+            let launcher = open(&catalog, &root)?;
+            let done = block_on(launcher.run_maintenance(&instance, &module, &action, false))??;
+            eprintln!(
+                "removed {} rows; backup made first: {}",
+                done.removed, done.backup
+            );
+            Ok(ExitCode::SUCCESS)
+        }
+        Command::Db {
+            command:
+                DbCommand::Start {
+                    instance,
+                    catalog,
+                    root,
+                },
+        } => {
+            let launcher = open(&catalog, &root)?;
+            let server = launcher.database_server(&instance)?;
+            let connection = launcher.database_connection(&instance)?;
+            block_on(async {
+                let hold = server.hold_database().await?;
+                eprintln!(
+                    "database up: host {} port {} user {} (password in secrets.json)",
+                    connection.host, connection.port, connection.user
+                );
+                eprintln!("press Enter or Ctrl+C to stop it");
+                let enter = tokio::task::spawn_blocking(|| {
+                    let mut line = String::new();
+                    let _ = std::io::stdin().read_line(&mut line);
+                });
+                tokio::select! {
+                    _ = tokio::signal::ctrl_c() => {}
+                    _ = enter => {}
+                }
+                server.release_database(hold).await?;
+                eprintln!("database stopped");
+                anyhow::Ok(ExitCode::SUCCESS)
+            })?
+        }
+        Command::Db {
+            command:
+                DbCommand::Stop {
+                    instance,
+                    catalog,
+                    root,
+                },
+        } => {
+            let launcher = open(&catalog, &root)?;
+            let server = launcher.database_server(&instance)?;
+            block_on(async {
+                if !server.db().ping().await {
+                    eprintln!("database already stopped");
+                    return anyhow::Ok(ExitCode::SUCCESS);
+                }
+                // Adopted (refused while the servers or a change hold the realm).
+                let hold = server.hold_database().await?;
+                server.release_database(hold).await?;
+                eprintln!("database stopped");
+                anyhow::Ok(ExitCode::SUCCESS)
+            })?
         }
         Command::Firewall { command } => {
             let (instance, catalog, root, action) = match command {

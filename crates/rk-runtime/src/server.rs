@@ -61,6 +61,25 @@ pub struct Server {
     module_databases: Vec<rk_core::manifest::Database>,
     /// Module settings kept in tables, written before each start (ADR 0029).
     table_sql: String,
+    /// The database started alone beforehand: the start takes its lock over.
+    held: std::sync::Mutex<Option<DatabaseHold>>,
+}
+
+/// The database of an instance started alone (to look at it with a SQL
+/// tool, or clean it up): the instance lock is held, so no start, change or
+/// other process gets in; database work of this process still borrows it.
+/// Given to [`Server::take_over`], the servers start on it; otherwise
+/// [`Server::release_database`] stops it.
+#[derive(Debug)]
+pub struct DatabaseHold {
+    instance: String,
+    _lock: install::InstanceLock,
+}
+
+impl DatabaseHold {
+    pub fn instance(&self) -> &str {
+        &self.instance
+    }
 }
 
 impl Server {
@@ -136,7 +155,47 @@ impl Server {
             record,
             processes,
             logs,
+            held: std::sync::Mutex::new(None),
         })
+    }
+
+    /// Starts the database alone (or adopts one already up) and holds the
+    /// instance lock: refused while the servers run or a change works.
+    pub async fn hold_database(&self) -> Result<DatabaseHold, RuntimeError> {
+        let lock = install::lock_instance(&self.layout, &self.record.id)?;
+        self.db.start().await?;
+        Ok(DatabaseHold {
+            instance: self.record.id.clone(),
+            _lock: lock,
+        })
+    }
+
+    /// Stops a database started alone, cleanly; the lock goes with `hold`.
+    pub async fn release_database(&self, hold: DatabaseHold) -> Result<(), RuntimeError> {
+        self.check_hold(&hold)?;
+        self.db.stop().await?;
+        drop(hold);
+        Ok(())
+    }
+
+    /// The next start runs on this database started alone and takes its
+    /// lock over: nothing gets in between. The start stops it as usual.
+    pub fn take_over(&self, hold: DatabaseHold) -> Result<(), RuntimeError> {
+        self.check_hold(&hold)?;
+        *self.held.lock().unwrap_or_else(|e| e.into_inner()) = Some(hold);
+        Ok(())
+    }
+
+    fn check_hold(&self, hold: &DatabaseHold) -> Result<(), RuntimeError> {
+        if hold.instance == self.record.id {
+            Ok(())
+        } else {
+            Err(install::PlanError::Unknown(format!(
+                "database of '{}' given to '{}'",
+                hold.instance, self.record.id
+            ))
+            .into())
+        }
     }
 
     pub fn record(&self) -> &InstanceRecord {
@@ -224,15 +283,27 @@ impl Server {
     ) -> Result<Option<Running>, RuntimeError> {
         self.check_driver(driver)?;
         let id = &self.record.id;
-        let lock = install::lock_instance(&self.layout, id)?;
+        let held = self.held.lock().unwrap_or_else(|e| e.into_inner()).take();
+        let was_held = held.is_some();
+        let lock = match held {
+            Some(hold) => hold._lock,
+            None => install::lock_instance(&self.layout, id)?,
+        };
         // A half-applied install, update or module change is resumed first.
-        install::ensure_finished(
+        let finished = install::ensure_finished(
             &self.layout,
             &[
                 install::instance_operation_id(id),
                 install::modules_operation_id(id),
             ],
-        )?;
+        );
+        if let Err(error) = finished {
+            // A start stops everything it ends: the database started alone too.
+            if was_held {
+                let _ = self.db.stop().await;
+            }
+            return Err(error.into());
+        }
         observer(ServerEvent::DatabaseStarting);
         self.db.start().await?;
         observer(ServerEvent::DatabaseReady);

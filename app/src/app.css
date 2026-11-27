@@ -262,6 +262,16 @@ button {
   cursor: not-allowed;
 }
 
+/* A square button holding only an icon (`Icon.svelte`); its name is its
+   `title` and `aria-label`. */
+.btn.btn-icon {
+  justify-content: center;
+  width: 32px;
+  height: 30px;
+  padding: 0;
+  flex: none;
+}
+
 /* Main call to action: red lacquered button with gold trim. */
 .btn-play {
   min-width: 220px;

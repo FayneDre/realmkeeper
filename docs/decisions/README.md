@@ -34,6 +34,7 @@ A changed decision gets a new ADR that supersedes the old one.
 | [0027](0027-optional-module-sql.md) | Optional module SQL files as `sql` options: packaged by CI, put where dbimport reads them, world rebuilt when one is turned off | Accepted |
 | [0028](0028-handoff-between-computers.md) | Handoff between computers through a synchronised folder: state sent at each clean stop, taken back on the other computer, conflicts never merged | Accepted |
 | [0029](0029-module-settings-in-tables.md) | Module settings kept in database tables: option targets and choices write table columns before each start (AHBot quantities, quality mix, prices) | Accepted |
+| [0030](0030-database-alone-and-module-cleanups.md) | Database started alone (SQL tools; servers take it over, stop refused while they run) and module cleanups run by hand (`maintenance`: empty a table after a backup; AHBot auctions) | Accepted |
 
 Template:
 
