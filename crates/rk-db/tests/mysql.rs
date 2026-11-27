@@ -7,12 +7,21 @@ use std::net::TcpListener;
 
 use rk_db::{generate_password, Binaries, Instance, ServerSettings};
 
+/// A port of its own for each test server. Not one the system hands out
+/// (`bind` on port 0): such a port is free when picked, but MySQL binds it
+/// only after its initialisation, a minute later, and a test running in
+/// parallel could get it meanwhile. These are below the dynamic ranges of
+/// Windows (49152+) and Linux (32768+), and skipped when taken.
 fn free_port() -> u16 {
-    TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port()
+    use std::sync::atomic::{AtomicU16, Ordering};
+    static NEXT: AtomicU16 = AtomicU16::new(24000);
+    loop {
+        let port = NEXT.fetch_add(1, Ordering::Relaxed);
+        assert!(port < 24000 + 2000, "no free test port");
+        if TcpListener::bind(("127.0.0.1", port)).is_ok() {
+            return port;
+        }
+    }
 }
 
 #[tokio::test(flavor = "multi_thread")]

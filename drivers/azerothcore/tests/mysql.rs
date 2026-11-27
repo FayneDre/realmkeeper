@@ -133,12 +133,21 @@ CREATE TABLE acore_playerbots.playerbots_account_type (
 /// Modules whose NPCs the launcher places (ADR 0023).
 const SPAWN_MODULES: [&str; 3] = ["mod-transmog", "mod-npc-enchanter", "mod-reagent-bank"];
 
+/// A port of its own for each test server. Not one the system hands out
+/// (`bind` on port 0): such a port is free when picked, but MySQL binds it
+/// only after its initialisation, a minute later, and a test running in
+/// parallel could get it meanwhile. These are below the dynamic ranges of
+/// Windows (49152+) and Linux (32768+), and skipped when taken.
 fn free_port() -> u16 {
-    TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port()
+    use std::sync::atomic::{AtomicU16, Ordering};
+    static NEXT: AtomicU16 = AtomicU16::new(26000);
+    loop {
+        let port = NEXT.fetch_add(1, Ordering::Relaxed);
+        assert!(port < 26000 + 2000, "no free test port");
+        if TcpListener::bind(("127.0.0.1", port)).is_ok() {
+            return port;
+        }
+    }
 }
 
 /// Stops the test server even when the test fails.
