@@ -1,4 +1,22 @@
 {
+  "0.3.8": {
+    "en": [
+      "You can start only the database of a realm (Home, Servers panel), for example to open it with HeidiSQL: the Connection button gives the address, port, user and password. Start servers and Play then use it as it is; it cannot be stopped while the servers run.",
+      "Modules, Auction House Bot options: Maintenance > Empty the auction houses removes every auction at once (players' ones included, after a confirmation and a backup), for example after lowering the number of auctions. Lowering that number no longer looks like a bug: its help says the bot waits for the auctions on sale to expire."
+    ],
+    "fr": [
+      "Tu peux démarrer seulement la base de données d'un royaume (Accueil, panneau Serveurs), par exemple pour l'ouvrir avec HeidiSQL : le bouton Connexion donne l'adresse, le port, l'utilisateur et le mot de passe. Démarrer les serveurs et Jouer l'utilisent ensuite telle quelle ; elle ne peut pas être arrêtée pendant que les serveurs tournent.",
+      "Modules, options du bot de l'hôtel des ventes : Entretien > Vider les hôtels des ventes supprime toutes les enchères d'un coup (celles des joueurs comprises, après une confirmation et une sauvegarde), par exemple après avoir baissé le nombre d'enchères. Son aide dit maintenant que le bot attend que les enchères en vente expirent quand on baisse ce nombre."
+    ],
+    "de": [
+      "Du kannst nur die Datenbank eines Realms starten (Start, Bereich Server), etwa um sie mit HeidiSQL zu öffnen: Die Schaltfläche Verbindung zeigt Adresse, Port, Benutzer und Passwort. Server starten und Spielen nutzen sie dann so, wie sie ist; solange die Server laufen, lässt sie sich nicht stoppen.",
+      "Module, Optionen des Auktionshaus-Bots: Wartung > Auktionshäuser leeren entfernt alle Auktionen auf einmal (auch die von Spielern, nach einer Bestätigung und einer Sicherung), etwa nachdem du die Anzahl der Auktionen gesenkt hast. Die Hilfe dazu sagt jetzt, dass der Bot wartet, bis die laufenden Auktionen ablaufen, wenn du die Zahl senkst."
+    ],
+    "es": [
+      "Puedes iniciar solo la base de datos de un reino (Inicio, panel Servidores), por ejemplo para abrirla con HeidiSQL: el botón Conexión da la dirección, el puerto, el usuario y la contraseña. Iniciar los servidores y Jugar la usan tal cual; no se puede detener mientras los servidores funcionan.",
+      "Módulos, opciones del bot de la casa de subastas: Mantenimiento > Vaciar las casas de subastas elimina todas las subastas de una vez (incluidas las de los jugadores, tras una confirmación y una copia de seguridad), por ejemplo después de bajar el número de subastas. Su ayuda dice ahora que el bot espera a que caduquen las subastas a la venta cuando bajas ese número."
+    ]
+  },
   "0.3.7": {
     "en": [
       "Realms start again: since 0.3.6, starting the servers stopped at once with the error \"No database selected\". Nothing was lost, your characters and accounts are intact."

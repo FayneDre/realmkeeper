@@ -146,6 +146,8 @@ Phase 6 goes on release by release, phase 7 proves a second emulator.
   (2026-11-24)
 - [x] RealmKeeper 0.3.7: realms start again (the 0.3.6 account type cleanup failed on
   MySQL 8.4 with ERROR 1046) (2026-11-25)
+- [x] RealmKeeper 0.3.8: database started alone for SQL tools (servers take it over),
+  auction houses emptied from the AHBot options after a backup (ADR 0030) (2026-11-27)
 
 ## Phase 7: second emulator prototype (started 2026-11-19, ADR 0024)
 
