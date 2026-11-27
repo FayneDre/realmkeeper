@@ -109,6 +109,9 @@ emulators, clients and modules later **as data + a small driver**, never as rewr
 | A 3.3.5a client with several `Data/<locale>` folders starts in the one named by `SET locale "xxXX"` in `WTF/Config.wtf`: copying `Data/frFR` in is not enough. Playerbots texts (`ai_playerbot_texts.text_loc2` for French) follow the locale of the real players online; ~130 replies are hard-coded English. | local client, `PlayerbotMgr::OnPlayerLogin`, `PlayerbotTextMgr.cpp` @ 405f811 (2026-11-20) |
 | Channels are keyed by name (`ChannelMgr::GetJoinChannel`): at login a client joins built-in channels under its own language names, the server (`UpdateLocalChannels` after a zone change) and Playerbots use the server DBC locale (`BroadcastHelper::GetLocale`): a frFR client and the bots were in different General/Trade channels. `CanPacketReceive` runs just before the handler (world thread for `CMSG_JOIN_CHANNEL`). | fork `ChannelHandler.cpp`, `ChannelMgr.cpp`, `PlayerUpdates.cpp`, `WorldSession.cpp`; Playerbots `PlayerbotMgr.cpp` @ 405f811 (2026-11-20) |
 | `Rate.InstanceResetTime` multiplies the DBC raid/heroic reset period, floored to whole days, at least 1 day (0.15 → raids daily, 0.43 → every 3 days); stored `characters.instance_reset` times keep the reset already planned. `SkillGain.Gathering` also drives fishing; `Rate.ArenaPoints` exists. No core key multiplies gathered quantities. mod-assistant sells at `item_template.BuyPrice` (its zeroing SQL is commented out); only its services have `*.Cost` keys (copper). | fork `InstanceSaveMgr.cpp`, `PlayerUpdates.cpp`, `WorldConfig.cpp` @ 32fd347; mod-assistant @ 77505b1 (2026-11-23) |
+| MySQL 8.4.13 Linux `linux-glibc2.28-x86_64-minimal.tar.xz`: 79 753 532 B, sha256 `5dfbb764…3d4ed2` (MD5 `fb536f5d…c0740`, not cross-checked: dev.mysql.com refuses scripts); has `mysqld`, `mysql`, `mysqldump`, `mysqladmin`, `libmysqlclient.so.24`, own OpenSSL/protobuf/Abseil in `lib/private`; `mysqld` still needs system `libaio.so.1` + `libnuma.so.1`, `mysql` needs `libncurses.so.6`/`libtinfo.so.6`. | cdn.mysql.com, ELF `DT_NEEDED` of the tarball (2026-11-27) |
+| Steam Deck, SteamOS 3.9.5 (build 20261023.100), glibc 2.43: the MySQL 8.4.13 minimal tarball's `mysqld`/`mysqldump`/`mysqladmin` start, `mysql` fails (`libncurses.so.6` missing: Arch has only `libncursesw.so.6`); `/usr/lib/ossl-modules/legacy.so` present; `/home` ext4 (NVMe), microSD ext4; Proton 7-11, Experimental, GE-Proton in `compatibilitytools.d`. | the maintainer's Deck (2026-11-27) |
+| The fork builds on Linux in its CI (Ubuntu 22.04/24.04, system Boost/OpenSSL/libmysqlclient); static Boost is requested on Windows only (`deps/boost/CMakeLists.txt`); on Linux the OpenSSL `legacy` provider comes from OpenSSL's module directory (`OPENSSL_MODULES` overrides it). On Linux configs are read from the compile-time `_CONF_DIR` (CMake `CONF_DIR`, default `<prefix>/etc`, also the install destination), not `configs/`: our build sets `-DCONF_DIR=configs` (relative to the working directory, like Windows). | fork `core-build-playerbots.yml`, `OpenSSLCrypto.cpp`, `Config.cpp` `GetConfigPath`, `src/cmake/showoptions.cmake` @ 32fd347 (2026-11-27) |
 
 Update this table when a fact is (re)verified; date it.
 
@@ -270,7 +273,14 @@ Update this table when a fact is (re)verified; date it.
   names, no free SQL): servers stopped, player data dumped first
   (`before-maintenance-*`), one transaction; confirmed in a modal; AHBot
   `clear-auctions` (players' auctions included); `rk maintenance`.
-- Scope v1: solo + LAN; Internet later. Linux/macOS later (keep code portable).
+- **0031** (Proposed) Linux and the Steam Deck: `linux-x86_64` server build
+  in the same CI run (ubuntu-22.04, static Boost, bundled libraries, smoke
+  test in an `archlinux` container), `sourceKey` (platform-independent)
+  compared by handoff/exports/restores, MySQL 8.4 minimal tarball (`.tar.xz`),
+  snapshot per platform, executables named without extension, process groups
+  + `PR_SET_PDEATHSIG`, logind inhibitor, `Wow.exe` through Proton (Steam
+  shortcut preferred), AppImage. Deck checks (system libraries) pending.
+- Scope v1: solo + LAN; Internet later. Linux (ADR 0031) in progress; macOS later.
 
 Never re-propose rejected options (MariaDB, Docker/WSL2, per-combination builds,
 reduced in-game settings) unless the user asks.
@@ -311,12 +321,14 @@ reduced in-game settings) unless the user asks.
 ├─ .github/workflows/
 │  ├─ ci.yml                 Windows full checks + Linux portable crates + cargo deny / npm audit
 │  ├─ release-app.yml        launcher installer: build, SignPath, update feed, release (manual)
-│  ├─ build-server.yml       phase 1: full server build + package + smoke test (on demand / catalog
-│  │                         changes; reuses the artifact when the build key is unchanged)
+│  ├─ build-server.yml       full server build + package + smoke test, Windows and Linux (ADR 0031:
+│  │                         ubuntu-22.04 build, Arch container smoke test) from one plan (on demand /
+│  │                         catalog changes; reuses an artifact when its build key is unchanged)
 │  └─ build-server-pandaria.yml   MoP prototype (ADR 0024): build + extractors + artifact, no publish yet
 ├─ tools/ci/                 build-plan.mjs, package-server.mjs, smoke-test.mjs (+ auth-client.mjs), index.mjs,
 │                            zip-zstd.mjs (release archives), app-release.mjs (launcher release),
-│                            package-pandaria.mjs (MoP prototype artifact)
+│                            package-pandaria.mjs (MoP prototype artifact), fetch-mysql.ps1/.sh,
+│                            bundle-libs.sh (Linux servers' libraries in lib/, ADR 0031)
 ├─ docs/                     architecture.md, roadmap.md, decisions/ (ADRs), faq.md + faq.fr.md
 │                            (player help, anchors linked from the UI errors)
 ├─ .claude/

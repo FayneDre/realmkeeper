@@ -3,16 +3,23 @@
 // and every catalog module compatible with it (ADR 0003). Writes the plan as
 // JSON and, on GitHub Actions, exposes key values as step outputs.
 //
-// Usage: node tools/ci/build-plan.mjs <emulator> <flavor> <out.json>
+// Usage: node tools/ci/build-plan.mjs <emulator> <flavor> <out.json> [platform]
+// Platform: windows-x86_64 (default) or linux-x86_64 (ADR 0031).
 
 import { readFileSync, readdirSync, writeFileSync, appendFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const [emulator, flavorId, out] = process.argv.slice(2);
-if (!emulator || !flavorId || !out) {
-  console.error("usage: build-plan.mjs <emulator> <flavor> <out.json>");
+const [emulator, flavorId, out, platform = "windows-x86_64"] = process.argv.slice(2);
+// Each platform is built by its own job; its key hashes that job (up to the
+// job after it) and the scripts it runs.
+const recipes = {
+  "windows-x86_64": { job: ["\n  build:\n", "\n  smoke-test:\n"], scripts: ["fetch-mysql.ps1"] },
+  "linux-x86_64": { job: ["\n  build-linux:\n", "\n  smoke-test-linux:\n"], scripts: ["fetch-mysql.sh", "bundle-libs.sh"] },
+};
+if (!emulator || !flavorId || !out || !recipes[platform]) {
+  console.error(`usage: build-plan.mjs <emulator> <flavor> <out.json> [${Object.keys(recipes).join("|")}]`);
   process.exit(2);
 }
 
@@ -84,23 +91,29 @@ const withoutComments = (yaml) =>
     .join("\n");
 const recipe = [
   withoutComments(section("\nenv:\n", "\njobs:\n")),
-  withoutComments(section("\n  build:\n", "\n  smoke-test:\n")),
-  ...["build-plan.mjs", "package-server.mjs", "fetch-mysql.ps1"].map((f) => text(join(here, f))),
+  withoutComments(section(...recipes[platform].job)),
+  ...["build-plan.mjs", "package-server.mjs", ...recipes[platform].scripts].map((f) => text(join(here, f))),
 ].join("\n");
 const keyInput = JSON.stringify({
+  platform,
   core: [flavor.source.repo, flavor.source.commit],
   // Whole plan entries: package-server.mjs writes them into build-info.json.
   modules,
-  // MySQL client libraries linked into the Windows servers.
-  database: read(join(root, database)).platforms["windows-x86_64"] ?? null,
+  // MySQL client libraries linked into the servers.
+  database: read(join(root, database)).platforms[platform] ?? null,
   recipe: sha256(recipe),
 });
 const buildKey = sha256(keyInput).slice(0, 16);
+// The same sources on every platform (ADR 0031): player data moves freely
+// between builds with the same source key (handoff, exports, restores).
+const sourceKey = sha256(JSON.stringify({ core: [flavor.source.repo, flavor.source.commit], modules })).slice(0, 16);
 
 const plan = {
   emulator,
   flavor: flavorId,
+  platform,
   buildKey,
+  sourceKey,
   core: { repo: flavor.source.repo, commit: flavor.source.commit },
   modules,
   database,
@@ -114,6 +127,7 @@ if (process.env.GITHUB_OUTPUT) {
     process.env.GITHUB_OUTPUT,
     [
       `build-key=${buildKey}`,
+      `source-key=${sourceKey}`,
       `core-repo=${flavor.source.repo}`,
       `core-commit=${flavor.source.commit}`,
       `artifact=server-${emulator}-${flavorId}-${buildKey}`,

@@ -19,6 +19,47 @@
         "admin": "bin/mysqladmin.exe",
         "client": "bin/mysql.exe"
       }
+    },
+    "linux-x86_64": {
+      "upstream": "https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-8.4.13-linux-glibc2.28-x86_64-minimal.tar.xz",
+      "size": 79753532,
+      "unpackedSize": 424000000,
+      "sha256": "5dfbb764f731df40ef9e4f5d69aed32bdac8ba1af20bd96b7d40a942d83d4ed2",
+      "executables": {
+        "server": "bin/mysqld",
+        "admin": "bin/mysqladmin",
+        "client": "bin/mysql"
+      },
+      "extras": [
+        {
+          "upstream": "https://snapshot.debian.org/file/01b61d6d98e59aac00f79a41f772286dd3a7c7e3",
+          "size": 13360,
+          "sha256": "d1476e4beab3d85f8a7d31de94c27472711ed3ef399ce70708e24b259426125b",
+          "format": "deb",
+          "files": { "usr/lib/x86_64-linux-gnu/libaio.so.1.0.2": "lib/private/libaio.so.1" }
+        },
+        {
+          "upstream": "https://snapshot.debian.org/file/bc10a217f361f79895ffc080aae70d8ba2056a17",
+          "size": 20964,
+          "sha256": "639e1ab6bd66ead40db8a22c332d7199679fa22db261cac34444eb8eb4c17dda",
+          "format": "deb",
+          "files": { "usr/lib/x86_64-linux-gnu/libnuma.so.1.0.0": "lib/private/libnuma.so.1" }
+        },
+        {
+          "upstream": "https://snapshot.debian.org/file/35fbf9e09df2f05b02e77e6caa18f6b0735e3dc4",
+          "size": 103136,
+          "sha256": "72300f09f02669c06c99b641ea795d52300ec7eb65eaccddf7bc3b72934f0ef5",
+          "format": "deb",
+          "files": { "lib/x86_64-linux-gnu/libncurses.so.6.4": "lib/private/libncurses.so.6" }
+        },
+        {
+          "upstream": "https://snapshot.debian.org/file/781ec9adada247b594f581c6e6d542082ecddf1f",
+          "size": 331352,
+          "sha256": "072d908f38f51090ca28ca5afa3b46b2957dc61fe35094c0b851426859a49a51",
+          "format": "deb",
+          "files": { "lib/x86_64-linux-gnu/libtinfo.so.6.4": "lib/private/libtinfo.so.6" }
+        }
+      ]
     }
   }
 }

@@ -85,11 +85,17 @@ async function entry(opts) {
   const info = readJson(opts["build-info"]);
   const snapshot = readJson(opts.snapshot);
   if (snapshot.buildKey !== info.buildKey) die(`snapshot is for build ${snapshot.buildKey}, server is ${info.buildKey}`);
+  // A data directory or server of another platform must never be listed under this one (ADR 0031).
+  for (const [what, platform] of [["server", info.platform], ["snapshot", snapshot.platform]]) {
+    if (platform && platform !== opts.platform) die(`${what} is for ${platform}, entry is for ${opts.platform}`);
+  }
   const build = {
     emulator: info.emulator,
     flavor: info.flavor,
     platform: opts.platform,
     buildKey: info.buildKey,
+    // Same sources on every platform (ADR 0031); older builds have none.
+    ...(info.sourceKey ? { sourceKey: info.sourceKey } : {}),
     core: { repo: info.core.repo, commit: info.core.commit },
     modules: Object.fromEntries([...info.modules].sort((a, b) => a.id.localeCompare(b.id)).map((m) => [m.id, m.commit])),
     server: { urls: [opts["server-url"]], ...(await fileFacts(opts.server)) },

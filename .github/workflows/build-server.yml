@@ -74,6 +74,10 @@ jobs:
       database-manifest: ${{ steps.plan.outputs.database-manifest }}
       client-manifest: ${{ steps.plan.outputs.client-manifest }}
       reuse-run-id: ${{ steps.reuse.outputs.run-id }}
+      # Linux build of the same sources (ADR 0031).
+      artifact-linux: ${{ steps.plan-linux.outputs.artifact }}
+      build-key-linux: ${{ steps.plan-linux.outputs.build-key }}
+      reuse-run-id-linux: ${{ steps.reuse-linux.outputs.run-id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -97,6 +101,37 @@ jobs:
             echo "Reusing $ARTIFACT from run $run_id: no compilation needed." | tee -a "$GITHUB_STEP_SUMMARY"
           else
             echo "No reusable $ARTIFACT: compiling." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Linux build plan and key
+        id: plan-linux
+        env:
+          SOURCE_KEY: ${{ steps.plan.outputs.source-key }}
+        run: |
+          set -euo pipefail
+          GITHUB_OUTPUT= node tools/ci/build-plan.mjs "$EMULATOR" "$FLAVOR" "$RUNNER_TEMP/plan-linux.json" linux-x86_64 > /dev/null
+          key="$(node -p 'require(process.argv[1]).buildKey' "$RUNNER_TEMP/plan-linux.json")"
+          source="$(node -p 'require(process.argv[1]).sourceKey' "$RUNNER_TEMP/plan-linux.json")"
+          if [ "$source" != "$SOURCE_KEY" ]; then
+            echo "::error::source key $source (Linux) differs from $SOURCE_KEY (Windows): both builds must come from the same sources"
+            exit 1
+          fi
+          echo "build-key=$key" >> "$GITHUB_OUTPUT"
+          echo "artifact=server-$EMULATOR-$FLAVOR-$key" >> "$GITHUB_OUTPUT"
+
+      - name: Look for a trusted Linux artifact with this build key
+        id: reuse-linux
+        if: ${{ !inputs.force-build }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT: ${{ steps.plan-linux.outputs.artifact }}
+        run: |
+          run_id="$(bash tools/ci/find-artifact.sh "$ARTIFACT")"
+          if [ -n "$run_id" ]; then
+            echo "Reusing $ARTIFACT from run $run_id: no Linux compilation needed." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No reusable $ARTIFACT: compiling for Linux." | tee -a "$GITHUB_STEP_SUMMARY"
           fi
           echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
 
@@ -408,17 +443,230 @@ jobs:
           path: ${{ runner.temp }}/instance/logs
           retention-days: 14
 
+  # Linux build of the same sources (ADR 0031), for the Steam Deck and desktop
+  # Linux. Built on Ubuntu 22.04 (glibc 2.35, older than SteamOS); every
+  # library outside the system base travels in lib/ (bundle-libs.sh). Keep it
+  # immediately followed by `smoke-test-linux`: build-plan.mjs hashes it.
+  build-linux:
+    name: Build Linux (${{ inputs.flavor || 'playerbot' }})
+    needs: plan
+    if: needs.plan.outputs.reuse-run-id-linux == ''
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    env:
+      AC_SRC: /home/runner/ac
+      MYSQL_DIR: /home/runner/mysql
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Build plan (must reproduce the plan job's key)
+        id: plan
+        env:
+          EXPECTED_KEY: ${{ needs.plan.outputs.build-key-linux }}
+        run: |
+          node tools/ci/build-plan.mjs "$EMULATOR" "$FLAVOR" "$RUNNER_TEMP/plan.json" linux-x86_64
+          key="$(node -p 'require(process.argv[1]).buildKey' "$RUNNER_TEMP/plan.json")"
+          if [ "$key" != "$EXPECTED_KEY" ]; then
+            echo "::error::build key $key differs from the plan job's $EXPECTED_KEY (non-deterministic inputs?)"
+            exit 1
+          fi
+
+      - name: Fetch core and modules at pinned commits
+        run: |
+          set -euo pipefail
+          fetch() { # <repo> <commit> <dir>
+            mkdir -p "$3" && cd "$3"
+            git init -q && git remote add origin "$1"
+            git fetch -q --depth 1 origin "$2" && git checkout -q FETCH_HEAD
+            echo "$(git rev-parse HEAD)  $1 -> $3"
+            cd - > /dev/null
+          }
+          fetch "${{ steps.plan.outputs.core-repo }}" "${{ steps.plan.outputs.core-commit }}" "$AC_SRC"
+          node -e 'for (const m of require(process.argv[1]).modules) console.log(`${m.repo} ${m.commit} ${m.id}`)' "$RUNNER_TEMP/plan.json" |
+          while read -r repo commit id; do fetch "$repo" "$commit" "$AC_SRC/modules/$id"; done
+
+      - name: Check module loader names
+        run: |
+          set -euo pipefail
+          for dir in "$AC_SRC"/modules/*/; do
+            id="$(basename "$dir")"
+            fn="Add${id//-/_}Scripts"
+            if ! grep -rqE "void[[:space:]]+${fn}[[:space:]]*\(" "$dir"; then
+              echo "::error::module directory '$id' needs $fn(), which it does not define."
+              exit 1
+            fi
+          done
+
+      - name: Install build dependencies
+        env:
+          DB_MANIFEST: ${{ needs.plan.outputs.database-manifest }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends cmake make clang libssl-dev libbz2-dev \
+            libreadline-dev libncurses-dev libboost-all-dev zlib1g-dev patchelf binutils xz-utils
+          # MySQL client library and headers: the pinned component, bundled with the servers.
+          bash tools/ci/fetch-mysql.sh "$DB_MANIFEST" "$MYSQL_DIR" linux-x86_64
+
+      # CONF_DIR is both where configs are installed and the path compiled
+      # into the servers (_CONF_DIR, Config.cpp GetConfigPath on Linux):
+      # relative "configs" makes them read configs/ and configs/modules/ in
+      # their working directory, the instance root, as on Windows.
+      - name: Configure CMake
+        run: >
+          cmake -S "$AC_SRC" -B "$AC_SRC/var/build"
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX="$AC_SRC/env/install"
+          -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          -DAPPS_BUILD=all -DTOOLS_BUILD=db-only
+          -DSCRIPTS=static -DMODULES=static
+          -DBUILD_TESTING=OFF -DWITH_WARNINGS=OFF
+          -DUSE_COREPCH=ON -DUSE_SCRIPTPCH=ON
+          -DBoost_USE_STATIC_LIBS=ON
+          -DCONF_DIR=configs
+          -DMYSQL_INCLUDE_DIR="$MYSQL_DIR/include"
+          -DMYSQL_LIBRARY="$MYSQL_DIR/lib/libmysqlclient.so"
+
+      - name: Build
+        run: cmake --build "$AC_SRC/var/build" --config Release -j "$(nproc)"
+
+      - name: Install and package
+        run: |
+          set -euo pipefail
+          cmake --install "$AC_SRC/var/build" --config Release
+          install="$AC_SRC/env/install"
+          # Same layout as the Windows build: programs at the root, configs/.
+          dist="$AC_SRC/env/dist"
+          mkdir -p "$dist/configs"
+          for exe in worldserver authserver dbimport; do
+            cp "$install/bin/$exe" "$dist/$exe"
+          done
+          cp -r "$install/configs/." "$dist/configs/"
+          LD_LIBRARY_PATH="$MYSQL_DIR/lib" bash tools/ci/bundle-libs.sh "$dist" "$dist/worldserver" "$dist/authserver" "$dist/dbimport"
+          ls -la "$dist" "$dist/lib" "$dist/configs"
+          node tools/ci/package-server.mjs "$RUNNER_TEMP/plan.json" "$AC_SRC" "$dist" "$RUNNER_TEMP/staging"
+
+      - name: Upload server artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ needs.plan.outputs.artifact-linux }}
+          path: ${{ runner.temp }}/staging
+          retention-days: 90
+          compression-level: 9
+
+  # The Linux smoke test runs in an Arch Linux container, the base of SteamOS:
+  # a library the servers or MySQL take from the system but SteamOS lacks
+  # fails here, not on a Steam Deck.
+  smoke-test-linux:
+    name: Smoke test Linux (Arch)
+    needs: [plan, build-linux]
+    if: ${{ !cancelled() && needs.plan.result == 'success' && (needs.build-linux.result == 'success' || needs.build-linux.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container: archlinux:base
+    steps:
+      - name: Tools
+        run: pacman -Syu --noconfirm --needed nodejs curl xz zstd binutils tar unzip git
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download server artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.plan.outputs.artifact-linux }}
+          path: ${{ runner.temp }}/server
+          run-id: ${{ needs.plan.outputs.reuse-run-id-linux || github.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Read component and data versions
+        id: versions
+        env:
+          DB_MANIFEST: ${{ needs.plan.outputs.database-manifest }}
+          CLIENT_MANIFEST: ${{ needs.plan.outputs.client-manifest }}
+        run: |
+          read_json() { node -p "require('./' + process.env.$1).$2"; }
+          echo "mysql=$(read_json DB_MANIFEST version)-$(read_json DB_MANIFEST 'platforms["linux-x86_64"].sha256')" >> "$GITHUB_OUTPUT"
+          echo "data=$(read_json CLIENT_MANIFEST serverData.version)" >> "$GITHUB_OUTPUT"
+          echo "data-url=$(read_json CLIENT_MANIFEST serverData.url)" >> "$GITHUB_OUTPUT"
+          echo "data-sha256=$(read_json CLIENT_MANIFEST serverData.sha256)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache MySQL server and server data
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            /opt/mysql
+            /opt/serverdata
+          key: smoke-linux-mysql-${{ steps.versions.outputs.mysql }}-data-${{ steps.versions.outputs.data }}
+
+      - name: Fetch MySQL server and upstream server data
+        env:
+          DB_MANIFEST: ${{ needs.plan.outputs.database-manifest }}
+          DATA_URL: ${{ steps.versions.outputs.data-url }}
+          DATA_SHA256: ${{ steps.versions.outputs.data-sha256 }}
+        run: |
+          set -euo pipefail
+          bash tools/ci/fetch-mysql.sh "$DB_MANIFEST" /opt/mysql linux-x86_64
+          if [ ! -d /opt/serverdata ]; then
+            curl -fsSL --retry 3 --retry-delay 30 -o "$RUNNER_TEMP/data.zip" "$DATA_URL"
+            # Same integrity rule as the launcher (ADR 0006): pinned sha256 or abort.
+            echo "$DATA_SHA256  $RUNNER_TEMP/data.zip" | sha256sum -c -
+            unzip -q "$RUNNER_TEMP/data.zip" -d /opt/serverdata
+            rm "$RUNNER_TEMP/data.zip"
+          fi
+
+      - name: Smoke test (modules off, then on)
+        env:
+          MANDATORY: ${{ needs.plan.outputs.mandatory }}
+          OPTIONAL: ${{ needs.plan.outputs.optional }}
+          DB_MANIFEST: ${{ needs.plan.outputs.database-manifest }}
+        run: |
+          set -euo pipefail
+          # Artifacts do not keep file modes.
+          chmod +x "$RUNNER_TEMP"/server/dist/{worldserver,authserver,dbimport}
+          node tools/ci/smoke-test.mjs \
+            --staging "$RUNNER_TEMP/server" \
+            --mysql /opt/mysql \
+            --mysql-manifest "$DB_MANIFEST" \
+            --data /opt/serverdata \
+            --work "$RUNNER_TEMP/instance" \
+            --snapshot "$RUNNER_TEMP/db-snapshot" \
+            --mandatory "$MANDATORY" \
+            --optional "$OPTIONAL"
+
+      - name: Upload database snapshot
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: db-snapshot-${{ needs.plan.outputs.build-key-linux }}
+          path: ${{ runner.temp }}/db-snapshot
+          retention-days: 90
+          compression-level: 6
+
+      - name: Upload smoke-test logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-logs-${{ needs.plan.outputs.build-key-linux }}
+          path: ${{ runner.temp }}/instance/logs
+          retention-days: 14
+
   # Publication (ADR 0010): GitHub release per build + the signed index.
   # Only from main, after a green smoke test. The server ZIP of a build key is
   # uploaded once and never replaced (the index may already point at it); the
   # database snapshot of each run gets its own asset name, the two newest are
   # kept. Without the signing secret, publication is skipped with a warning.
   publish:
-    name: Publish (release + signed index)
-    needs: [plan, build, smoke-test]
+    name: Publish (releases + signed index)
+    needs: [plan, build, smoke-test, build-linux, smoke-test-linux]
+    # The Windows build gates the publication; the Linux one joins it when its
+    # own smoke test passed (ADR 0031: a missing Linux build only delays the
+    # Deck, it never holds back Windows players).
     if: ${{ !cancelled() && needs.smoke-test.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: write # releases and their assets
       actions: read
@@ -428,13 +676,17 @@ jobs:
       cancel-in-progress: false
     env:
       GH_TOKEN: ${{ github.token }}
-      BUILD_KEY: ${{ needs.plan.outputs.build-key }}
-      TAG: build-${{ inputs.emulator || 'azerothcore' }}-${{ inputs.flavor || 'playerbot' }}-${{ needs.plan.outputs.build-key }}
+      PREFIX: build-${{ inputs.emulator || 'azerothcore' }}-${{ inputs.flavor || 'playerbot' }}
       HAS_KEY: ${{ secrets.RK_INDEX_SIGNING_KEY != '' }}
+      LINUX: ${{ needs.smoke-test-linux.result == 'success' }}
     steps:
       - name: Check the signing key
         if: env.HAS_KEY != 'true'
         run: echo "::warning::RK_INDEX_SIGNING_KEY is not set, nothing is published."
+
+      - name: Note a missing Linux build
+        if: env.HAS_KEY == 'true' && env.LINUX != 'true'
+        run: echo "::warning::the Linux smoke test did not pass, only the Windows build is published."
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: env.HAS_KEY == 'true'
@@ -444,54 +696,88 @@ jobs:
         with:
           node-version: 24
 
-      - name: Download the tested server artifact
+      - name: Download the tested Windows server artifact
         if: env.HAS_KEY == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: ${{ needs.plan.outputs.artifact }}
-          path: ${{ runner.temp }}/server
+          path: ${{ runner.temp }}/windows-x86_64/server
           run-id: ${{ needs.plan.outputs.reuse-run-id || github.run_id }}
           github-token: ${{ github.token }}
 
-      - name: Download this run's database snapshot
+      - name: Download this run's Windows database snapshot
         if: env.HAS_KEY == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: db-snapshot-${{ needs.plan.outputs.build-key }}
-          path: ${{ runner.temp }}/db-snapshot
+          path: ${{ runner.temp }}/windows-x86_64/db-snapshot
+
+      - name: Download the tested Linux server artifact
+        if: env.HAS_KEY == 'true' && env.LINUX == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.plan.outputs.artifact-linux }}
+          path: ${{ runner.temp }}/linux-x86_64/server
+          run-id: ${{ needs.plan.outputs.reuse-run-id-linux || github.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Download this run's Linux database snapshot
+        if: env.HAS_KEY == 'true' && env.LINUX == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: db-snapshot-${{ needs.plan.outputs.build-key-linux }}
+          path: ${{ runner.temp }}/linux-x86_64/db-snapshot
 
       - name: Release assets
         if: env.HAS_KEY == 'true'
-        id: assets
+        env:
+          KEY_WINDOWS: ${{ needs.plan.outputs.build-key }}
+          KEY_LINUX: ${{ needs.plan.outputs.build-key-linux }}
         run: |
           set -euo pipefail
-          out="$RUNNER_TEMP/out"; mkdir -p "$out"
-          server="server-$BUILD_KEY.zip"
-          snapshot="db-snapshot-$BUILD_KEY-r$GITHUB_RUN_ID.zip"
-          # zstd entries (ADR 0015): about a third smaller than deflate.
-          node tools/ci/zip-zstd.mjs "$RUNNER_TEMP/db-snapshot" "$out/$snapshot"
-          if gh release view "$TAG" > /dev/null 2>&1; then
-            echo "release $TAG exists"
-          else
-            gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" \
-              --notes "Server build $BUILD_KEY (core and module commits in build-info.json). Installed by the launcher through the signed index; not meant to be downloaded by hand."
-          fi
-          if gh release view "$TAG" --json assets -q '.assets[].name' | grep -qx "$server"; then
-            # Never replaced: reuse the published bytes (the index hashes them).
-            gh release download "$TAG" --pattern "$server" --dir "$out"
-          else
-            node tools/ci/zip-zstd.mjs "$RUNNER_TEMP/server" "$out/$server"
-            gh release upload "$TAG" "$out/$server"
-          fi
-          gh release upload "$TAG" "$out/$snapshot"
-          base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
-          node tools/ci/index.mjs entry \
-            --build-info "$RUNNER_TEMP/server/build-info.json" \
-            --snapshot "$RUNNER_TEMP/db-snapshot/snapshot.json" \
-            --platform windows-x86_64 \
-            --server "$out/$server" --server-url "$base/$server" \
-            --db-snapshot "$out/$snapshot" --db-snapshot-url "$base/$snapshot" \
-            --out "$out/entry.json"
+          platforms=(windows-x86_64)
+          if [ "$LINUX" = true ]; then platforms+=(linux-x86_64); fi
+          for platform in "${platforms[@]}"; do
+            in="$RUNNER_TEMP/$platform"
+            out="$in/out"; mkdir -p "$out"
+            if [ "$platform" = linux-x86_64 ]; then
+              key="$KEY_LINUX"
+              # Artifacts do not keep file modes; the release ZIP records them.
+              chmod +x "$in"/server/dist/{worldserver,authserver,dbimport}
+              modes=(--unix-modes)
+            else
+              key="$KEY_WINDOWS"
+              modes=()
+            fi
+            tag="$PREFIX-$key"
+            server="server-$key.zip"
+            snapshot="db-snapshot-$key-r$GITHUB_RUN_ID.zip"
+            # zstd entries (ADR 0015): about a third smaller than deflate.
+            node tools/ci/zip-zstd.mjs "$in/db-snapshot" "$out/$snapshot" "${modes[@]}"
+            if gh release view "$tag" > /dev/null 2>&1; then
+              echo "release $tag exists"
+            else
+              gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" \
+                --notes "Server build $key for $platform (core and module commits in build-info.json). Installed by the launcher through the signed index; not meant to be downloaded by hand."
+            fi
+            if gh release view "$tag" --json assets -q '.assets[].name' | grep -qx "$server"; then
+              # Never replaced: reuse the published bytes (the index hashes them).
+              gh release download "$tag" --pattern "$server" --dir "$out"
+            else
+              node tools/ci/zip-zstd.mjs "$in/server" "$out/$server" "${modes[@]}"
+              gh release upload "$tag" "$out/$server"
+            fi
+            gh release upload "$tag" "$out/$snapshot"
+            base="https://github.com/$GITHUB_REPOSITORY/releases/download/$tag"
+            node tools/ci/index.mjs entry \
+              --build-info "$in/server/build-info.json" \
+              --snapshot "$in/db-snapshot/snapshot.json" \
+              --platform "$platform" \
+              --server "$out/$server" --server-url "$base/$server" \
+              --db-snapshot "$out/$snapshot" --db-snapshot-url "$base/$snapshot" \
+              --out "$RUNNER_TEMP/entry-$platform.json"
+            echo "$tag" >> "$RUNNER_TEMP/tags.txt"
+          done
 
       - name: Update and sign the index
         if: env.HAS_KEY == 'true'
@@ -499,26 +785,35 @@ jobs:
           RK_INDEX_SIGNING_KEY: ${{ secrets.RK_INDEX_SIGNING_KEY }}
         run: |
           set -euo pipefail
-          out="$RUNNER_TEMP/out"
+          out="$RUNNER_TEMP/index"; mkdir -p "$out"
           if ! gh release view index > /dev/null 2>&1; then
             gh release create index --latest=false --title "Artifact index" \
               --notes "Signed index read by the launcher (ADR 0010). Do not edit."
           fi
-          previous=()
+          current=()
           if gh release download index --pattern index.json --dir "$out/previous" 2>/dev/null; then
-            previous=(--previous "$out/previous/index.json")
+            current=(--previous "$out/previous/index.json")
           fi
-          node tools/ci/index.mjs update "${previous[@]}" --entry "$out/entry.json" --out "$out/index.json"
+          # One update per platform entry, each on top of the previous one.
+          n=0
+          for entry in "$RUNNER_TEMP"/entry-*.json; do
+            n=$((n + 1))
+            node tools/ci/index.mjs update "${current[@]}" --entry "$entry" --out "$out/index-$n.json"
+            current=(--previous "$out/index-$n.json")
+          done
+          cp "$out/index-$n.json" "$out/index.json"
           node tools/ci/index.mjs verify "$out/index.json" > /dev/null
           gh release upload index "$out/index.json" --clobber
-          echo "Published $TAG and index serial $(node -p "JSON.parse(require('$out/index.json').payload).serial")" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "Published $(paste -sd' ' "$RUNNER_TEMP/tags.txt") and index serial $(node -p "JSON.parse(require('$out/index.json').payload).serial")" | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Keep the two newest snapshots of this build
+      - name: Keep the two newest snapshots of each build
         if: env.HAS_KEY == 'true'
         run: |
           set -euo pipefail
-          gh release view "$TAG" --json assets -q '.assets[] | select(.name | startswith("db-snapshot-")) | "\(.createdAt) \(.name)"' |
-            sort -r | tail -n +3 | while read -r _ name; do
-              echo "deleting old snapshot $name"
-              gh release delete-asset "$TAG" "$name" --yes
-            done
+          while read -r tag; do
+            gh release view "$tag" --json assets -q '.assets[] | select(.name | startswith("db-snapshot-")) | "\(.createdAt) \(.name)"' |
+              sort -r | tail -n +3 | while read -r _ name; do
+                echo "deleting old snapshot $name"
+                gh release delete-asset "$tag" "$name" --yes
+              done
+          done < "$RUNNER_TEMP/tags.txt"

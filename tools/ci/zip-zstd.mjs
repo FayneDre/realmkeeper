@@ -8,18 +8,25 @@
 // same tree always gives the same bytes (and the same sha256 in the index).
 // Directories get their own entries (empty ones matter in a MySQL datadir).
 //
-// Usage: node tools/ci/zip-zstd.mjs <dir> <out.zip> [--level 19]
+// --unix-modes (Linux builds, ADR 0031): entries record Unix permissions
+// (0755 for executables and directories, 0644 otherwise), so that servers
+// unpacked on Linux can run; without it the archive is unchanged.
+//
+// Usage: node tools/ci/zip-zstd.mjs <dir> <out.zip> [--level 19] [--unix-modes]
 
 import { closeSync, openSync, readFileSync, readdirSync, statSync, writeSync } from "node:fs";
 import { join } from "node:path";
 import { constants, crc32, zstdCompressSync } from "node:zlib";
 
 const args = process.argv.slice(2);
+const unixIndex = args.indexOf("--unix-modes");
+const unixModes = unixIndex >= 0;
+if (unixModes) args.splice(unixIndex, 1);
 const levelIndex = args.indexOf("--level");
 const level = levelIndex >= 0 ? Number(args.splice(levelIndex, 2)[1]) : 19;
 const [dir, out] = args;
 if (!dir || !out || !Number.isInteger(level)) {
-  console.error("usage: zip-zstd.mjs <dir> <out.zip> [--level 1-22]");
+  console.error("usage: zip-zstd.mjs <dir> <out.zip> [--level 1-22] [--unix-modes]");
   process.exit(2);
 }
 
@@ -40,7 +47,7 @@ function walk(root, prefix = "") {
       entries.push({ name: `${rel}/`, dir: true });
       entries.push(...walk(root, rel));
     } else {
-      entries.push({ name: rel, dir: false });
+      entries.push({ name: rel, dir: false, executable: (statSync(join(root, rel)).mode & 0o111) !== 0 });
     }
   }
   return entries;
@@ -84,12 +91,18 @@ for (const entry of walk(dir)) {
   central.push(
     Buffer.concat([
       u32(0x02014b50),
-      u16(VERSION), // made by: MS-DOS attributes
+      // made by: MS-DOS attributes, or Unix (3) with permissions in the high word
+      u16(unixModes ? (3 << 8) | VERSION : VERSION),
       ...fields,
       u16(0), // comment
       u16(0), // disk
       u16(0), // internal attributes
-      u32(entry.dir ? 0x10 : 0), // external: directory flag
+      // external: directory flag, plus the Unix mode with --unix-modes
+      u32(
+        ((unixModes ? (entry.dir ? 0o40755 : entry.executable ? 0o100755 : 0o100644) * 0x10000 : 0) +
+          (entry.dir ? 0x10 : 0)) >>>
+          0,
+      ),
       u32(headerOffset),
       name,
     ]),

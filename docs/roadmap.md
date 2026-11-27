@@ -172,3 +172,16 @@ that an emulator is data + a driver.
 - More modules and game versions in the catalog
 - Optional "external database" mode, server auto-restart after a crash
 - Linux / macOS (the core crates are kept portable and tested on Linux)
+
+## Phase 8: Linux and the Steam Deck (started 2026-11-27, ADR 0031)
+
+- [x] ADR 0031 (proposed): platform `linux-x86_64`, source key, Proton client
+- [x] Deck checks: system libraries, MySQL minimal tarball, file systems, Proton (SteamOS 3.9.5)
+- [ ] CI: Linux server build + Arch container smoke test, `sourceKey`, index entries (written, first run pending)
+- [ ] Engine: `.tar.xz`, executable suffix rule, Linux snapshot
+- [ ] Runtime and launcher: process groups, `/proc` ports, logind inhibitor, data root
+- [ ] Client through Proton (Steam shortcut, `proton run`, `wine`)
+- [ ] AppImage + updater in `release-app.yml`
+- [ ] Cross-platform restore in CI (Windows dump into the Linux smoke test)
+- [ ] Handoff Windows <-> Deck verified (Syncthing folder)
+- [ ] Later: action bars per computer, controller (ConsolePortLK + Steam Input)

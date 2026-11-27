@@ -162,17 +162,20 @@ const runSync = (name, exe, argv, cwd) => {
 
 // ------------------------------------------------------------------ locate
 const dist = join(staging, "dist");
+// Same layout on every platform; only Windows programs have an extension (ADR 0031).
+const platform = process.platform === "win32" ? "windows-x86_64" : "linux-x86_64";
+const suffix = process.platform === "win32" ? ".exe" : "";
 const exe = Object.fromEntries(
-  ["worldserver.exe", "authserver.exe", "dbimport.exe"].map((n) => {
-    const path = findFile(dist, n);
-    if (!path) fail(`${n} not found in ${dist}`);
-    return [n.replace(".exe", ""), path];
+  ["worldserver", "authserver", "dbimport"].map((n) => {
+    const path = findFile(dist, n + suffix);
+    if (!path) fail(`${n + suffix} not found in ${dist}`);
+    return [n, path];
   }),
 );
-const mysqld = join(mysqlRoot, "bin", "mysqld.exe");
-const mysqlCli = join(mysqlRoot, "bin", "mysql.exe");
-const mysqladmin = join(mysqlRoot, "bin", "mysqladmin.exe");
-if (!existsSync(mysqld)) fail(`mysqld.exe not found under ${mysqlRoot}`);
+const mysqld = join(mysqlRoot, "bin", "mysqld" + suffix);
+const mysqlCli = join(mysqlRoot, "bin", "mysql" + suffix);
+const mysqladmin = join(mysqlRoot, "bin", "mysqladmin" + suffix);
+if (!existsSync(mysqld)) fail(`mysqld${suffix} not found under ${mysqlRoot}`);
 const dataDir = findDir(resolve(args.data), "dbc");
 if (!dataDir) fail("server data (dbc/maps/...) not found");
 note(`ℹ️ binaries: ${dirname(exe.worldserver)}`);
@@ -257,6 +260,8 @@ const writeMyIni = () =>
       "collation-server=utf8mb4_unicode_ci",
       "innodb_buffer_pool_size=1024M",
       "innodb_redo_log_capacity=512M",
+      // CI containers run as root, which mysqld refuses without this.
+      ...(process.getuid?.() === 0 ? ["user=root"] : []),
       "",
     ].join("\n"),
   );
@@ -352,7 +357,9 @@ async function makeSnapshot() {
   const manifest = {
     format: 1,
     buildKey: buildInfo.buildKey,
-    mysql: { id: mysqlManifest.id, version: mysqlManifest.version, sha256: mysqlManifest.platforms["windows-x86_64"].sha256 },
+    // A data directory keeps its lower_case_table_names: never restored on another platform.
+    platform,
+    mysql: { id: mysqlManifest.id, version: mysqlManifest.version, sha256: mysqlManifest.platforms[platform].sha256 },
     databases,
     modules: baseModules,
     createdAt: new Date().toISOString(),

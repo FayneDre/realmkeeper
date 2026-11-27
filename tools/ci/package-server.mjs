@@ -45,17 +45,27 @@ for (const module of plan.modules) {
   }
 }
 
-// Executables plus the runtime DLLs they load from their own directory (legacy.dll:
-// OpenSSL 3 legacy provider, asserted at startup by OpenSSLCrypto.cpp on Windows).
-const required = [
-  "worldserver.exe",
-  "authserver.exe",
-  "dbimport.exe",
-  "libmysql.dll",
-  "libssl-3-x64.dll",
-  "libcrypto-3-x64.dll",
-  "legacy.dll",
-];
+// Executables plus the runtime libraries they load from their own directory.
+// Windows: legacy.dll is the OpenSSL 3 legacy provider, asserted at startup by
+// OpenSSLCrypto.cpp. Linux (ADR 0031): libraries outside the system base are
+// bundled in lib/ by bundle-libs.sh; OpenSSL 3 comes from the system. Both
+// layouts are the same: executables at the root, configs/ with the .conf.dist.
+const required = {
+  "windows-x86_64": [
+    "worldserver.exe",
+    "authserver.exe",
+    "dbimport.exe",
+    "libmysql.dll",
+    "libssl-3-x64.dll",
+    "libcrypto-3-x64.dll",
+    "legacy.dll",
+  ],
+  "linux-x86_64": ["worldserver", "authserver", "dbimport", "lib/libmysqlclient.so.24", "configs/worldserver.conf.dist"],
+}[plan.platform ?? "windows-x86_64"];
+if (!required) {
+  console.error(`unknown platform ${plan.platform}`);
+  process.exit(1);
+}
 const walk = (dir) =>
   readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);

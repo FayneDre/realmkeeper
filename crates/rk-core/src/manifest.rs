@@ -1357,6 +1357,32 @@ pub struct PlatformBuild {
     pub unpacked_size: Option<u64>,
     pub sha256: String,
     pub executables: BTreeMap<String, String>,
+    /// Libraries the download expects from the system but some systems lack
+    /// (ADR 0031), copied into the unpacked component.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub extras: Vec<ComponentExtra>,
+}
+
+/// An official package of another distribution whose files complete a
+/// component (ADR 0031): downloaded from its permanent upstream URL, never
+/// re-hosted, verified by size and sha256.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ComponentExtra {
+    pub upstream: String,
+    pub size: u64,
+    pub sha256: String,
+    pub format: PackageFormat,
+    /// Regular file in the package (no leading `./`) -> destination relative
+    /// to the component root.
+    pub files: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageFormat {
+    /// `ar` archive holding `data.tar.{xz,zst,gz}`.
+    Deb,
 }
 
 #[cfg(test)]

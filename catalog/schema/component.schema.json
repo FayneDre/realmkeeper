@@ -16,7 +16,7 @@
     "license": { "$ref": "common.schema.json#/$defs/spdxLicense" },
     "homepage": { "type": "string", "format": "uri" },
     "platforms": {
-      "description": "Keyed by '<os>-<arch>' (e.g. 'windows-x86_64'). Other platforms are added later.",
+      "description": "Keyed by '<os>-<arch>' (e.g. 'windows-x86_64', 'linux-x86_64').",
       "type": "object",
       "propertyNames": { "pattern": "^(windows|linux|macos)-(x86_64|aarch64)$" },
       "minProperties": 1,
@@ -47,6 +47,28 @@
           "executables": {
             "type": "object",
             "additionalProperties": { "type": "string" }
+          },
+          "extras": {
+            "description": "Libraries the upstream download expects from the system but some systems lack (SteamOS has no package installation): official packages of another distribution, downloaded from their permanent upstream URL (never re-hosted) and verified, whose files are copied into the unpacked component.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["upstream", "size", "sha256", "format", "files"],
+              "properties": {
+                "upstream": { "type": "string", "format": "uri" },
+                "size": { "type": "integer", "minimum": 1 },
+                "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                "format": { "description": "Package format: 'deb' (ar archive with data.tar.*).", "enum": ["deb"] },
+                "files": {
+                  "description": "Regular file in the package (path without leading './') -> destination relative to the component root.",
+                  "type": "object",
+                  "minProperties": 1,
+                  "propertyNames": { "pattern": "^[A-Za-z0-9._+-]+(/[A-Za-z0-9._+-]+)*$" },
+                  "additionalProperties": { "type": "string", "pattern": "^[A-Za-z0-9._+-]+(/[A-Za-z0-9._+-]+)*$" }
+                }
+              },
+              "additionalProperties": false
+            }
           }
         },
         "additionalProperties": false
