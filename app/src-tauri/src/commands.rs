@@ -982,8 +982,7 @@ pub fn join_lan(
     let client = launcher
         .prepare_client_for_lan(&emulator, &address)
         .map_err(ui)?;
-    let mut child = rk_client::launch(&client.manifest, &client.state)
-        .map_err(|e| ui(LauncherError::Client(e)))?;
+    let mut child = client.launch().map_err(|e| ui(LauncherError::Client(e)))?;
     game_started(&app);
     tauri::async_runtime::spawn(async move {
         let _ = child.wait().await;

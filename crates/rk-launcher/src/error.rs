@@ -478,6 +478,7 @@ fn client_code(e: &ClientError) -> (&'static str, Vec<(&'static str, String)>) {
         ClientError::InUse(_) => ("client.inUse", Vec::new()),
         ClientError::Busy(_) => ("client.busy", Vec::new()),
         ClientError::Conflict { .. } => ("client.conflict", Vec::new()),
+        ClientError::NoRunner => ("client.noRunner", Vec::new()),
         _ => ("unknown", Vec::new()),
     }
 }

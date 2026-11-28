@@ -210,6 +210,7 @@
   "error.client.inUse": "Un archivo del juego está en uso. Cierra el juego y vuelve a intentarlo.",
   "error.client.busy": "El juego ya se está preparando o jugando desde este launcher.",
   "error.client.conflict": "Se sustituiría un archivo de tu carpeta del juego. Muévelo y vuelve a intentarlo (los detalles indican cuál).",
+  "error.client.noRunner": "En Linux el juego necesita Proton o Wine. Instala Steam (trae Proton: inicia una vez cualquier juego con Proton) o Wine y vuelve a intentarlo.",
   "error.assets.missing": "Falta un archivo de un módulo. Vuelve a aplicar las opciones del módulo (pestaña Módulos).",
   "error.firewall.declined": "Se rechazó la solicitud de administrador: el cortafuegos no se ha modificado.",
   "error.firewall.failed": "Windows no pudo modificar el cortafuegos. También puedes permitir authserver.exe y worldserver.exe a mano para las redes privadas.",

@@ -691,6 +691,7 @@ enum Input<'a> {
 /// A command for a console program that never opens a console window, even
 /// when called from the GUI (Windows would otherwise flash one per call).
 fn command(program: &Path) -> Command {
+    #[cfg_attr(not(windows), allow(unused_mut))]
     let mut command = Command::new(program);
     #[cfg(windows)]
     {

@@ -138,6 +138,14 @@ Upstream facts (2026-11-27):
    `STEAM_COMPAT_CLIENT_INSTALL_PATH`); else `wine` when installed. "The
    game exited" is watched on the `Wow.exe` process, not on the child the
    launcher started. Client detection (version resource) is unchanged.
+   Implemented (2026-11-28, `rk-client` `runner`): Steam roots
+   `~/.steam/steam`, `~/.local/share/Steam` and Flatpak, their libraries
+   from `steamapps/libraryfolders.vdf`, and `compatibilitytools.d`;
+   preference: Valve's numbered Proton (newest), Experimental, Hotfix, then
+   custom builds; prefixes in `clients/<client>.prefix/{proton,wine}`. The
+   game process is the one whose `comm` is the executable's name and whose
+   command line ends with it (Wine renames its processes; assumed, to
+   check on the Deck).
 8. **App.** Tauri on WebKitGTK, packaged as an AppImage by `release-app.yml`
    (an Ubuntu 22.04 job next to the Windows one), with the Tauri updater
    (`latest.json` gains a `linux-x86_64` entry). Window and tray code in

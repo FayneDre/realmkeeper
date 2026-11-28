@@ -716,6 +716,15 @@ pub struct PreparedClient {
     pub state: ClientState,
     pub report: PrepareReport,
     pub lock: ClientLock,
+    /// The client's folder in the data root: Proton / Wine prefixes.
+    pub prefixes: PathBuf,
+}
+
+impl PreparedClient {
+    /// Starts the game (through Proton or Wine on Linux).
+    pub fn launch(&self) -> std::result::Result<rk_client::Game, rk_client::ClientError> {
+        rk_client::launch(&self.manifest, &self.state, &self.prefixes)
+    }
 }
 
 /// Option values by module, for convenience in tests and callers.

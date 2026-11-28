@@ -210,6 +210,7 @@
   "error.client.inUse": "Un fichier du jeu est utilisé. Ferme le jeu, puis réessaie.",
   "error.client.busy": "Le jeu est déjà en cours de préparation ou lancé depuis ce launcher.",
   "error.client.conflict": "Un fichier de ton dossier de jeu serait remplacé. Déplace-le, puis réessaie (les détails le nomment).",
+  "error.client.noRunner": "Proton ou Wine est nécessaire pour lancer le jeu sous Linux. Installe Steam (il fournit Proton : lance une fois n'importe quel jeu avec Proton) ou Wine, puis réessaie.",
   "error.assets.missing": "Un fichier de module manque. Applique à nouveau les options du module (onglet Modules).",
   "error.firewall.declined": "La demande d'administrateur a été refusée : le pare-feu n'a pas été modifié.",
   "error.firewall.failed": "Windows n'a pas pu modifier le pare-feu. Tu peux aussi autoriser authserver.exe et worldserver.exe à la main pour les réseaux privés.",

@@ -179,8 +179,10 @@ that an emulator is data + a driver.
 - [x] Deck checks: system libraries, MySQL minimal tarball, file systems, Proton (SteamOS 3.9.5)
 - [ ] CI: Linux server build + Arch container smoke test, `sourceKey`, index entries (written, first run pending)
 - [x] Engine: `.tar.xz` (links as hard links, Unix modes, also from release ZIPs), MySQL `extras` from Debian packages, executable suffix rule, other-platform builds and snapshots refused, source key in records, exports and handoff
-- [ ] Runtime and launcher: process groups, `/proc` ports, logind inhibitor, data root
-- [ ] Client through Proton (Steam shortcut, `proton run`, `wine`)
+- [x] Runtime and launcher: process groups, `/proc` ports, logind inhibitor, data root, orphaned servers, sync folders
+- [x] Servers bundle OpenSSL 3 + its legacy provider (Arch is on OpenSSL 4)
+- [x] Client through Proton (`proton run`, newest Proton first, else `wine`), game exit watched in `/proc` (to verify on the Deck)
+- [ ] Client as a Steam shortcut (with the controller work)
 - [ ] AppImage + updater in `release-app.yml`
 - [ ] Cross-platform restore in CI (Windows dump into the Linux smoke test)
 - [ ] Handoff Windows <-> Deck verified (Syncthing folder)

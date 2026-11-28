@@ -92,11 +92,13 @@ impl Launcher {
             &files,
             &addons,
         )?;
+        let prefixes = dir.join(format!("{}.prefix", manifest.id));
         Ok(PreparedClient {
             manifest,
             state,
             report,
             lock,
+            prefixes,
         })
     }
 
@@ -122,11 +124,13 @@ impl Launcher {
             .ok_or_else(|| LauncherError::NoClient(manifest.version.clone()))?;
         let server = format!("lan-{address}");
         let report = rk_client::prepare(&dir, &manifest, &mut state, address, &server, &[], &[])?;
+        let prefixes = dir.join(format!("{}.prefix", manifest.id));
         Ok(PreparedClient {
             manifest,
             state,
             report,
             lock,
+            prefixes,
         })
     }
 }

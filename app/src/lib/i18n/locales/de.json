@@ -210,6 +210,7 @@
   "error.client.inUse": "Eine Spieldatei wird gerade verwendet. Schließe das Spiel und versuche es erneut.",
   "error.client.busy": "Das Spiel wird bereits von diesem Launcher vorbereitet oder gespielt.",
   "error.client.conflict": "Eine Datei in deinem Spielordner würde ersetzt. Verschiebe sie und versuche es erneut (die Details nennen sie).",
+  "error.client.noRunner": "Unter Linux braucht das Spiel Proton oder Wine. Installiere Steam (es bringt Proton mit: starte einmal irgendein Spiel mit Proton) oder Wine und versuche es dann erneut.",
   "error.assets.missing": "Eine Moduldatei fehlt. Übernimm die Moduloptionen erneut (Reiter „Module“).",
   "error.firewall.declined": "Die Administratorabfrage wurde abgelehnt: Die Firewall wurde nicht geändert.",
   "error.firewall.failed": "Windows konnte die Firewall nicht ändern. Du kannst authserver.exe und worldserver.exe auch von Hand für private Netzwerke zulassen.",

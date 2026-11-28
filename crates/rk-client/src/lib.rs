@@ -7,7 +7,8 @@
 //! - [`prepare`], before every launch: realmlist (and the address the
 //!   client saved in its settings), cache cleared when the server changes,
 //!   managed patch files reconciled with the instance's choices.
-//! - [`launch`]: starts the executable from the client directory.
+//! - [`launch`]: starts the executable from the client directory, through
+//!   Proton or Wine on Linux ([`runner`], ADR 0031).
 //!
 //! Managed files are tracked with their sha256. A file the player had put
 //! at the same place is moved aside (`<name>.rk-backup`) and put back when
@@ -19,6 +20,7 @@
 
 mod files;
 mod find;
+mod runner;
 mod version;
 
 use std::path::{Path, PathBuf};
@@ -29,6 +31,7 @@ use thiserror::Error;
 
 pub use files::ManagedFile;
 pub use find::find;
+pub use runner::{runner, Runner};
 pub use version::executable_build;
 
 #[derive(Debug, Error)]
@@ -62,6 +65,8 @@ pub enum ClientError {
     Busy(String),
     #[error("{0} is in use: close the game first")]
     InUse(PathBuf),
+    #[error("Proton or Wine is needed to start the game on Linux: install Steam (Proton) or Wine")]
+    NoRunner,
     #[error("{path}: {message}")]
     State { path: PathBuf, message: String },
     #[error("I/O error on {path}: {source}")]
@@ -388,20 +393,78 @@ pub fn prepare(
     Ok(report)
 }
 
+/// A game started by [`launch`].
+pub struct Game {
+    child: tokio::process::Child,
+    /// Executable watched in `/proc` once the wrapper (Proton, Wine) ended.
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+    watched: Option<String>,
+}
+
+impl Game {
+    /// Waits until the game exits; its exit code when known.
+    pub async fn wait(&mut self) -> std::io::Result<Option<i32>> {
+        let status = self.child.wait().await?;
+        #[cfg(target_os = "linux")]
+        if let Some(executable) = &self.watched {
+            // The wrapper may return while the game still runs.
+            let mut waited = false;
+            while runner::game_running(executable) {
+                waited = true;
+                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            }
+            if waited {
+                return Ok(None);
+            }
+        }
+        Ok(status.code())
+    }
+}
+
 /// Starts the client from its folder. The child is independent of the
-/// launcher (closing the launcher never closes the game).
+/// launcher (closing the launcher never closes the game). `prefixes`: the
+/// client's folder in the data root, where Proton or Wine keep their
+/// prefix (unused on Windows).
 pub fn launch(
     manifest: &ClientManifest,
     state: &ClientState,
-) -> Result<tokio::process::Child, ClientError> {
+    prefixes: &Path,
+) -> Result<Game, ClientError> {
     let exe = state.path.join(&manifest.detection.executable);
-    tokio::process::Command::new(&exe)
+    let runner = runner()?;
+    let mut command = match &runner {
+        Runner::Native => tokio::process::Command::new(&exe),
+        Runner::Proton { script, steam } => {
+            let mut command = tokio::process::Command::new(script);
+            command
+                .arg("run")
+                .arg(&exe)
+                .env("STEAM_COMPAT_CLIENT_INSTALL_PATH", steam);
+            command
+        }
+        Runner::Wine(wine) => {
+            let mut command = tokio::process::Command::new(wine);
+            command.arg(&exe);
+            command
+        }
+    };
+    if let Some(prefix) = runner::prefix_dir(&runner, prefixes) {
+        std::fs::create_dir_all(&prefix).map_err(ClientError::io(&prefix))?;
+        let var = match runner {
+            Runner::Proton { .. } => "STEAM_COMPAT_DATA_PATH",
+            _ => "WINEPREFIX",
+        };
+        command.env(var, &prefix);
+    }
+    let child = command
         .current_dir(&state.path)
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
         .spawn()
-        .map_err(ClientError::io(&exe))
+        .map_err(ClientError::io(&exe))?;
+    let watched = (runner != Runner::Native).then(|| exe.to_string_lossy().into_owned());
+    Ok(Game { child, watched })
 }
 
 #[cfg(test)]

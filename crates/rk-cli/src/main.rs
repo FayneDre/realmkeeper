@@ -1593,7 +1593,7 @@ fn main() -> Result<ExitCode> {
             let client = launcher.prepare_client_for_lan(&emulator, &address)?;
             eprintln!("realmlist set to {address}; launching the game");
             block_on(async {
-                let mut child = rk_client::launch(&client.manifest, &client.state)?;
+                let mut child = client.launch()?;
                 child.wait().await.map_err(anyhow::Error::from)?;
                 anyhow::Ok(())
             })??;

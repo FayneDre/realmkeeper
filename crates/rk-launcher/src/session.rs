@@ -466,7 +466,7 @@ async fn supervise(
     let mut prepared: Option<Box<PreparedClient>> = None;
     let mut child = None;
     if let Some(game) = game {
-        match rk_client::launch(&game.client.manifest, &game.client.state) {
+        match game.client.launch() {
             Ok(c) => {
                 events(SessionEvent::GameStarted { keep_running });
                 child = Some(c);
@@ -605,7 +605,7 @@ async fn supervise(
             } => {
                 child = None;
                 prepared = None;
-                events(SessionEvent::GameExited { code: status.ok().and_then(|s| s.code()) });
+                events(SessionEvent::GameExited { code: status.ok().flatten() });
                 if !keep_running {
                     if exclusive.is_some() || !quick.is_empty() {
                         stop_after = true;
@@ -633,7 +633,7 @@ async fn supervise(
 /// servers keep running.
 fn launch_later(
     launch: Launch,
-    child: &mut Option<tokio::process::Child>,
+    child: &mut Option<rk_client::Game>,
     prepared: &mut Option<Box<PreparedClient>>,
     events: &EventSink,
 ) {
@@ -641,7 +641,7 @@ fn launch_later(
         client,
         keep_running,
     } = launch;
-    match rk_client::launch(&client.manifest, &client.state) {
+    match client.launch() {
         Ok(c) => {
             events(SessionEvent::GameStarted { keep_running });
             *child = Some(c);
