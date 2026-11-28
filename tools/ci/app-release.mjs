@@ -6,8 +6,10 @@
 //       build makes updater artifacts and the app checks the signed feed;
 //       without one, the release has no auto-update (the app hides it).
 //
-//   feed    --version <v> --installer-url <url> --signature <file.sig> --out <latest.json>
-//       The update feed read by tauri-plugin-updater (static JSON format).
+//   feed    --version <v> --installer-url <url> --signature <file.sig>
+//           [--appimage-url <url> --appimage-signature <file.sig>] --out <latest.json>
+//       The update feed read by tauri-plugin-updater (static JSON format):
+//       windows-x86_64, and linux-x86_64 when the AppImage is given (ADR 0031).
 //       Release notes come from app/src/lib/release-notes.json: `notesByLocale`
 //       for the launcher, `notes` (English, one change per line) for 0.3.x.
 //
@@ -78,6 +80,12 @@ switch (command) {
         "windows-x86_64": { signature, url: need("installer-url") },
       },
     };
+    if (options["appimage-url"]) {
+      feed.platforms["linux-x86_64"] = {
+        signature: readFileSync(need("appimage-signature"), "utf8").trim(),
+        url: options["appimage-url"],
+      };
+    }
     writeFileSync(need("out"), JSON.stringify(feed, null, 2));
     console.log(`feed for ${feed.version}`);
     break;

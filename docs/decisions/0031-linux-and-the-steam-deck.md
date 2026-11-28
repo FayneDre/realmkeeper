@@ -151,6 +151,12 @@ Upstream facts (2026-11-27):
    (`latest.json` gains a `linux-x86_64` entry). Window and tray code in
    `app/src-tauri/src/os.rs` gets a Linux side or is skipped. Gamepad use of
    the launcher in Game Mode is a later step.
+   Implemented (2026-11-28): `tauri.linux.conf.json` selects the AppImage
+   (no GStreamer: the app plays no media); `release-app.yml` job
+   `build-linux` (ubuntu-22.04), update signature made in the publish job
+   like the installer's, `RealmKeeper_<v>_amd64.AppImage` in the release;
+   `ci.yml` runs the whole workspace on Linux and, when started by hand,
+   uploads a test AppImage (`appimage-test`, no update feed).
 9. **Handoff on SteamOS.** ADR 0028 needs a folder the player already
    synchronises. Google Drive and OneDrive have no Linux client on SteamOS:
    the FAQ recommends Syncthing (on both computers) or an rclone sync; the

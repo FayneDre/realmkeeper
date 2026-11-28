@@ -108,13 +108,57 @@ jobs:
       - name: npm audit (shipped dependencies)
         run: npm audit --omit=dev --audit-level=moderate
 
-  linux-core:
-    name: Linux (portable crates)
-    runs-on: ubuntu-latest
+  # The whole workspace, app included (ADR 0031): Linux code cannot be
+  # compiled on a Windows desk. Ubuntu 22.04 like the AppImage build.
+  linux:
+    name: Linux (full workspace + app)
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: System libraries of the Tauri app (WebKitGTK, tray)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libwebkit2gtk-4.1-dev             libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev build-essential file
+
       - name: Install Rust toolchain
         run: rustup show
+
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-      - name: tests (core crates only, keeps them portable)
-        run: cargo test --locked -p rk-core -p rk-catalog -p rk-conf -p rk-db -p rk-engine -p rk-runtime -p rk-store -p rk-launcher -p rk-cli
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build UI (required by tauri::generate_context!)
+        run: npm run build --workspace app
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: tests
+        run: cargo test --workspace --locked
+
+      # A branch run on demand also packs the AppImage, to try on a Deck
+      # (no update feed: release-app.yml makes the published one).
+      - name: AppImage (on demand)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: app
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: |
+          sudo apt-get install -y -q --no-install-recommends libfuse2
+          npx tauri build --bundles appimage
+
+      - name: Upload the AppImage
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: appimage-test
+          path: target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+          retention-days: 7

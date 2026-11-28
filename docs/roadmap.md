@@ -183,7 +183,7 @@ that an emulator is data + a driver.
 - [x] Servers bundle OpenSSL 3 + its legacy provider (Arch is on OpenSSL 4)
 - [x] Client through Proton (`proton run`, newest Proton first, else `wine`), game exit watched in `/proc` (to verify on the Deck)
 - [ ] Client as a Steam shortcut (with the controller work)
-- [ ] AppImage + updater in `release-app.yml`
+- [x] AppImage + updater in `release-app.yml` (`linux-x86_64` feed entry), test AppImage from a CI run on demand (first build pending)
 - [ ] Cross-platform restore in CI (Windows dump into the Linux smoke test)
 - [ ] Handoff Windows <-> Deck verified (Syncthing folder)
 - [ ] Later: action bars per computer, controller (ConsolePortLK + Steam Input)
