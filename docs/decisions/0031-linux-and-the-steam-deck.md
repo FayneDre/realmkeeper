@@ -68,9 +68,15 @@ Upstream facts (2026-11-27):
    pinned MySQL component; every library outside the system base copied
    into `lib/` (`tools/ci/bundle-libs.sh`, `RUNPATH $ORIGIN/lib`, the copies
    `$ORIGIN`), and CI fails when a binary still resolves one elsewhere. The
-   system base: glibc, libstdc++ / libgcc_s, zlib and OpenSSL 3 (on the Deck
-   with its `legacy` provider in `/usr/lib/ossl-modules`; a bundled
-   libcrypto would look for its providers at the build machine's path).
+   system base: glibc, libstdc++ / libgcc_s and zlib. OpenSSL 3 is bundled
+   too (amended 2026-11-28): Arch moved to OpenSSL 4 (`libssl.so.4`,
+   `libssl.so.3` only in its `openssl-3` compat package) and the first Arch
+   smoke test failed on `libssl.so.3`; SteamOS follows Arch. Its `legacy`
+   provider goes to `lib/ossl-modules/legacy.so`: the bundled libcrypto
+   would look for it at the build machine's path, so the supervisor and the
+   tool steps pass that directory as `OPENSSL_MODULES` when it exists
+   (`rk_core::manifest::openssl_modules_dir`), and the smoke test checks
+   that worldserver mapped it (the fork never checks `OSSL_PROVIDER_load`).
    `-DCONF_DIR=configs`: that value is also compiled into the servers
    (`_CONF_DIR`, `Config.cpp` `GetConfigPath` on Linux), so they read
    `configs/` and `configs/modules/` in their working directory, the

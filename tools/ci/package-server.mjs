@@ -48,8 +48,9 @@ for (const module of plan.modules) {
 // Executables plus the runtime libraries they load from their own directory.
 // Windows: legacy.dll is the OpenSSL 3 legacy provider, asserted at startup by
 // OpenSSLCrypto.cpp. Linux (ADR 0031): libraries outside the system base are
-// bundled in lib/ by bundle-libs.sh; OpenSSL 3 comes from the system. Both
-// layouts are the same: executables at the root, configs/ with the .conf.dist.
+// bundled in lib/ by bundle-libs.sh, OpenSSL 3 and its legacy provider
+// (lib/ossl-modules, given as OPENSSL_MODULES) included. Both layouts are the
+// same: executables at the root, configs/ with the .conf.dist.
 const required = {
   "windows-x86_64": [
     "worldserver.exe",
@@ -60,7 +61,16 @@ const required = {
     "libcrypto-3-x64.dll",
     "legacy.dll",
   ],
-  "linux-x86_64": ["worldserver", "authserver", "dbimport", "lib/libmysqlclient.so.24", "configs/worldserver.conf.dist"],
+  "linux-x86_64": [
+    "worldserver",
+    "authserver",
+    "dbimport",
+    "lib/libmysqlclient.so.24",
+    "lib/libssl.so.3",
+    "lib/libcrypto.so.3",
+    "lib/ossl-modules/legacy.so",
+    "configs/worldserver.conf.dist",
+  ],
 }[plan.platform ?? "windows-x86_64"];
 if (!required) {
   console.error(`unknown platform ${plan.platform}`);

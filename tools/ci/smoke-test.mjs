@@ -131,9 +131,16 @@ function setConf(file, values) {
   writeFileSync(file, text);
 }
 
+// Same rule as the launcher (rk_core::manifest::openssl_modules_dir): a Linux
+// server build carries its OpenSSL legacy provider in lib/ossl-modules.
+function serverEnv(exe) {
+  const modules = join(dirname(exe), "lib", "ossl-modules");
+  return existsSync(modules) ? { ...process.env, OPENSSL_MODULES: modules } : process.env;
+}
+
 function startProcess(name, exe, argv, cwd) {
   const log = createWriteStream(join(logs, `${name}.log`), { flags: "a" });
-  const child = spawn(exe, argv, { cwd, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+  const child = spawn(exe, argv, { cwd, env: serverEnv(exe), stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
   child.stdout.pipe(log);
   child.stderr.pipe(log);
   child.exitCodeValue = null;
@@ -155,7 +162,7 @@ async function waitReady(name, child, port) {
 }
 
 const runSync = (name, exe, argv, cwd) => {
-  const result = spawnSync(exe, argv, { cwd, encoding: "utf8", maxBuffer: 256 * 1024 * 1024, windowsHide: true });
+  const result = spawnSync(exe, argv, { cwd, env: serverEnv(exe), encoding: "utf8", maxBuffer: 256 * 1024 * 1024, windowsHide: true });
   writeFileSync(join(logs, `${name}.log`), (result.stdout ?? "") + (result.stderr ?? ""), { flag: "a" });
   return result;
 };
@@ -522,6 +529,13 @@ async function round(label, allowed, enabled, maxImportSeconds = Infinity, live 
   const world = startProcess(`worldserver-${label}`, exe.worldserver, ["-c", confFile("worldserver.conf")], work);
   children.push(world);
   await waitReady(`worldserver (${label})`, world, 8085);
+  if (process.platform === "linux") {
+    // OSSL_PROVIDER_load("legacy") is not checked by the server: without the
+    // bundled provider it starts, and only the world session crypt (RC4) fails.
+    const maps = readFileSync(`/proc/${world.pid}/maps`, "utf8");
+    if (!maps.includes("/ossl-modules/legacy.so")) fail(`worldserver (${label}) did not load the bundled OpenSSL legacy provider`);
+    note(`✅ worldserver (${label}) loaded the bundled OpenSSL legacy provider`);
+  }
   if (live) {
     await checkLogin(label);
     await checkLive(label, world, ahbotGuid);

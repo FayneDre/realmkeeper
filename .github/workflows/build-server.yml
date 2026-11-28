@@ -574,6 +574,8 @@ jobs:
     timeout-minutes: 90
     container: archlinux:base
     steps:
+      # No openssl-3 on purpose: Arch has only OpenSSL 4 (libssl.so.4), so the
+      # servers prove they run on the OpenSSL 3 they bundle (bundle-libs.sh).
       - name: Tools
         run: pacman -Syu --noconfirm --needed nodejs curl xz zstd binutils tar unzip git
 
