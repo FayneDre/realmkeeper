@@ -271,6 +271,18 @@ pub fn program_path(executable: &str) -> String {
     format!("{executable}{}", std::env::consts::EXE_SUFFIX)
 }
 
+/// Directory of the OpenSSL 3 providers (`legacy.so`) bundled next to the
+/// programs of a Linux server build (`lib/ossl-modules`, ADR 0031). The
+/// bundled `libcrypto` would look in the build machine's module directory,
+/// so the servers get it as `OPENSSL_MODULES` when it exists.
+pub fn openssl_modules_dir(program: &std::path::Path) -> std::path::PathBuf {
+    program
+        .parent()
+        .unwrap_or_else(|| std::path::Path::new(""))
+        .join("lib")
+        .join("ossl-modules")
+}
+
 /// A command-line tool shipped with the server build.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

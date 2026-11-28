@@ -13,7 +13,8 @@ pub fn lan_ipv4() -> Option<Ipv4Addr> {
 
 /// Name of the program listening on TCP `port` on this computer (e.g.
 /// `authserver.exe`), to say which one to close when a port is taken.
-/// Windows only (`netstat` then `tasklist`); `None` when unknown.
+/// Windows: `netstat` then `tasklist`; Linux: `/proc` (only processes of
+/// this user can be named). `None` when unknown.
 pub fn port_owner(port: u16) -> Option<String> {
     #[cfg(windows)]
     {
@@ -23,11 +24,54 @@ pub fn port_owner(port: u16) -> Option<String> {
         let tasks = hidden_output("tasklist", &["/FI", &filter, "/FO", "CSV", "/NH"])?;
         process_name(&tasks)
     }
-    #[cfg(not(windows))]
+    #[cfg(target_os = "linux")]
+    {
+        let inode = ["/proc/net/tcp", "/proc/net/tcp6"]
+            .iter()
+            .find_map(|table| listening_inode(&std::fs::read_to_string(table).ok()?, port))?;
+        let socket = format!("socket:[{inode}]");
+        for entry in std::fs::read_dir("/proc").ok()?.flatten() {
+            let Some(pid) = entry
+                .file_name()
+                .to_str()
+                .and_then(|n| n.parse::<u32>().ok())
+            else {
+                continue;
+            };
+            let Ok(fds) = std::fs::read_dir(format!("/proc/{pid}/fd")) else {
+                continue; // another user's process
+            };
+            let owns = fds.flatten().any(|fd| {
+                std::fs::read_link(fd.path()).is_ok_and(|l| l.as_os_str() == socket.as_str())
+            });
+            if owns {
+                let comm = std::fs::read_to_string(format!("/proc/{pid}/comm")).ok()?;
+                return Some(comm.trim().to_owned()).filter(|n| !n.is_empty());
+            }
+        }
+        None
+    }
+    #[cfg(not(any(windows, target_os = "linux")))]
     {
         let _ = port;
         None
     }
+}
+
+/// Inode of the socket listening on `port` in a `/proc/net/tcp{,6}` table:
+/// `sl local_address rem_address st ... inode`, addresses as hex `ip:port`,
+/// state `0A` = listening.
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+fn listening_inode(table: &str, port: u16) -> Option<u64> {
+    let wanted = format!("{port:04X}");
+    table.lines().skip(1).find_map(|line| {
+        let fields: Vec<&str> = line.split_whitespace().collect();
+        let local_port = fields.get(1)?.rsplit(':').next()?;
+        (local_port.eq_ignore_ascii_case(&wanted) && *fields.get(3)? == "0A")
+            .then(|| fields.get(9)?.parse().ok())
+            .flatten()
+            .filter(|inode| *inode != 0)
+    })
 }
 
 #[cfg(windows)]
@@ -76,6 +120,19 @@ fn process_name(tasklist: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_listening_socket_of_a_port_is_found_in_proc() {
+        let table = "  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+   0: 0100007F:0E8C 0100007F:9C40 01 00000000:00000000 00:00000000 00000000  1000        0 11111 1
+   1: 00000000:0E8C 00000000:0000 0A 00000000:00000000 00:00000000 00000000  1000        0 22222 1
+   2: 00000000:1F95 00000000:0000 0A 00000000:00000000 00:00000000 00000000  1000        0 33333 1
+";
+        // 3724 = 0x0E8C: the established connection is skipped.
+        assert_eq!(listening_inode(table, 3724), Some(22222));
+        assert_eq!(listening_inode(table, 8085), Some(33333));
+        assert_eq!(listening_inode(table, 7878), None);
+    }
 
     #[test]
     fn the_listening_socket_gives_the_pid() {

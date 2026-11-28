@@ -52,11 +52,17 @@ fn random_hex(bytes: usize) -> Result<String> {
     Ok(hex::encode(buffer))
 }
 
-/// The computer's name (`COMPUTERNAME`), else a generic one.
+/// The computer's name (`COMPUTERNAME`; on Linux `/etc/hostname`, the
+/// shell's `HOSTNAME` is seldom exported), else a generic one.
 pub fn machine_name() -> String {
     ["COMPUTERNAME", "HOSTNAME"]
         .iter()
         .find_map(|var| std::env::var(var).ok().filter(|v| !v.trim().is_empty()))
+        .or_else(|| {
+            std::fs::read_to_string("/etc/hostname")
+                .ok()
+                .filter(|v| !v.trim().is_empty())
+        })
         .map(|v| v.trim().chars().take(64).collect())
         .unwrap_or_else(|| "PC".to_owned())
 }

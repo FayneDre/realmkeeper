@@ -672,12 +672,21 @@ impl<C: Sync> Step<C> for RunTool {
                     .map_err(EngineError::io(&self.log))
             };
             let (out, err) = (open()?, open()?);
-            let status = tokio::process::Command::new(&self.executable)
+            let mut command = tokio::process::Command::new(&self.executable);
+            command
                 .args(&self.args)
                 .current_dir(&self.cwd)
                 .stdin(Stdio::null())
                 .stdout(out)
-                .stderr(err)
+                .stderr(err);
+            #[cfg(unix)]
+            {
+                let modules = rk_core::manifest::openssl_modules_dir(&self.executable);
+                if modules.is_dir() {
+                    command.env("OPENSSL_MODULES", modules);
+                }
+            }
+            let status = command
                 .status()
                 .await
                 .map_err(EngineError::io(&self.executable))?;

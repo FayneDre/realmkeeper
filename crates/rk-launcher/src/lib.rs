@@ -63,10 +63,17 @@ pub fn app_dir() -> PathBuf {
     if let Some(root) = std::env::var_os("RK_ROOT") {
         return PathBuf::from(root);
     }
-    let base = std::env::var_os("LOCALAPPDATA")
-        .map(PathBuf::from)
-        .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/share")))
-        .unwrap_or_else(|| PathBuf::from("."));
+    // Linux: `$XDG_DATA_HOME`, else `~/.local/share` (ADR 0031).
+    let var = |name: &str| std::env::var_os(name).filter(|v| !v.is_empty());
+    let base = if cfg!(windows) {
+        var("LOCALAPPDATA").map(PathBuf::from)
+    } else {
+        var("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .filter(|p| p.is_absolute())
+            .or_else(|| var("HOME").map(|h| PathBuf::from(h).join(".local/share")))
+    }
+    .unwrap_or_else(|| PathBuf::from("."));
     base.join(APP_FOLDER)
 }
 

@@ -29,7 +29,98 @@ fn synced_folders() -> Vec<(PathBuf, &'static str)> {
     if let Some(home) = std::env::var_os("USERPROFILE") {
         folders.push((PathBuf::from(home).join("iCloudDrive"), "iCloud Drive"));
     }
+    folders.extend(linux_synced_folders(true));
     folders
+}
+
+/// Folders of the Linux sync clients (ADR 0031): Syncthing and Nextcloud
+/// folders, Dropbox ones (`all`: business accounts too). Read from their
+/// configuration files under the home folder; empty on Windows.
+fn linux_synced_folders(all: bool) -> Vec<(PathBuf, &'static str)> {
+    let Some(home) = std::env::var_os("HOME").filter(|_| !cfg!(windows)) else {
+        return Vec::new();
+    };
+    let home = PathBuf::from(home);
+    let config = std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| home.join(".config"));
+    let state = std::env::var_os("XDG_STATE_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| home.join(".local/state"));
+    let mut folders = Vec::new();
+    for file in [
+        state.join("syncthing/config.xml"),
+        config.join("syncthing/config.xml"),
+    ] {
+        if let Ok(text) = std::fs::read_to_string(file) {
+            folders.extend(
+                syncthing_folders(&text, &home)
+                    .into_iter()
+                    .map(|p| (p, "Syncthing")),
+            );
+            break;
+        }
+    }
+    if let Ok(text) = std::fs::read_to_string(config.join("Nextcloud/nextcloud.cfg")) {
+        folders.extend(
+            nextcloud_folders(&text)
+                .into_iter()
+                .map(|p| (p, "Nextcloud")),
+        );
+    }
+    if let Ok(bytes) = std::fs::read(home.join(".dropbox/info.json")) {
+        let paths = if all {
+            dropbox_folders(&bytes)
+        } else {
+            serde_json::from_slice::<serde_json::Value>(&bytes)
+                .ok()
+                .and_then(|v| v.get("personal")?.get("path")?.as_str().map(PathBuf::from))
+                .into_iter()
+                .collect()
+        };
+        folders.extend(paths.into_iter().map(|p| (p, "Dropbox")));
+    }
+    folders
+}
+
+/// `path` attributes of the `<folder>` elements of Syncthing's
+/// `config.xml` (`~` is the home folder).
+fn syncthing_folders(config: &str, home: &Path) -> Vec<PathBuf> {
+    config
+        .split("<folder ")
+        .skip(1)
+        .filter_map(|element| {
+            let tag = element.split('>').next()?;
+            let start = tag
+                .find(" path=\"")
+                .map(|i| i + 7)
+                .or_else(|| tag.starts_with("path=\"").then_some(6))?;
+            let value = &tag[start..];
+            let value = &value[..value.find('"')?];
+            let value = value
+                .replace("&amp;", "&")
+                .replace("&apos;", "'")
+                .replace("&quot;", "\"");
+            Some(match value.strip_prefix('~') {
+                Some(rest) => home.join(rest.trim_start_matches('/')),
+                None => PathBuf::from(value),
+            })
+        })
+        .collect()
+}
+
+/// `localPath` of the synchronised folders in Nextcloud's `nextcloud.cfg`
+/// (`0\Folders\1\localPath=/home/deck/Nextcloud/`).
+fn nextcloud_folders(config: &str) -> Vec<PathBuf> {
+    config
+        .lines()
+        .filter_map(|line| {
+            let (key, value) = line.split_once('=')?;
+            key.ends_with("localPath")
+                .then(|| PathBuf::from(value.trim()))
+        })
+        .filter(|p| !p.as_os_str().is_empty())
+        .collect()
 }
 
 /// Synchronised folders of personal accounts (a handoff folder must not be
@@ -55,6 +146,7 @@ pub fn personal_synced_folders() -> Vec<(PathBuf, &'static str)> {
             }
         }
     }
+    folders.extend(linux_synced_folders(false));
     folders
 }
 
@@ -128,6 +220,45 @@ mod tests {
         assert_eq!(synced(r"D:\Dropbox\WoW"), Some("Dropbox"));
         assert_eq!(synced(r"G:\My Drive\Realms"), Some("Google Drive"));
         assert_eq!(synced(r"D:\Games\Realms"), None);
+    }
+
+    #[test]
+    fn linux_sync_clients_name_their_folders() {
+        let home = Path::new("/home/deck");
+        let syncthing = r#"<configuration version="37">
+    <folder id="abcd-1234" label="RealmKeeper" path="~/Sync/RealmKeeper" type="sendreceive">
+        <device id="X"></device>
+    </folder>
+    <folder id="efgh" label="Photos &amp; more" path="/run/media/deck/SD/Photos &amp; more"></folder>
+    <device id="X" name="PC"></device>
+</configuration>"#;
+        assert_eq!(
+            syncthing_folders(syncthing, home),
+            vec![
+                PathBuf::from("/home/deck/Sync/RealmKeeper"),
+                PathBuf::from("/run/media/deck/SD/Photos & more")
+            ]
+        );
+        let nextcloud = r"[Accounts]
+0\Folders\1\localPath=/home/deck/Nextcloud/
+0\url=https://cloud
+";
+        assert_eq!(
+            nextcloud_folders(nextcloud),
+            vec![PathBuf::from("/home/deck/Nextcloud/")]
+        );
+        let folders = vec![(PathBuf::from("/home/deck/Sync"), "Syncthing")];
+        assert_eq!(
+            synced_by_in(Path::new("/home/deck/Sync/Realms"), &folders),
+            Some("Syncthing")
+        );
+        assert_eq!(
+            synced_by_in(
+                Path::new("/home/deck/.local/share/RealmKeeperData"),
+                &folders
+            ),
+            None
+        );
     }
 
     #[test]

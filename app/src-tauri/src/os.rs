@@ -1,7 +1,8 @@
 //! Windows integration the player's data depends on (ADR 0020): the
 //! computer stays awake during an install or an update, and Windows waits
 //! for the servers to stop cleanly before it shuts down or logs off.
-//! No-ops on other platforms.
+//! On Linux (ADR 0031) a logind inhibitor keeps it awake; at shutdown the
+//! servers get SIGTERM from systemd and stop cleanly on their own.
 //!
 //! The only module of the app allowed `unsafe` (Win32 FFI): every block has
 //! a SAFETY comment.
@@ -12,6 +13,10 @@
 pub struct KeepAwake {
     #[cfg(windows)]
     handle: windows_sys::Win32::Foundation::HANDLE,
+    /// `systemd-inhibit ... cat`: holds the lock while `cat` waits on its
+    /// stdin, which closes when we drop it, or when the launcher dies.
+    #[cfg(target_os = "linux")]
+    inhibitor: std::process::Child,
 }
 
 // The handle is a plain kernel handle, usable from any thread.
@@ -52,9 +57,42 @@ impl KeepAwake {
         }
     }
 
-    #[cfg(not(windows))]
+    /// `None` without logind (`systemd-inhibit` missing or refused).
+    #[cfg(target_os = "linux")]
+    pub fn new(reason: &str) -> Option<Self> {
+        use std::process::{Command, Stdio};
+        let mut inhibitor = Command::new("systemd-inhibit")
+            .args([
+                "--what=sleep:idle",
+                "--mode=block",
+                "--who=RealmKeeper",
+                &format!("--why={reason}"),
+                "cat",
+            ])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .ok()?;
+        // Refused at once (no logind, no session): the work runs anyway.
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        match inhibitor.try_wait() {
+            Ok(None) => Some(Self { inhibitor }),
+            _ => None,
+        }
+    }
+
+    #[cfg(not(any(windows, target_os = "linux")))]
     pub fn new(_reason: &str) -> Option<Self> {
         None
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Drop for KeepAwake {
+    fn drop(&mut self) {
+        drop(self.inhibitor.stdin.take()); // EOF: `cat` ends, the lock goes
+        let _ = self.inhibitor.wait();
     }
 }
 

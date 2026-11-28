@@ -116,6 +116,10 @@ impl Process {
                 });
             }
         }
+        #[cfg(unix)]
+        if matches!(config.stop, StopMethod::Terminate) {
+            crate::orphan::end_leftover(&config.log_file, &config.program).await;
+        }
         let log = ConsoleLog::open(config.log_file.clone(), LOG_ROTATE_BYTES)?;
 
         let mut command = Command::new(&config.program);
@@ -133,7 +137,29 @@ impl Process {
             const CREATE_NO_WINDOW: u32 = 0x0800_0000;
             command.creation_flags(CREATE_NO_WINDOW);
         }
+        #[cfg(unix)]
+        {
+            // Own process group: Ctrl+C in the launcher's terminal reaches
+            // the launcher only, which stops the servers itself.
+            command.process_group(0);
+            // worldserver's console is readline on Linux: no terminal codes
+            // (bracketed paste) in the output it writes to our pipe.
+            command.env("TERM", "dumb");
+            let modules = rk_core::manifest::openssl_modules_dir(&config.program);
+            if modules.is_dir() {
+                command.env("OPENSSL_MODULES", modules);
+            }
+        }
         let mut child = command.spawn().map_err(RuntimeError::io(&config.program))?;
+        #[cfg(unix)]
+        let leftover = match (&config.stop, child.id()) {
+            (StopMethod::Terminate, Some(pid)) => {
+                // Best effort: without it, only a launcher crash leaves it running.
+                let _ = crate::orphan::record(&config.log_file, pid);
+                Some(config.log_file.clone())
+            }
+            _ => None,
+        };
 
         #[cfg(windows)]
         let job = match config.stop {
@@ -208,6 +234,10 @@ impl Process {
                 let _ = pump.await;
             }
             let code = status.ok().and_then(|s| s.code());
+            #[cfg(unix)]
+            if let Some(log_file) = leftover {
+                crate::orphan::forget(&log_file);
+            }
             let _ = exit_tx.send(Some(Exit { code }));
         });
 

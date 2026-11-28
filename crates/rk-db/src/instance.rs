@@ -80,6 +80,20 @@ impl Instance {
     pub fn log_file(&self) -> PathBuf {
         self.root.join("mysqld.log")
     }
+    /// Unix socket of the server (Linux): in the user's runtime directory,
+    /// named after the port (unique among running instances), since a path
+    /// under the data root could pass the 107-byte limit of socket paths.
+    /// The tools never use it: they connect over TCP (`client.cnf`).
+    fn socket_file(&self) -> Option<PathBuf> {
+        if cfg!(windows) {
+            return None;
+        }
+        let dir = std::env::var_os("XDG_RUNTIME_DIR")
+            .map(PathBuf::from)
+            .filter(|d| d.is_dir())
+            .unwrap_or_else(std::env::temp_dir);
+        Some(dir.join(format!("rk-mysql-{}.sock", self.settings.port)))
+    }
     fn config_file(&self) -> PathBuf {
         self.root.join("my.ini")
     }
@@ -103,9 +117,12 @@ impl Instance {
     /// at another instance's server (a copied realm, ADR 0020).
     pub fn write_config(&self) -> Result<(), DbError> {
         std::fs::create_dir_all(&self.root).map_err(DbError::io(&self.root))?;
-        let text = self
-            .settings
-            .render(&self.binaries.basedir, &self.datadir(), &self.log_file());
+        let text = self.settings.render(
+            &self.binaries.basedir,
+            &self.datadir(),
+            &self.log_file(),
+            self.socket_file().as_deref(),
+        );
         write_atomic(&self.config_file(), text.as_bytes())?;
         if let Some(password) = self.saved_root_password() {
             let wanted = format!("port={}", self.settings.port);

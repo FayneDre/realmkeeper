@@ -45,6 +45,13 @@ pub fn redact(text: &str) -> String {
             out = replace_ignore_case(&out, &value, by);
         }
     }
+    // Linux names the computer in a file, not in the environment (ADR 0031).
+    if let Ok(host) = std::fs::read_to_string("/etc/hostname") {
+        let host = host.trim();
+        if host.len() > 2 {
+            out = replace_ignore_case(&out, host, "<computer>");
+        }
+    }
     out
 }
 

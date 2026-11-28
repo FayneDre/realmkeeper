@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A branch on demand (Linux code cannot be compiled on a Windows desk).
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -115,4 +117,4 @@ jobs:
         run: rustup show
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - name: tests (core crates only, keeps them portable)
-        run: cargo test --locked -p rk-core -p rk-catalog -p rk-conf -p rk-db -p rk-engine -p rk-store -p rk-launcher -p rk-cli
+        run: cargo test --locked -p rk-core -p rk-catalog -p rk-conf -p rk-db -p rk-engine -p rk-runtime -p rk-store -p rk-launcher -p rk-cli
